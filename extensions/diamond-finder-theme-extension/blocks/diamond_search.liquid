@@ -1,0 +1,67 @@
+<div class="tw-p-4 md:tw-p-8">
+  {% if block.settings.section_title != blank %}
+    <h2 class="tw-text-2xl tw-font-bold tw-mb-6 tw-text-center">{{ block.settings.section_title }}</h2>
+  {% endif %}
+
+  <div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
+    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-x-8 tw-gap-y-6">
+      <div>
+        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Type:</label>
+        {% render 'filter-button-group', group_id: 'ds-type', options_str: "Natural:Natural|Lab Grown:Lab Grown", multiselect: "false" %}
+      </div>
+      <div>
+        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Shape:</label>
+        {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Oval:OVAL|Emerald:EMERALD|Princess:PRINCESS", multiselect: "true" %}
+      </div>
+    </div>
+
+    <div class="tw-mt-8 tw-border-t tw-pt-6">
+        <h4 class="tw-text-md tw-font-semibold tw-mb-4">Basic Filters:</h4>
+        <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-6 tw-mb-4">
+            <div>
+                <label for="ds-min-carat" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1">Min Carat:</label>
+                <input type="number" id="ds-min-carat" step="0.01" placeholder="0.30" class="tw-mt-1 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-w-full tw-shadow-sm sm:tw-text-sm tw-border-gray-300 tw-rounded-md tw-p-2">
+            </div>
+            <div>
+                <label for="ds-max-carat" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1">Max Carat:</label>
+                <input type="number" id="ds-max-carat" step="0.01" placeholder="1.50" class="tw-mt-1 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-w-full tw-shadow-sm sm:tw-text-sm tw-border-gray-300 tw-rounded-md tw-p-2">
+            </div>
+            <!-- Price and other filters will be added here -->
+        </div>
+    </div>
+
+    <div class="tw-flex tw-justify-end tw-mt-6">
+      <button type="button" id="ds-apply-filters" class="tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-white tw-font-semibold tw-py-2 tw-px-6 tw-rounded-md tw-shadow-md tw-transition-colors">Search Diamonds</button>
+    </div>
+  </div>
+
+  <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
+    <p class="tw-text-sm tw-text-gray-700">Results - <span id="ds-results-count">0</span> Diamonds</p>
+    <div>
+      <!-- List/Grid and Sort controls will go here -->
+    </div>
+  </div>
+
+  <div id="diamond-results-container" class="tw-bg-white">
+    <p class="tw-text-center tw-py-10 tw-text-gray-500">Loading available diamonds...</p>
+    <!-- Products will be dynamically inserted here -->
+  </div>
+</div>
+
+<script src="{{ 'diamond-data.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-search.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Diamond Search",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Find Your Diamond"
+    }
+  ]
+}
+{% endschema %}

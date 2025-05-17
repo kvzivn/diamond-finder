@@ -1,0 +1,19 @@
+{%- assign option_pairs = options_str | split: '|' -%}
+<div class="tw-flex tw-flex-wrap tw-gap-2" data-filter-group="{{ group_id }}" data-multiselect="{{ multiselect | default: 'false' }}">
+  {%- for pair_str in option_pairs -%}
+    {%- assign parts = pair_str | split: ':' -%}
+    {%- assign label = parts[0] -%}
+    {%- assign value = parts[1] | default: label -%}
+    {%- assign id_val = value | downcase | replace: ' ', '-' -%}
+    {%- assign id = group_id | append: '-' | append: id_val -%}
+    <button
+      type="button"
+      class="filter-button tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-indigo-500 data-[active='true']:tw-bg-indigo-600 data-[active='true']:tw-text-white data-[active='true']:tw-border-indigo-600 transition-colors duration-150 ease-in-out"
+      data-value="{{ value }}"
+      aria-pressed="false"
+      id="{{ id }}"
+    >
+      {{ label }}
+    </button>
+  {%- endfor -%}
+</div>
