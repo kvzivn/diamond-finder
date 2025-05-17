@@ -23,44 +23,51 @@ if (typeof window !== 'undefined') {
 
     diamondsToRender.forEach(diamond => {
       const diamondCard = document.createElement('div');
-      diamondCard.className = 'tw-border tw-rounded-lg tw-p-4 tw-shadow-lg hover:tw-shadow-xl tw-transition-shadow tw-flex tw-flex-col';
+      diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-shadow hover:tw-shadow-md tw-transition-shadow tw-overflow-hidden';
 
       const image = document.createElement('img');
-      image.src = diamond.topImage;
-      image.alt = diamond.title;
-      image.className = 'tw-w-full tw-h-48 tw-object-cover tw-rounded-md tw-mb-3';
+      image.className = 'tw-w-full tw-h-48 tw-object-contain tw-rounded-md tw-mb-4';
+      image.src = diamond.image && diamond.image.src ? diamond.image.src : (diamond.topImage || 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png');
+      image.alt = `${diamond.certificate.carats.toFixed(2)}ct ${diamond.certificate.shape} ${diamond.type} Diamond`;
 
-      const title = document.createElement('h5');
-      title.className = 'tw-text-sm tw-font-semibold tw-mb-1 tw-truncate';
-      title.textContent = diamond.detailPageTitle;
+      const titleText = `${diamond.certificate.carats.toFixed(2)}ct ${diamond.certificate.shape} ${diamond.type} Diamond`;
+      const title = document.createElement('h3');
+      title.className = 'tw-text-lg tw-font-semibold tw-mb-1 tw-truncate';
+      title.textContent = titleText;
 
-      const subtitleText = diamond.subtitle.map(s => `${s.label}: ${s.value}`).join(', ');
+      const subtitleParts = [];
+      if (diamond.certificate.color) subtitleParts.push(`Colour: ${diamond.certificate.color}`);
+      if (diamond.certificate.clarity) subtitleParts.push(`Clarity: ${diamond.certificate.clarity}`);
+      if (diamond.certificate.cut) subtitleParts.push(`Cut: ${diamond.certificate.cut}`);
+
       const subtitle = document.createElement('p');
-      subtitle.className = 'tw-text-xs tw-text-gray-600 tw-mb-2 tw-h-8 tw-overflow-hidden';
-      subtitle.textContent = subtitleText;
+      subtitle.className = 'tw-text-sm tw-text-gray-600 tw-mb-2';
+      subtitle.textContent = subtitleParts.join(', ');
+
+      const priceCertWrapper = document.createElement('div');
+      priceCertWrapper.className = 'tw-flex tw-justify-between tw-items-center tw-mb-3';
 
       const price = document.createElement('p');
-      price.className = 'tw-text-md tw-font-bold tw-text-gray-800 tw-mb-3';
+      price.className = 'tw-text-lg tw-font-bold text-gray-900';
       price.textContent = `${diamond.price.toLocaleString()} ${diamond.currency}`;
 
       const certInfo = document.createElement('p');
-      certInfo.className = 'tw-text-xs tw-text-gray-500 tw-mb-3';
+      certInfo.className = 'tw-text-sm tw-text-gray-500';
       certInfo.textContent = `${diamond.certificate.lab} Certified`;
 
-      const spacer = document.createElement('div');
-      spacer.className = 'tw-flex-grow'; // Pushes button to the bottom
-
-      const addButton = document.createElement('button');
-      addButton.className = 'tw-w-full tw-bg-blue-500 tw-text-white tw-py-2 tw-px-4 tw-rounded hover:tw-bg-blue-600 tw-transition-colors tw-text-sm tw-mt-auto';
-      addButton.textContent = 'Add to cart';
-      addButton.onclick = () => console.log('Add to cart:', diamond.id);
+      priceCertWrapper.appendChild(price);
+      priceCertWrapper.appendChild(certInfo);
 
       diamondCard.appendChild(image);
       diamondCard.appendChild(title);
       diamondCard.appendChild(subtitle);
-      diamondCard.appendChild(price);
-      diamondCard.appendChild(certInfo);
-      diamondCard.appendChild(spacer);
+      diamondCard.appendChild(priceCertWrapper);
+
+      const addButton = document.createElement('button');
+      addButton.className = 'tw-w-full tw-bg-white tw-text-gray-800 tw-py-2 tw-px-4 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-transition-colors tw-text-base tw-mt-auto';
+      addButton.textContent = 'Add to cart';
+      addButton.onclick = () => console.log('Add to cart:', diamond.id);
+
       diamondCard.appendChild(addButton);
       grid.appendChild(diamondCard);
     });

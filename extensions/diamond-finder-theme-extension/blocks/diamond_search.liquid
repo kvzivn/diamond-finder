@@ -6,41 +6,93 @@
   {% endif %}
 
   <div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
-    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-x-8 tw-gap-y-6">
-      <div>
-        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Type:</label>
-        {% render 'filter-button-group', group_id: 'ds-type', options_str: "Natural:Natural|Lab Grown:Lab Grown", multiselect: "false" %}
-      </div>
-      <div>
-        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Shape:</label>
-        {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Oval:OVAL|Emerald:EMERALD|Princess:PRINCESS", multiselect: "true" %}
-      </div>
+    <!-- Top Row: Natural/Lab Grown Tabs -->
+    <div class="tw-flex tw-justify-center tw-mb-6">
+      {% render 'filter-button-group', group_id: 'ds-type', options_str: "Natural:Natural|Lab Grown:Lab Grown", multiselect: "false", custom_class: "tabs" %}
     </div>
 
-    <div class="tw-mt-8 tw-border-t tw-pt-6">
-        <h4 class="tw-text-md tw-font-semibold tw-mb-4">Basic Filters:</h4>
-        <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-6 tw-mb-4">
-            <div>
-                <label for="ds-min-carat" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1">Min Carat:</label>
-                <input type="number" id="ds-min-carat" step="0.01" placeholder="0.30" class="tw-mt-1 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-w-full tw-shadow-sm sm:tw-text-sm tw-border-gray-300 tw-rounded-md tw-p-2">
-            </div>
-            <div>
-                <label for="ds-max-carat" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-1">Max Carat:</label>
-                <input type="number" id="ds-max-carat" step="0.01" placeholder="1.50" class="tw-mt-1 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-w-full tw-shadow-sm sm:tw-text-sm tw-border-gray-300 tw-rounded-md tw-p-2">
-            </div>
-            <!-- Price and other filters will be added here -->
+    <!-- Main Filter Grid -->
+    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-8 tw-gap-y-6">
+      <!-- Shape Filter -->
+      <div>
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Shape</label>
+        {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Princess:PRINCESS|Cushion:CUSHION|Emerald:EMERALD|Oval:OVAL|Radiant:RADIANT|Asscher:ASSCHER|Marquise:MARQUISE|Heart:HEART|Pear:PEAR", multiselect: "true", custom_class: "shape-buttons" %}
+      </div>
+
+      <!-- Carats Filter -->
+      <div class="lg:tw-col-span-2">
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Carats</label>
+        <div class="tw-flex tw-items-center tw-space-x-2">
+          <input type="number" id="ds-min-carat" step="0.01" placeholder="0.7" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+          <div class="tw-flex-grow"><!-- Placeholder for range slider --> <input type="range" class="tw-w-full"></div>
+          <input type="number" id="ds-max-carat" step="0.01" placeholder="1.5" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
         </div>
+      </div>
+
+      <!-- Colour Filter -->
+      <div>
+        <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Colour</label>
+        <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="100" value="50" class="tw-w-full">
+        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500"><p>G</p><p>F</p><p>E</p></div>
+      </div>
+
+      <!-- Clarity Filter -->
+      <div>
+        <label for="ds-clarity-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Clarity</label>
+        <input type="range" id="ds-clarity-slider" name="ds-clarity-slider" min="0" max="100" value="50" class="tw-w-full">
+        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500"><p>VS2</p><p>VS1</p><p>VVS2</p><p>VVS1</p><p>IF</p><p>FL</p></div>
+      </div>
+
+      <!-- Cut Filter -->
+      <div>
+        <label for="ds-cut-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut</label>
+        <input type="range" id="ds-cut-slider" name="ds-cut-slider" min="0" max="100" value="50" class="tw-w-full">
+        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500"><p>Very Good</p><p>Excellent</p><p>Ideal</p></div>
+      </div>
+
+      <!-- Price Filter -->
+      <div class="lg:tw-col-span-2">
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Price</label>
+        <div class="tw-flex tw-items-center tw-space-x-2">
+          <input type="text" id="ds-min-price" placeholder="SEK 0" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+          <div class="tw-flex-grow"><!-- Placeholder for range slider --> <input type="range" class="tw-w-full"></div>
+          <input type="text" id="ds-max-price" placeholder="SEK 48,689,759" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+        </div>
+      </div>
     </div>
 
-    <div class="tw-flex tw-justify-end tw-mt-6">
+    <div class="tw-mt-6 tw-text-center">
+      <button type="button" id="ds-advanced-filters-toggle" class="tw-text-base tw-text-blue-600 hover:tw-text-blue-800">
+        Advanced Filters <span class="tw-inline-block tw-transform group-hover:tw-rotate-180 tw-transition-transform">-</span>
+      </button>
+    </div>
+    <!-- Advanced filters will be hidden/shown by JS -->
+    <div id="ds-advanced-filters-content" class="tw-hidden tw-mt-4 tw-border-t tw-pt-4">
+      <!-- Add advanced filter inputs here -->
+      <p class="tw-text-gray-500">Advanced filter options will appear here.</p>
+    </div>
+
+    <div class="tw-flex tw-justify-end tw-mt-6 tw-hidden"> <!-- Hidden for now, as per image only advanced filters button is visible initially -->
       <button type="button" id="ds-apply-filters" class="tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-white tw-font-semibold tw-py-2 tw-px-6 tw-rounded-md tw-shadow-md tw-transition-colors">Search Diamonds</button>
     </div>
   </div>
 
   <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
-    <p class="tw-text-sm tw-text-gray-700">Results - <span id="ds-results-count">0</span> Diamonds</p>
-    <div>
-      <!-- List/Grid and Sort controls will go here -->
+    <p class="tw-text-base tw-text-gray-700">Results - <span id="ds-results-count">0</span> Diamonds</p>
+    <div class="tw-flex tw-items-center tw-space-x-2">
+      <div class="tw-flex tw-border tw-border-gray-300 tw-rounded">
+        <button id="ds-view-list" class="tw-p-2 tw-border-r tw-border-gray-300"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="tw-w-5 tw-h-5"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg></button>
+        <button id="ds-view-grid" class="tw-p-2 tw-bg-gray-200"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="tw-w-5 tw-h-5"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 14a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 14a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></button>
+      </div>
+      <div>
+        <label for="ds-sort-by" class="tw-sr-only">Sort by</label>
+        <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-10 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-rounded-md">
+          <option>Price: low to high</option>
+          <option>Price: high to low</option>
+          <option>Carat: low to high</option>
+          <option>Carat: high to low</option>
+        </select>
+      </div>
     </div>
   </div>
 
