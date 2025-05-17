@@ -16,7 +16,9 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
+    "vite": "vite",
+    "tailwind:build": "tailwindcss -i ./extensions/diamond-finder-theme-extension/assets/tailwind-input.css -o ./extensions/diamond-finder-theme-extension/assets/tailwind-output.css",
+    "tailwind:watch": "tailwindcss -i ./extensions/diamond-finder-theme-extension/assets/tailwind-input.css -o ./extensions/diamond-finder-theme-extension/assets/tailwind-output.css --watch"
   },
   "type": "module",
   "engines": {
@@ -52,7 +54,7 @@
     "eslint-config-prettier": "^10.0.1",
     "postcss": "^8.5.3",
     "prettier": "^3.2.4",
-    "tailwindcss": "^4.1.7",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.2.2",
     "vite": "^6.2.2"
   },

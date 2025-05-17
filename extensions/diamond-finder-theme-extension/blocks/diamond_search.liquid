@@ -1,3 +1,5 @@
+{{ 'tailwind-output.css' | asset_url | stylesheet_tag }}
+
 <div class="tw-p-4 md:tw-p-8">
   {% if block.settings.section_title != blank %}
     <h2 class="tw-text-2xl tw-font-bold tw-mb-6 tw-text-center">{{ block.settings.section_title }}</h2>
