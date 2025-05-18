@@ -1,62 +1,170 @@
 {{ 'tailwind-output.css' | asset_url | stylesheet_tag }}
 
+<style>
+  .diamond-filters-ui input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    background: #D1D5DB;
+    border-radius: 1px;
+    border: 0px solid #000000;
+  }
+
+  .diamond-filters-ui input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    background: #D1D5DB;
+    border-radius: 1px;
+    border: 0px solid #000000;
+  }
+
+  .diamond-filters-ui input[type="range"]::-ms-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    background: transparent; /* IE/Edge track needs to be transparent */
+    border-color: transparent;
+    color: transparent;
+    border-width: 1px 0; /* IE/Edge needs border for height */
+  }
+  .diamond-filters-ui input[type="range"]::-ms-fill-lower {
+    background: #D1D5DB;
+    border: 0px solid #000000;
+    border-radius: 2px;
+  }
+  .diamond-filters-ui input[type="range"]::-ms-fill-upper {
+    background: #D1D5DB;
+    border: 0px solid #000000;
+    border-radius: 2px;
+  }
+
+  /* Center thumb on track */
+  .diamond-filters-ui input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #4F46E5; /* Indigo */
+    cursor: pointer;
+    border-radius: 50%;
+    margin-top: -7px; /* (track_height - thumb_height) / 2 + any offset adjustment */
+  }
+
+  .diamond-filters-ui input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #4F46E5; /* Indigo */
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+  }
+
+  .diamond-filters-ui input[type="range"]::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    background: #4F46E5; /* Indigo */
+    cursor: pointer;
+    border-radius: 50%;
+    border: 0px solid #000000;
+    /* margin-top: 0px; IE thumbs usually align well by default once styled */
+  }
+</style>
+
 <div class="tw-p-4 md:tw-p-8">
   {% if block.settings.section_title != blank %}
-    <h2 class="tw-text-2xl tw-font-bold tw-mb-6 tw-text-center">{{ block.settings.section_title }}</h2>
+    <h2 class="tw-text-4xl tw-font-medium tw-mb-6 tw-text-center">{{ block.settings.section_title }}</h2>
   {% endif %}
 
   <div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
     <!-- Top Row: Natural/Lab Grown Tabs -->
     <div class="tw-flex tw-justify-center tw-mb-6">
-      {% render 'filter-button-group', group_id: 'ds-type', options_str: "Natural:Natural|Lab Grown:Lab Grown", multiselect: "false", custom_class: "tabs" %}
+      <div class="tw-flex tw-gap-2 tw-w-64" data-filter-group="ds-type" data-multiselect="false">
+        <button
+          type="button"
+          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-indigo-500 data-[active='true']:tw-bg-indigo-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-indigo-700 transition-colors duration-150 ease-in-out"
+          data-value="Natural"
+          aria-pressed="false"
+          id="ds-type-natural"
+        >
+          Natural
+        </button>
+        <button
+          type="button"
+          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-indigo-500 data-[active='true']:tw-bg-indigo-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-indigo-700 transition-colors duration-150 ease-in-out"
+          data-value="Lab Grown"
+          aria-pressed="false"
+          id="ds-type-lab-grown"
+        >
+          Lab Grown
+        </button>
+      </div>
     </div>
 
     <!-- Main Filter Grid -->
-    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-8 tw-gap-y-6">
+    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8">
       <!-- Shape Filter -->
       <div>
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Shape</label>
-        {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Princess:PRINCESS|Cushion:CUSHION|Emerald:EMERALD|Oval:OVAL|Radiant:RADIANT|Asscher:ASSCHER|Marquise:MARQUISE|Heart:HEART|Pear:PEAR", multiselect: "true", custom_class: "shape-buttons" %}
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Shape <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
+        {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Princess:PRINCESS|Cushion:CUSHION|Emerald:EMERALD|Oval:OVAL|Radiant:RADIANT|Asscher:ASSCHER|Marquise:MARQUISE|Heart:HEART|Pear:PEAR", multiselect: "true", custom_class: "shape-buttons tw-grid tw-grid-cols-5 tw-gap-2" %}
       </div>
 
-      <!-- Carats Filter -->
-      <div class="lg:tw-col-span-2">
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Carats</label>
-        <div class="tw-flex tw-items-center tw-space-x-2">
-          <input type="number" id="ds-min-carat" step="0.01" placeholder="0.7" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
-          <div class="tw-flex-grow"><!-- Placeholder for range slider --> <input type="range" class="tw-w-full"></div>
-          <input type="number" id="ds-max-carat" step="0.01" placeholder="1.5" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+      <!-- Price Filter -->
+      <div>
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Price</label>
+        <div class="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-mb-2">
+          <div>
+            <label for="ds-min-price" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Price</label>
+            <input type="text" id="ds-min-price" placeholder="$200" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+          </div>
+          <div>
+            <label for="ds-max-price" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Price</label>
+            <input type="text" id="ds-max-price" placeholder="$5,000,000" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+          </div>
         </div>
+        <div><input type="range" class="tw-w-full" name="ds-price-range"></div>
+      </div>
+
+      <!-- Carat Filter -->
+      <div>
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Carat <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
+        <div class="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-mb-2">
+          <div>
+            <label for="ds-min-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Carat</label>
+            <input type="number" id="ds-min-carat" step="0.01" placeholder="1.00" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+          </div>
+          <div>
+            <label for="ds-max-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Carat</label>
+            <input type="number" id="ds-max-carat" step="0.01" placeholder="8.00" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+          </div>
+        </div>
+        <div><input type="range" class="tw-w-full" name="ds-carat-range"></div>
       </div>
 
       <!-- Colour Filter -->
       <div>
-        <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Colour</label>
-        <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="100" value="50" class="tw-w-full">
-        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500"><p>G</p><p>F</p><p>E</p></div>
+        <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Color</label>
+        <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="7" value="4" class="tw-w-full">
+        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500" id="ds-colour-labels">
+          <span>K</span><span>J</span><span>I</span><span>H</span><span>G</span><span>F</span><span>E</span><span>D</span>
+        </div>
       </div>
 
       <!-- Clarity Filter -->
       <div>
-        <label for="ds-clarity-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Clarity</label>
-        <input type="range" id="ds-clarity-slider" name="ds-clarity-slider" min="0" max="100" value="50" class="tw-w-full">
-        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500"><p>VS2</p><p>VS1</p><p>VVS2</p><p>VVS1</p><p>IF</p><p>FL</p></div>
+        <label for="ds-clarity-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Clarity <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
+        <input type="range" id="ds-clarity-slider" name="ds-clarity-slider" min="0" max="7" value="4" class="tw-w-full">
+        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500" id="ds-clarity-labels">
+          <span>SI2</span><span>SI1</span><span>VS2</span><span>VS1</span><span>VVS2</span><span>VVS1</span><span>IF</span><span>FL</span>
+        </div>
       </div>
 
       <!-- Cut Filter -->
       <div>
-        <label for="ds-cut-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut</label>
-        <input type="range" id="ds-cut-slider" name="ds-cut-slider" min="0" max="100" value="50" class="tw-w-full">
-        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500"><p>Very Good</p><p>Excellent</p><p>Ideal</p></div>
-      </div>
-
-      <!-- Price Filter -->
-      <div class="lg:tw-col-span-2">
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Price</label>
-        <div class="tw-flex tw-items-center tw-space-x-2">
-          <input type="text" id="ds-min-price" placeholder="SEK 0" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
-          <div class="tw-flex-grow"><!-- Placeholder for range slider --> <input type="range" class="tw-w-full"></div>
-          <input type="text" id="ds-max-price" placeholder="SEK 48,689,759" class="tw-w-1/3 focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+        <label for="ds-cut-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
+        <input type="range" id="ds-cut-slider" name="ds-cut-slider" min="0" max="3" value="1" class="tw-w-full">
+        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500" id="ds-cut-labels">
+          <span>Good</span><span>Very Good</span><span>Excellent</span><span>Astor</span>
         </div>
       </div>
     </div>

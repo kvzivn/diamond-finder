@@ -113,6 +113,7 @@ if (typeof window !== 'undefined') {
         activeFilters[groupId] = null; // For single-select, initialize or set to default
         // Optional: Set a default active button for single-select groups if needed
         // For example, to make "Natural" active by default:
+        /* START REMOVAL
         if (groupId === 'ds-type') {
             const naturalButton = group.querySelector('[data-value="Natural"]');
             if (naturalButton) {
@@ -122,6 +123,7 @@ if (typeof window !== 'undefined') {
                 activeFilters[groupId] = 'Natural';
             }
         }
+        END REMOVAL */
       } else {
         activeFilters[groupId] = []; // For multi-select
       }
