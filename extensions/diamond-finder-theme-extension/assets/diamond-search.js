@@ -27,7 +27,11 @@ if (typeof window !== 'undefined') {
 
       const image = document.createElement('img');
       image.className = 'tw-w-full tw-h-48 tw-object-contain tw-rounded-md tw-mb-4';
-      image.src = diamond.image && diamond.image.src ? diamond.image.src : (diamond.topImage || 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png');
+
+      image.src = diamond.topImage
+
+      // image.src = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
+
       image.alt = `${diamond.certificate.carats.toFixed(2)}ct ${diamond.certificate.shape} ${diamond.type} Diamond`;
 
       const titleText = `${diamond.certificate.carats.toFixed(2)}ct ${diamond.certificate.shape} ${diamond.type} Diamond`;
@@ -117,7 +121,7 @@ if (typeof window !== 'undefined') {
         if (groupId === 'ds-type') {
             const naturalButton = group.querySelector('[data-value="Natural"]');
             if (naturalButton) {
-                naturalButton.classList.add('tw-bg-indigo-600', 'tw-text-white', 'tw-border-indigo-600');
+                naturalButton.classList.add('tw-bg-gray-600', 'tw-text-white', 'tw-border-gray-600');
                 naturalButton.setAttribute('aria-pressed', 'true');
                 naturalButton.dataset.active = 'true';
                 activeFilters[groupId] = 'Natural';
@@ -135,12 +139,12 @@ if (typeof window !== 'undefined') {
             const index = activeFilters[groupId].indexOf(value);
             if (index > -1) {
               activeFilters[groupId].splice(index, 1);
-              button.classList.remove('tw-bg-indigo-600', 'tw-text-white', 'tw-border-indigo-600');
+              button.classList.remove('tw-bg-gray-600', 'tw-text-white', 'tw-border-gray-600');
               button.setAttribute('aria-pressed', 'false');
               button.dataset.active = 'false';
             } else {
               activeFilters[groupId].push(value);
-              button.classList.add('tw-bg-indigo-600', 'tw-text-white', 'tw-border-indigo-600');
+              button.classList.add('tw-bg-gray-600', 'tw-text-white', 'tw-border-gray-600');
               button.setAttribute('aria-pressed', 'true');
               button.dataset.active = 'true';
             }
@@ -149,17 +153,17 @@ if (typeof window !== 'undefined') {
             if (activeFilters[groupId] === value) {
               // Optional: allow deselecting single-select if clicked again
               // activeFilters[groupId] = null;
-              // button.classList.remove('tw-bg-indigo-600', 'tw-text-white', 'tw-border-indigo-600');
+              // button.classList.remove('tw-bg-gray-600', 'tw-text-white', 'tw-border-gray-600');
               // button.setAttribute('aria-pressed', 'false');
               // button.dataset.active = 'false';
             } else {
               buttons.forEach(b => { // Deselect other buttons in the group
-                b.classList.remove('tw-bg-indigo-600', 'tw-text-white', 'tw-border-indigo-600');
+                b.classList.remove('tw-bg-gray-600', 'tw-text-white', 'tw-border-gray-600');
                 b.setAttribute('aria-pressed', 'false');
                 b.dataset.active = 'false';
               });
               activeFilters[groupId] = value;
-              button.classList.add('tw-bg-indigo-600', 'tw-text-white', 'tw-border-indigo-600');
+              button.classList.add('tw-bg-gray-600', 'tw-text-white', 'tw-border-gray-600');
               button.setAttribute('aria-pressed', 'true');
               button.dataset.active = 'true';
             }
@@ -201,5 +205,30 @@ if (typeof window !== 'undefined') {
     const maxCaratInput = document.getElementById('ds-max-carat');
     if(minCaratInput) minCaratInput.addEventListener('input', applyAllFilters);
     if(maxCaratInput) maxCaratInput.addEventListener('input', applyAllFilters);
+
+    // Handle color slider image visibility
+    const colorSlider = document.getElementById('ds-colour-slider');
+    const colorImagesDiv = document.getElementById('ds-colour-images');
+
+    if (colorSlider && colorImagesDiv) {
+      const showImages = () => {
+        colorImagesDiv.style.opacity = '1';
+        colorImagesDiv.style.pointerEvents = 'auto';
+      };
+
+      const hideImages = () => {
+        colorImagesDiv.style.opacity = '0';
+        colorImagesDiv.style.pointerEvents = 'none';
+      };
+
+      colorSlider.addEventListener('mousedown', showImages);
+      colorSlider.addEventListener('touchstart', showImages); // For touch devices
+
+      // Hide when mouse is released anywhere or focus is lost
+      document.addEventListener('mouseup', hideImages);
+      colorSlider.addEventListener('blur', hideImages); // Hide when slider loses focus
+      document.addEventListener('touchend', hideImages); // For touch devices, hide on touchend
+    }
+
   });
 }

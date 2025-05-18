@@ -45,7 +45,7 @@
     appearance: none;
     width: 16px;
     height: 16px;
-    background: #4F46E5; /* Indigo */
+    background: #4F46E5; /* gray */
     cursor: pointer;
     border-radius: 50%;
     margin-top: -7px; /* (track_height - thumb_height) / 2 + any offset adjustment */
@@ -54,7 +54,7 @@
   .diamond-filters-ui input[type="range"]::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    background: #4F46E5; /* Indigo */
+    background: #4F46E5; /* gray */
     cursor: pointer;
     border-radius: 50%;
     border: none;
@@ -63,18 +63,52 @@
   .diamond-filters-ui input[type="range"]::-ms-thumb {
     width: 16px;
     height: 16px;
-    background: #4F46E5; /* Indigo */
+    background: #4F46E5; /* gray */
     cursor: pointer;
     border-radius: 50%;
     border: 0px solid #000000;
     /* margin-top: 0px; IE thumbs usually align well by default once styled */
   }
+
+  /* Specific styles for the Colour slider track */
+  .diamond-filters-ui input[type="range"]#ds-colour-slider::-webkit-slider-runnable-track {
+    {% comment %} height: 4px; /* Make track slightly thicker */ {% endcomment %}
+    background: linear-gradient(to right,
+      #D1D5DB 0%, #D1D5DB calc(12.5% - 1px), #9CA3AF calc(12.5% - 1px), #9CA3AF 12.5%,
+      #D1D5DB 12.5%, #D1D5DB calc(25% - 1px), #9CA3AF calc(25% - 1px), #9CA3AF 25%,
+      #D1D5DB 25%, #D1D5DB calc(37.5% - 1px), #9CA3AF calc(37.5% - 1px), #9CA3AF 37.5%,
+      #D1D5DB 37.5%, #D1D5DB calc(50% - 1px), #9CA3AF calc(50% - 1px), #9CA3AF 50%,
+      #D1D5DB 50%, #D1D5DB calc(62.5% - 1px), #9CA3AF calc(62.5% - 1px), #9CA3AF 62.5%,
+      #D1D5DB 62.5%, #D1D5DB calc(75% - 1px), #9CA3AF calc(75% - 1px), #9CA3AF 75%,
+      #D1D5DB 75%, #D1D5DB calc(87.5% - 1px), #9CA3AF calc(87.5% - 1px), #9CA3AF 87.5%,
+      #D1D5DB 87.5%, #D1D5DB 100%
+    );
+  }
+
+  .diamond-filters-ui input[type="range"]#ds-colour-slider::-moz-range-track {
+    {% comment %} height: 4px; /* Make track slightly thicker */ {% endcomment %}
+    background: linear-gradient(to right,
+      #D1D5DB 0%, #D1D5DB calc(12.5% - 1px), #9CA3AF calc(12.5% - 1px), #9CA3AF 12.5%,
+      #D1D5DB 12.5%, #D1D5DB calc(25% - 1px), #9CA3AF calc(25% - 1px), #9CA3AF 25%,
+      #D1D5DB 25%, #D1D5DB calc(37.5% - 1px), #9CA3AF calc(37.5% - 1px), #9CA3AF 37.5%,
+      #D1D5DB 37.5%, #D1D5DB calc(50% - 1px), #9CA3AF calc(50% - 1px), #9CA3AF 50%,
+      #D1D5DB 50%, #D1D5DB calc(62.5% - 1px), #9CA3AF calc(62.5% - 1px), #9CA3AF 62.5%,
+      #D1D5DB 62.5%, #D1D5DB calc(75% - 1px), #9CA3AF calc(75% - 1px), #9CA3AF 75%,
+      #D1D5DB 75%, #D1D5DB calc(87.5% - 1px), #9CA3AF calc(87.5% - 1px), #9CA3AF 87.5%,
+      #D1D5DB 87.5%, #D1D5DB 100%
+    );
+  }
+
+  /* Adjust thumb position for the thicker track on Colour slider */
+  .diamond-filters-ui input[type="range"]#ds-colour-slider::-webkit-slider-thumb {
+    margin-top: -6px; /* (16px thumb height - 4px track height) / 2 = 6px */
+  }
 </style>
 
 <div class="tw-p-4 md:tw-p-8">
-  {% if block.settings.section_title != blank %}
+  {% comment %} {% if block.settings.section_title != blank %}
     <h2 class="tw-text-4xl tw-font-medium tw-mb-6 tw-text-center">{{ block.settings.section_title }}</h2>
-  {% endif %}
+  {% endif %} {% endcomment %}
 
   <div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
     <!-- Top Row: Natural/Lab Grown Tabs -->
@@ -82,7 +116,7 @@
       <div class="tw-flex tw-gap-2 tw-w-64" data-filter-group="ds-type" data-multiselect="false">
         <button
           type="button"
-          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-indigo-500 data-[active='true']:tw-bg-indigo-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-indigo-700 transition-colors duration-150 ease-in-out"
+          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-gray-500 data-[active='true']:tw-bg-gray-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-gray-700 transition-colors duration-150 ease-in-out"
           data-value="Natural"
           aria-pressed="false"
           id="ds-type-natural"
@@ -91,7 +125,7 @@
         </button>
         <button
           type="button"
-          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-indigo-500 data-[active='true']:tw-bg-indigo-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-indigo-700 transition-colors duration-150 ease-in-out"
+          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-gray-500 data-[active='true']:tw-bg-gray-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-gray-700 transition-colors duration-150 ease-in-out"
           data-value="Lab Grown"
           aria-pressed="false"
           id="ds-type-lab-grown"
@@ -115,11 +149,11 @@
         <div class="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-mb-2">
           <div>
             <label for="ds-min-price" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Price</label>
-            <input type="text" id="ds-min-price" placeholder="$200" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+            <input type="text" id="ds-min-price" placeholder="$200" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
           </div>
           <div>
             <label for="ds-max-price" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Price</label>
-            <input type="text" id="ds-max-price" placeholder="$5,000,000" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+            <input type="text" id="ds-max-price" placeholder="$5,000,000" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
           </div>
         </div>
         <div><input type="range" class="tw-w-full" name="ds-price-range"></div>
@@ -131,11 +165,11 @@
         <div class="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-mb-2">
           <div>
             <label for="ds-min-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Carat</label>
-            <input type="number" id="ds-min-carat" step="0.01" placeholder="1.00" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+            <input type="number" id="ds-min-carat" step="0.01" placeholder="1.00" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
           </div>
           <div>
             <label for="ds-max-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Carat</label>
-            <input type="number" id="ds-max-carat" step="0.01" placeholder="8.00" class="tw-w-full focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+            <input type="number" id="ds-max-carat" step="0.01" placeholder="8.00" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
           </div>
         </div>
         <div><input type="range" class="tw-w-full" name="ds-carat-range"></div>
@@ -143,10 +177,25 @@
 
       <!-- Colour Filter -->
       <div>
-        <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Color</label>
-        <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="7" value="4" class="tw-w-full">
-        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500" id="ds-colour-labels">
-          <span>K</span><span>J</span><span>I</span><span>H</span><span>G</span><span>F</span><span>E</span><span>D</span>
+        <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Colour <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
+        <div class="tw-relative">
+          <div id="ds-colour-images" class="tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-flex tw-justify-between tw-items-end tw-bg-white tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300">
+            {% assign color_grades_for_images = "L,K,J,I,H,G,F,E,D" | split: ',' %}
+            {% for grade_img_filename in color_grades_for_images %}
+              <div class="tw-w-1/9 tw-text-center">
+                <img src="{{ '/' | append: grade_img_filename | append: '.jpg' | asset_url }}" alt="{{ grade_img_filename }} color" class="tw-mx-auto tw-h-10 tw-w-auto" width="40" height="40">
+              </div>
+            {% endfor %}
+          </div>
+
+          <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="8" value="4" class="tw-w-full">
+
+          <div class="tw-flex tw-text-sm tw-text-gray-500 mt-1" id="ds-colour-labels">
+            {% assign color_grades_for_labels = "L,K,J,I,H,G,F,E,D" | split: ',' %}
+            {% for grade_label in color_grades_for_labels %}
+            <span class="tw-flex-1 tw-text-center">{{ grade_label }}</span>
+            {% endfor %}
+          </div>
         </div>
       </div>
 
@@ -170,8 +219,8 @@
     </div>
 
     <div class="tw-mt-6 tw-text-center">
-      <button type="button" id="ds-advanced-filters-toggle" class="tw-text-base tw-text-blue-600 hover:tw-text-blue-800">
-        Advanced Filters <span class="tw-inline-block tw-transform group-hover:tw-rotate-180 tw-transition-transform">-</span>
+      <button type="button" id="ds-advanced-filters-toggle" class="tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
+        Advanced Filters <span class="tw-inline-block tw-transform group-hover:tw-rotate-180 tw-transition-transform"></span>
       </button>
     </div>
     <!-- Advanced filters will be hidden/shown by JS -->
@@ -194,7 +243,7 @@
       </div>
       <div>
         <label for="ds-sort-by" class="tw-sr-only">Sort by</label>
-        <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-10 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-indigo-500 focus:tw-border-indigo-500 tw-rounded-md">
+        <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-10 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-rounded-md">
           <option>Price: low to high</option>
           <option>Price: high to low</option>
           <option>Carat: low to high</option>
