@@ -184,6 +184,15 @@ export async function fetchDiamondsFromApi(type: DiamondType): Promise<Diamond[]
 
   console.log(`Parsing CSV data for ${type} diamonds...`);
   const diamonds = parseCSV(csvString, headers);
+
+  // Log the first few diamond objects and total count for inspection
+  if (diamonds.length > 0) {
+    console.log(`[IDEX SERVICE] Parsed ${diamonds.length} ${type} diamonds. First 3 objects:`);
+    console.log(JSON.stringify(diamonds.slice(0, 3), null, 2)); // Pretty print first 3
+  } else {
+    console.log(`[IDEX SERVICE] No ${type} diamonds found or parsed.`);
+  }
+
   console.log(`Successfully parsed ${diamonds.length} ${type} diamonds.`);
   return diamonds;
 }

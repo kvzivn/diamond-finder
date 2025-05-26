@@ -29,7 +29,7 @@
     </div>
 
     <!-- Main Filter Grid -->
-    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8">
+    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8 tw-pb-8">
       <!-- Shape Filter -->
       <div>
         <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Shape <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
@@ -81,10 +81,10 @@
             {% endfor %}
           </div>
 
-          <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="8" value="4" class="tw-w-full">
+          {% comment %} <input type="range" id="ds-colour-slider" name="ds-colour-slider" min="0" max="8" value="4" class="tw-w-full"> {% endcomment %}
           <div id="ds-colour-slider-noui" class="tw-mt-8"></div>
 
-          <div class="tw-flex tw-text-sm tw-text-gray-500 mt-1" id="ds-colour-labels">
+          <div class="tw-flex tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-colour-labels">
             {% assign color_grades_for_labels = "L,K,J,I,H,G,F,E,D" | split: ',' %}
             {% for grade_label in color_grades_for_labels %}
             <span class="tw-flex-1 tw-text-center">{{ grade_label }}</span>
@@ -98,32 +98,31 @@
         <label for="ds-clarity-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Clarity <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
 
         <div id="ds-clarity-slider-noui" class="tw-mt-8"></div>
-        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500" id="ds-clarity-labels">
+        <div class="tw-flex tw-justify-between tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-clarity-labels">
           <span>SI2</span><span>SI1</span><span>VS2</span><span>VS1</span><span>VVS2</span><span>VVS1</span><span>IF</span><span>FL</span>
         </div>
       </div>
 
       <!-- Cut Filter -->
       <div>
-        <label for="ds-cut-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
+        <label for="ds-cut-grade-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut Grade <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
 
-        <div id="ds-cut-slider-noui" class="tw-mt-8"></div>
-        <div class="tw-flex tw-justify-between tw-text-sm tw-text-gray-500" id="ds-cut-labels">
+        <div id="ds-cut-grade-slider-noui" class="tw-mt-8"></div>
+        <div class="tw-flex tw-justify-between tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-cut-grade-labels">
           <span>Good</span><span>Very Good</span><span>Excellent</span><span>Astor</span>
         </div>
       </div>
     </div>
 
-    <div class="tw-mt-6 tw-text-center">
+    {% comment %} <div class="tw-mt-6 tw-text-center">
       <button type="button" id="ds-advanced-filters-toggle" class="tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
         Advanced Filters <span class="tw-inline-block tw-transform group-hover:tw-rotate-180 tw-transition-transform"></span>
       </button>
     </div>
-    <!-- Advanced filters will be hidden/shown by JS -->
+
     <div id="ds-advanced-filters-content" class="tw-hidden tw-mt-4 tw-border-t tw-pt-4">
-      <!-- Add advanced filter inputs here -->
       <p class="tw-text-gray-500">Advanced filter options will appear here.</p>
-    </div>
+    </div> {% endcomment %}
 
     <div class="tw-flex tw-justify-end tw-mt-6 tw-hidden"> <!-- Hidden for now, as per image only advanced filters button is visible initially -->
       <button type="button" id="ds-apply-filters" class="tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-white tw-font-semibold tw-py-2 tw-px-6 tw-rounded-md tw-shadow-md tw-transition-colors">Search Diamonds</button>

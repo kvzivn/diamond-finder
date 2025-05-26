@@ -3,6 +3,43 @@ import { getCachedDiamonds } from '../services/diamond-cache.server';
 import { refreshDiamondCacheByType } from '../services/diamond-updater.server';
 import type { Diamond } from '../models/diamond.server'; // Assuming Diamond model exists
 
+function applyFilters(diamonds: Diamond[], filters: {
+  shape?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minCarat?: number;
+  maxCarat?: number;
+  type?: string;
+}): Diamond[] {
+  let filtered = [...diamonds];
+
+  // Shape filter (using 'cut' property for shape)
+  if (filters.shape) {
+    filtered = filtered.filter(d => {
+      const diamondShape = d.cut ? d.cut.toUpperCase() : '';
+      return diamondShape === filters.shape!.toUpperCase();
+    });
+  }
+
+  // Price filters
+  if (filters.minPrice !== undefined) {
+    filtered = filtered.filter(d => d.totalPrice !== null && d.totalPrice !== undefined && d.totalPrice >= filters.minPrice!);
+  }
+  if (filters.maxPrice !== undefined) {
+    filtered = filtered.filter(d => d.totalPrice !== null && d.totalPrice !== undefined && d.totalPrice <= filters.maxPrice!);
+  }
+
+  // Carat filters
+  if (filters.minCarat !== undefined) {
+    filtered = filtered.filter(d => d.carat !== null && d.carat !== undefined && d.carat >= filters.minCarat!);
+  }
+  if (filters.maxCarat !== undefined) {
+    filtered = filtered.filter(d => d.carat !== null && d.carat !== undefined && d.carat <= filters.maxCarat!);
+  }
+
+  return filtered;
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   console.log("TEST_VAR from .env:", process.env.TEST_VAR);
   console.log("IDEX_API_KEY from .env:", process.env.IDEX_API_KEY ? "Loaded" : "NOT LOADED");
@@ -11,7 +48,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1");
-  const limit = parseInt(url.searchParams.get("limit") || "100"); // Default to 100 items per page
+  const limit = parseInt(url.searchParams.get("limit") || "24"); // Changed default to 24 to match frontend
+
+  // Extract filter parameters
+  const filters = {
+    shape: url.searchParams.get("shape") || undefined,
+    minPrice: url.searchParams.get("minPrice") ? parseFloat(url.searchParams.get("minPrice")!) : undefined,
+    maxPrice: url.searchParams.get("maxPrice") ? parseFloat(url.searchParams.get("maxPrice")!) : undefined,
+    minCarat: url.searchParams.get("minCarat") ? parseFloat(url.searchParams.get("minCarat")!) : undefined,
+    maxCarat: url.searchParams.get("maxCarat") ? parseFloat(url.searchParams.get("maxCarat")!) : undefined,
+    type: url.searchParams.get("type") || undefined,
+  };
+
+  console.log('API Route (/all): Received filters:', JSON.stringify(filters, null, 2));
 
   let naturalDiamonds: Diamond[] = getCachedDiamonds('natural') || [];
   let labDiamonds: Diamond[] = getCachedDiamonds('lab') || [];
@@ -43,23 +92,38 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   }
 
-  const allDiamonds = [...naturalDiamonds, ...labDiamonds];
+  // Filter diamonds by type if specified
+  let allDiamonds: Diamond[];
+  if (filters.type === 'Natural') {
+    allDiamonds = naturalDiamonds;
+  } else if (filters.type === 'Lab Grown') {
+    allDiamonds = labDiamonds;
+  } else {
+    allDiamonds = [...naturalDiamonds, ...labDiamonds];
+  }
 
-  const totalDiamonds = allDiamonds.length;
+  // Apply filters to the full dataset
+  const filteredDiamonds = applyFilters(allDiamonds, filters);
+
+  console.log(`API Route (/all): Applied filters. Total diamonds: ${allDiamonds.length}, Filtered: ${filteredDiamonds.length}`);
+
+  const totalFilteredDiamonds = filteredDiamonds.length;
   const totalNaturalDiamonds = naturalDiamonds.length;
   const totalLabDiamonds = labDiamonds.length;
 
+  // Apply pagination to filtered results
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
-  const paginatedDiamonds = allDiamonds.slice(startIndex, endIndex);
+  const paginatedDiamonds = filteredDiamonds.slice(startIndex, endIndex);
 
   return json({
     diamonds: paginatedDiamonds,
-    totalDiamonds,
+    totalDiamonds: totalFilteredDiamonds, // Total after filtering
     totalNaturalDiamonds,
     totalLabDiamonds,
     currentPage: page,
-    totalPages: Math.ceil(totalDiamonds / limit),
+    totalPages: Math.ceil(totalFilteredDiamonds / limit),
     limit,
+    appliedFilters: filters, // Include applied filters in response for debugging
   });
 }

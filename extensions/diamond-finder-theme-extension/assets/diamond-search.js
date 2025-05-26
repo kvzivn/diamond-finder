@@ -11,23 +11,23 @@ if (typeof window !== 'undefined') {
     carat: false,
     colour: false,
     clarity: false,
-    cut: false
+    cutGrade: false // Changed from cut to cutGrade
   };
 
   // Default filter ranges - centralized configuration
   const DEFAULT_FILTER_RANGES = {
     price: [200, 5000000],
-    carat: [1.00, 20.00],     // Start from 0.1 to include smaller diamonds
+    carat: [0.50, 20.00],     // Start from 0.1 to include smaller diamonds
     colour: ['K', 'D'],      // Default: K to D
     clarity: ['I3', 'FL'],   // Default: I3 to FL (covers all clarity grades)
-    cut: ['Good', 'Astor']    // Default: Good to Astor
+    cutGrade: ['Good', 'Astor'] // Changed from cut to cutGrade, reflects quality
   };
 
   // Label definitions - centralized for consistency
   const FILTER_LABELS = {
     colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
     clarity: ['I3', 'I2', 'I1', 'SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
-    cut: ['Good', 'Very Good', 'Excellent', 'Astor']
+    cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor'] // Changed from cut to cutGrade
   };
 
   // Helper function to format numbers with commas for tooltips
@@ -43,11 +43,9 @@ if (typeof window !== 'undefined') {
   // Mark slider as initialized and check if we can proceed with initial filtering
   function markSliderInitialized(sliderType) {
     sliderInitializationState[sliderType] = true;
-    console.log(`[DEBUG] Slider ${sliderType} initialized. State:`, sliderInitializationState);
 
-    // If all sliders are now initialized and we have data, apply initial filters
-    if (areAllSlidersInitialized() && window.allDiamonds.length > 0 && !initialLoadComplete) {
-      console.log('[DEBUG] All sliders initialized and data available. Applying initial filters...');
+    // If all sliders are now initialized, apply initial filters (which will fetch data)
+    if (areAllSlidersInitialized() && !initialLoadComplete) {
       applyInitialFilters();
     }
   }
@@ -56,19 +54,27 @@ if (typeof window !== 'undefined') {
   function applyInitialFilters() {
     if (initialLoadComplete) return; // Prevent multiple calls
 
-    console.log('[DEBUG] Applying initial filters with default ranges');
-
     // Set "ROUND" shape filter as active by default
     const roundShapeButton = document.getElementById('ds-shape-round');
     if (roundShapeButton) {
       roundShapeButton.dataset.active = 'true';
       roundShapeButton.setAttribute('aria-pressed', 'true');
-      // Note: activeFilters['ds-shape'] will be populated correctly by setupFilterButtonGroups
-      // because setupFilterButtonGroups reads the data-active attribute.
+      console.log('[SHAPE] Set ROUND button as active by default');
+    } else {
+      console.warn('[SHAPE] ROUND shape button not found! Available buttons:');
+      const shapeButtons = document.querySelectorAll('[data-filter-group="ds-shape"] button');
+      shapeButtons.forEach(btn => {
+        console.log('[SHAPE] Button ID:', btn.id, 'Value:', btn.dataset.value);
+      });
     }
 
     setupFilterButtonGroups(); // Initialize filter states from buttons
-    applyAllFilters(true); // Use initial default values
+
+    // Now that filters are set up, fetch fresh data with the correct filters
+    console.log('[INITIAL] Active filters after setup:', activeFilters);
+    console.log('[INITIAL] Fetching diamonds with default ROUND filter');
+    fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
+
     initialLoadComplete = true;
   }
 
@@ -77,7 +83,7 @@ if (typeof window !== 'undefined') {
     const caratSlider = document.getElementById('ds-carat-slider');
     const colourSlider = document.getElementById('ds-colour-slider-noui');
     const claritySlider = document.getElementById('ds-clarity-slider-noui');
-    const cutSlider = document.getElementById('ds-cut-slider-noui');
+    const cutGradeSlider = document.getElementById('ds-cut-grade-slider-noui'); // Changed from cutSlider and ID
 
     const minPriceInput = document.getElementById('ds-min-price');
     const maxPriceInput = document.getElementById('ds-max-price');
@@ -89,14 +95,6 @@ if (typeof window !== 'undefined') {
       clearTimeout(sliderChangeTimeout);
       sliderChangeTimeout = setTimeout(() => {
         fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
-      }, 500); // 500ms debounce
-    };
-
-    let applyFiltersTimeout;
-    const debouncedApplyFilters = () => {
-      clearTimeout(applyFiltersTimeout);
-      applyFiltersTimeout = setTimeout(() => {
-        applyAllFilters();
       }, 500); // 500ms debounce
     };
 
@@ -169,7 +167,7 @@ if (typeof window !== 'undefined') {
         }
       });
 
-      caratSlider.noUiSlider.on('change', debouncedApplyFilters);
+      caratSlider.noUiSlider.on('change', debounceFetch);
 
       minCaratInput.addEventListener('change', function () {
         caratSlider.noUiSlider.set([this.value, null]);
@@ -204,12 +202,10 @@ if (typeof window !== 'undefined') {
         }
       });
 
-      colourSlider.noUiSlider.on('change', debounceFetch);
+      // colourSlider.noUiSlider.on('change', debounceFetch); // DISABLED: Colour filter no longer affects results
 
       // Verify slider initialization
       setTimeout(() => {
-        const values = colourSlider.noUiSlider.get();
-        console.log('[DEBUG] Colour slider initialized with values:', values);
         markSliderInitialized('colour');
       }, 10); // Small delay to ensure slider is fully ready
     }
@@ -237,46 +233,54 @@ if (typeof window !== 'undefined') {
         }
       });
 
-      claritySlider.noUiSlider.on('change', debounceFetch);
+      // claritySlider.noUiSlider.on('change', debounceFetch); // DISABLED: Clarity filter no longer affects results
 
       // Verify slider initialization
       setTimeout(() => {
-        const values = claritySlider.noUiSlider.get();
-        console.log('[DEBUG] Clarity slider initialized with values:', values);
         markSliderInitialized('clarity');
       }, 10); // Small delay to ensure slider is fully ready
     }
 
-    // Initialize Cut Slider
-    if (cutSlider) {
-      const cutLabels = FILTER_LABELS.cut;
-      const defaultCutStart = [0, 3]; // Good to Astor
+    // Initialize Cut Grade Slider (formerly Cut Slider)
+    if (cutGradeSlider) {
+      console.log('[DEBUG] Initializing cutGradeSlider. Current slider instance:', cutGradeSlider.noUiSlider);
+      const cutGradeLabels = FILTER_LABELS.cutGrade; // Use cutGrade labels
+      // Ensure defaultCutGradeStart aligns with FILTER_LABELS.cutGrade and DEFAULT_FILTER_RANGES.cutGrade
+      const defaultCutGradeStart = [
+        cutGradeLabels.indexOf(DEFAULT_FILTER_RANGES.cutGrade[0]),
+        cutGradeLabels.indexOf(DEFAULT_FILTER_RANGES.cutGrade[1])
+      ];
+      console.log('[DEBUG] cutGradeSlider defaultCutGradeStart:', defaultCutGradeStart, 'Based on:', DEFAULT_FILTER_RANGES.cutGrade);
 
-      window.noUiSlider.create(cutSlider, {
-        start: defaultCutStart,
+      // Check if a slider instance already exists and destroy it to prevent errors/duplicates
+      if (cutGradeSlider.noUiSlider) {
+        console.log('[DEBUG] Destroying existing cutGradeSlider instance before re-creating.');
+        cutGradeSlider.noUiSlider.destroy();
+      }
+
+      window.noUiSlider.create(cutGradeSlider, {
+        start: defaultCutGradeStart,
         connect: true,
         step: 1,
         range: {
           'min': 0,
-          'max': 3
+          'max': cutGradeLabels.length - 1 // Max index of cutGradeLabels
         },
         format: {
           to: function (value) {
-            return cutLabels[Math.round(value)];
+            return cutGradeLabels[Math.round(value)];
           },
           from: function (value) {
-            return cutLabels.indexOf(value);
+            return cutGradeLabels.indexOf(value);
           }
         }
       });
 
-      cutSlider.noUiSlider.on('change', debounceFetch);
+      // cutGradeSlider.noUiSlider.on('change', debounceFetch); // DISABLED: Cut grade filter no longer affects results
 
       // Verify slider initialization
       setTimeout(() => {
-        const values = cutSlider.noUiSlider.get();
-        console.log('[DEBUG] Cut slider initialized with values:', values);
-        markSliderInitialized('cut');
+        markSliderInitialized('cutGrade'); // Mark cutGrade as initialized
       }, 10); // Small delay to ensure slider is fully ready
     }
   }
@@ -294,99 +298,135 @@ if (typeof window !== 'undefined') {
 
     if (!gridArea) return;
 
-    if (!diamondsToRender || diamondsToRender.length === 0) {
-      // If it's not an append operation (i.e., initial load or filter change) and no diamonds, show no results.
-      // If it *is* an append, and we get no diamonds, it just means no *more* diamonds, so don't clear grid / show "no results"
-      if (!isLoadingMore) {
-        gridArea.innerHTML = '<p class="tw-text-center tw-text-gray-500 tw-py-10">No diamonds match your criteria.</p>';
-      }
-    } else {
-      // If it's not an append, clear previous results from the grid area.
-      if (!isLoadingMore) {
-        gridArea.innerHTML = '';
-      }
+    // Always clear previous results from the grid area.
+    gridArea.innerHTML = '';
 
-      const grid = gridArea.querySelector('.tw-grid') || document.createElement('div');
-      if (!gridArea.contains(grid)) { // If grid doesn't exist, create and append
+    if (!diamondsToRender || diamondsToRender.length === 0) {
+        gridArea.innerHTML = '<p class="tw-text-center tw-text-gray-500 tw-py-10">No diamonds match your criteria.</p>';
+    } else {
+        const grid = document.createElement('div');
         grid.className = 'tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-6';
         gridArea.appendChild(grid);
-      }
 
-      diamondsToRender.forEach(diamond => {
-        const diamondCard = document.createElement('div');
-        diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-shadow hover:tw-shadow-md tw-transition-shadow tw-overflow-hidden';
+        diamondsToRender.forEach(diamond => {
+            const diamondCard = document.createElement('div');
+            diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-shadow hover:tw-shadow-md tw-transition-shadow tw-overflow-hidden';
 
-        const image = document.createElement('img');
-        image.className = 'tw-w-full tw-h-48 tw-object-contain tw-rounded-md tw-mb-4';
+            const image = document.createElement('img');
+            image.className = 'tw-w-full tw-h-48 tw-object-contain tw-rounded-md tw-mb-4';
 
-        if (diamond.imagePath) {
-          image.src = diamond.imagePath;
-        } else {
-          image.src = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
-          console.warn('Diamond missing imagePath:', diamond.itemId);
-        }
+            if (diamond.imagePath) {
+              image.src = diamond.imagePath;
+            } else {
+              image.src = 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
+            }
 
-        const carats = diamond.carat !== null && typeof diamond.carat === 'number' ? diamond.carat.toFixed(2) : 'N/A';
-        const shape = diamond.cut || 'Unknown Shape';
-        const displayType = 'Diamond';
+            const carats = diamond.carat !== null && typeof diamond.carat === 'number' ? diamond.carat.toFixed(2) : 'N/A';
+            const shape = diamond.cut || 'Unknown Shape';
+            const displayType = 'Diamond';
 
-        image.alt = `${carats}ct ${shape} ${displayType}`;
+            image.alt = `${carats}ct ${shape} ${displayType}`;
 
-        const titleText = `${carats}ct ${shape} ${displayType}`;
-        const title = document.createElement('h3');
-        title.className = 'tw-text-lg tw-font-semibold tw-mb-1 tw-truncate';
-        title.textContent = titleText;
+            const titleText = `${carats}ct ${shape} ${displayType}`;
+            const title = document.createElement('h3');
+            title.className = 'tw-text-lg tw-font-semibold tw-mb-1 tw-truncate';
+            title.textContent = titleText;
 
-        const subtitleParts = [];
-        if (diamond.color) subtitleParts.push(`Colour: ${diamond.color}`);
-        if (diamond.clarity) subtitleParts.push(`Clarity: ${diamond.clarity}`);
-        if (diamond.cutGrade) subtitleParts.push(`Cut: ${diamond.cutGrade}`);
+            const subtitleParts = [];
+            if (diamond.color) subtitleParts.push(`Colour: ${diamond.color}`);
+            if (diamond.clarity) subtitleParts.push(`Clarity: ${diamond.clarity}`);
+            if (diamond.cutGrade) subtitleParts.push(`Cut: ${diamond.cutGrade}`);
 
-        if (subtitleParts.length === 0) {
-          subtitleParts.push('Details not specified');
-        }
+            if (subtitleParts.length === 0) {
+              subtitleParts.push('Details not specified');
+            }
 
-        const subtitle = document.createElement('p');
-        subtitle.className = 'tw-text-sm tw-text-gray-600 tw-mb-2';
-        subtitle.textContent = subtitleParts.join(', ');
+            const subtitle = document.createElement('p');
+            subtitle.className = 'tw-text-sm tw-text-gray-600 tw-mb-2';
+            subtitle.textContent = subtitleParts.join(', ');
 
-        const priceCertWrapper = document.createElement('div');
-        priceCertWrapper.className = 'tw-flex tw-justify-between tw-items-center tw-mb-3';
+            const priceCertWrapper = document.createElement('div');
+            priceCertWrapper.className = 'tw-flex tw-justify-between tw-items-center tw-mb-3';
 
-        const price = document.createElement('p');
-        price.className = 'tw-text-lg tw-font-bold text-gray-900';
-        const displayPrice = diamond.totalPrice !== null && typeof diamond.totalPrice === 'number' ? diamond.totalPrice.toLocaleString() : 'Price N/A';
-        const displayCurrency = 'USD';
-        price.textContent = `${displayPrice} ${displayCurrency}`.trim();
+            const price = document.createElement('p');
+            price.className = 'tw-text-lg tw-font-bold text-gray-900';
+            const displayPrice = diamond.totalPrice !== null && typeof diamond.totalPrice === 'number' ? diamond.totalPrice.toLocaleString() : 'Price N/A';
+            const displayCurrency = 'USD';
+            price.textContent = `${displayPrice} ${displayCurrency}`.trim();
 
-        const certInfo = document.createElement('p');
-        certInfo.className = 'tw-text-sm tw-text-gray-500';
-        certInfo.textContent = diamond.gradingLab ? `${diamond.gradingLab} Certified` : 'Certification N/A';
+            const certInfo = document.createElement('p');
+            certInfo.className = 'tw-text-sm tw-text-gray-500';
+            certInfo.textContent = diamond.gradingLab ? `${diamond.gradingLab} Certified` : 'Certification N/A';
 
-        priceCertWrapper.appendChild(price);
-        priceCertWrapper.appendChild(certInfo);
+            priceCertWrapper.appendChild(price);
+            priceCertWrapper.appendChild(certInfo);
 
-        diamondCard.appendChild(image);
-        diamondCard.appendChild(title);
-        diamondCard.appendChild(subtitle);
-        diamondCard.appendChild(priceCertWrapper);
+            diamondCard.appendChild(image);
+            diamondCard.appendChild(title);
+            diamondCard.appendChild(subtitle);
+            diamondCard.appendChild(priceCertWrapper);
 
-        const addButton = document.createElement('button');
-        addButton.className = 'tw-w-full tw-bg-white tw-text-gray-800 tw-py-2 tw-px-4 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-transition-colors tw-text-base tw-mt-auto';
-        addButton.textContent = 'Add to cart';
-        addButton.onclick = () => console.log('Add to cart:', diamond.itemId);
+            const addButton = document.createElement('button');
+            addButton.className = 'tw-w-full tw-bg-white tw-text-gray-800 tw-py-2 tw-px-4 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-transition-colors tw-text-base tw-mt-auto';
+            addButton.textContent = 'Add to cart';
+            addButton.onclick = () => {}; // Removed console.log
 
-        diamondCard.appendChild(addButton);
-        grid.appendChild(diamondCard); // Append to grid, not gridArea
-      });
+            diamondCard.appendChild(addButton);
+            grid.appendChild(diamondCard); // Append to grid, not gridArea
+        });
     }
 
-    // Update results count based on totalDiamonds from paginationInfo, not just rendered length
+    // Update results count based on totalDiamonds from paginationInfo (which now reflects filtered results)
     if (resultsCountEl && window.diamondPaginationInfo && window.diamondPaginationInfo.totalDiamonds !== undefined) {
-      resultsCountEl.textContent = `${window.diamondPaginationInfo.totalDiamonds} (Showing ${window.allDiamonds.length} on page)`;
+      const currentlyShown = window.allDiamonds.length; // Total diamonds loaded so far (across all pages)
+      const totalFiltered = window.diamondPaginationInfo.totalDiamonds; // Total matching the current filters
+      resultsCountEl.textContent = `Showing ${currentlyShown} of ${totalFiltered} diamonds`;
     } else if (resultsCountEl) {
-      resultsCountEl.textContent = window.allDiamonds.length; // Fallback if pagination info not ready
+      resultsCountEl.textContent = `${diamondsToRender.length} diamonds`; // Fallback if pagination info not ready or for initial state
     }
+  }
+
+  function buildFilterQueryString() {
+    const params = new URLSearchParams();
+
+    // Add shape filter - default to ROUND if no shape is selected yet
+    if (activeFilters['ds-shape']) {
+      params.append('shape', activeFilters['ds-shape']);
+    } else if (!initialLoadComplete) {
+      // For initial load, default to ROUND shape
+      params.append('shape', 'ROUND');
+    }
+
+    // Add type filter
+    if (activeFilters['ds-type']) {
+      params.append('type', activeFilters['ds-type']);
+    }
+
+    // Add price filters from sliders
+    const priceSliderEl = document.getElementById('ds-price-slider');
+    if (priceSliderEl && priceSliderEl.noUiSlider) {
+      const priceValues = priceSliderEl.noUiSlider.get();
+      if (priceValues && priceValues.length === 2) {
+        const minPrice = parseFloat(String(priceValues[0]).replace(/,/g, ''));
+        const maxPrice = parseFloat(String(priceValues[1]).replace(/,/g, ''));
+        if (!isNaN(minPrice)) params.append('minPrice', minPrice.toString());
+        if (!isNaN(maxPrice)) params.append('maxPrice', maxPrice.toString());
+      }
+    }
+
+    // Add carat filters from sliders
+    const caratSliderEl = document.getElementById('ds-carat-slider');
+    if (caratSliderEl && caratSliderEl.noUiSlider) {
+      const caratValues = caratSliderEl.noUiSlider.get();
+      if (caratValues && caratValues.length === 2) {
+        const minCarat = parseFloat(caratValues[0]);
+        const maxCarat = parseFloat(caratValues[1]);
+        if (!isNaN(minCarat)) params.append('minCarat', minCarat.toString());
+        if (!isNaN(maxCarat)) params.append('maxCarat', maxCarat.toString());
+      }
+    }
+
+    return params.toString();
   }
 
   async function fetchDiamondData(page = 1, limit = 24, isLoadMore = false) {
@@ -402,7 +442,13 @@ if (typeof window !== 'undefined') {
     }
 
     try {
-      const response = await fetch(`/apps/api/diamonds/all?page=${page}&limit=${limit}`);
+      const filterParams = buildFilterQueryString();
+      const baseUrl = `/apps/api/diamonds/all?page=${page}&limit=${limit}`;
+      const url = filterParams ? `${baseUrl}&${filterParams}` : baseUrl;
+
+      console.log('[FETCH] Requesting diamonds with URL:', url);
+
+      const response = await fetch(url);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
@@ -421,10 +467,14 @@ if (typeof window !== 'undefined') {
           totalNaturalDiamonds: data.totalNaturalDiamonds,
           totalLabDiamonds: data.totalLabDiamonds,
         };
-        renderDiamonds(newDiamonds); // Render only new ones for load more
+        applyAllFilters(); // Re-render with the expanded list (already filtered by server)
       } else { // Initial Load OR Full Filter Refresh Action
         window.allDiamonds = newDiamonds; // Replace current diamonds
         if (gridArea) gridArea.innerHTML = ''; // Clear loading/previous message
+
+        // Filter out any diamonds where the 'cut' property is literally 'Cut' (case-insensitive)
+        // This is to prevent a potential header row or bad data from interfering.
+        window.allDiamonds = window.allDiamonds.filter(d => d.cut && d.cut.toLowerCase() !== 'cut');
 
         window.diamondPaginationInfo = {
           currentPage: data.currentPage,
@@ -435,18 +485,15 @@ if (typeof window !== 'undefined') {
           totalLabDiamonds: data.totalLabDiamonds,
         };
 
-        console.log('[DEBUG] Diamonds fetched:', JSON.parse(JSON.stringify(window.allDiamonds)));
-
-        // Check if we can apply initial filters (if sliders are ready)
-        if (areAllSlidersInitialized() && !initialLoadComplete) {
-          console.log('[DEBUG] Data fetched and sliders ready. Applying initial filters...');
-          applyInitialFilters();
-        } else if (!initialLoadComplete) {
-          console.log('[DEBUG] Data fetched but sliders not ready yet. Waiting for slider initialization...');
-        } else {
-          // This is a subsequent full refresh (e.g., after a filter change that re-fetches page 1)
-          applyAllFilters(); // Regular call, uses current slider values
+                console.log('[DIAMONDS] Fetched:', window.allDiamonds.length, 'diamonds');
+        if (window.allDiamonds.length > 0) {
+          // Show all unique shapes in the dataset
+          const uniqueShapes = [...new Set(window.allDiamonds.map(d => d.cut).filter(Boolean))];
+          console.log('[SHAPES] Available in dataset:', uniqueShapes);
         }
+
+        // Render the fetched diamonds
+        applyAllFilters(); // Regular call, uses current slider values
       }
     } catch (error) {
       console.error('Failed to fetch diamond data:', error);
@@ -471,187 +518,46 @@ if (typeof window !== 'undefined') {
         carat: DEFAULT_FILTER_RANGES.carat.map(val => val.toFixed(2)),
         colour: DEFAULT_FILTER_RANGES.colour,
         clarity: DEFAULT_FILTER_RANGES.clarity,
-        cut: DEFAULT_FILTER_RANGES.cut
+        cutGrade: DEFAULT_FILTER_RANGES.cutGrade
       };
     }
 
     // Get current values from sliders
-    const priceSlider = document.getElementById('ds-price-slider');
-    if (priceSlider && priceSlider.noUiSlider) {
-      values.price = priceSlider.noUiSlider.get();
+    const priceSliderEl = document.getElementById('ds-price-slider');
+    if (priceSliderEl && priceSliderEl.noUiSlider) {
+      values.price = priceSliderEl.noUiSlider.get();
     }
 
-    const caratSlider = document.getElementById('ds-carat-slider');
-    if (caratSlider && caratSlider.noUiSlider) {
-      values.carat = caratSlider.noUiSlider.get();
+    const caratSliderEl = document.getElementById('ds-carat-slider');
+    if (caratSliderEl && caratSliderEl.noUiSlider) {
+      values.carat = caratSliderEl.noUiSlider.get();
     }
 
-    const colourSlider = document.getElementById('ds-colour-slider-noui');
-    if (colourSlider && colourSlider.noUiSlider) {
-      values.colour = colourSlider.noUiSlider.get();
+    const colourSliderEl = document.getElementById('ds-colour-slider-noui');
+    if (colourSliderEl && colourSliderEl.noUiSlider) {
+      values.colour = colourSliderEl.noUiSlider.get();
     }
 
-    const claritySlider = document.getElementById('ds-clarity-slider-noui');
-    if (claritySlider && claritySlider.noUiSlider) {
-      values.clarity = claritySlider.noUiSlider.get();
+    const claritySliderEl = document.getElementById('ds-clarity-slider-noui');
+    if (claritySliderEl && claritySliderEl.noUiSlider) {
+      values.clarity = claritySliderEl.noUiSlider.get();
     }
 
-    const cutSlider = document.getElementById('ds-cut-slider-noui');
-    if (cutSlider && cutSlider.noUiSlider) {
-      values.cut = cutSlider.noUiSlider.get();
+    const cutGradeSliderEl = document.getElementById('ds-cut-grade-slider-noui');
+    if (cutGradeSliderEl && cutGradeSliderEl.noUiSlider) {
+      values.cutGrade = cutGradeSliderEl.noUiSlider.get();
     }
 
     return values;
   }
 
   function applyAllFilters(useInitialDefaults = false) {
-    let filteredDiamonds = [...window.allDiamonds];
-    console.log('[DEBUG] applyAllFilters called. Initial count:', filteredDiamonds.length, 'Using initial defaults:', useInitialDefaults);
-    console.log('[DEBUG] Active Filters Object:', JSON.parse(JSON.stringify(activeFilters)));
+    // Since filtering now happens server-side, this function mainly handles
+    // rendering the diamonds that were already filtered by the server
+    // This is kept for initial load and any local-only operations
 
-    // Get slider values using the centralized function
-    const sliderValues = getSliderValues(useInitialDefaults);
-    console.log('[DEBUG] Slider values:', sliderValues);
-
-    // Ensure activeFilters is up-to-date for 'ds-type' before filtering
-    const typeButtons = document.querySelectorAll('[data-filter-group="ds-type"] .filter-button');
-    let activeType = null;
-    typeButtons.forEach(button => {
-        if (button.dataset.active === 'true') {
-            activeType = button.dataset.value;
-        }
-    });
-    if (activeType) {
-        activeFilters['ds-type'] = activeType;
-    }
-
-    // Type filter (single select)
-    if (activeFilters['ds-type']) {
-      // This needs to be updated to reflect the diamond's actual type (natural or lab)
-      // Assuming 'type' property will be added to diamond objects by the backend or processing step.
-      // For now, this filter might not work as expected until 'd.type' is correctly populated.
-      // Example: filteredDiamonds = filteredDiamonds.filter(d => d.type === activeFilters['ds-type']);
-      // Placeholder: if data.type does not exist, how to filter?
-      // For now, let's assume we will filter based on totalNaturalDiamonds vs totalLabDiamonds if type is not on diamond object
-      // THIS LOGIC IS A COMPLEX PLACEHOLDER AND NEEDS TO BE REFINED BASED ON API RESPONSE AND DIAMOND OBJECT STRUCTURE
-      if (activeFilters['ds-type'] === 'Natural' && window.diamondPaginationInfo.totalNaturalDiamonds !== undefined) {
-        // How to filter window.allDiamonds which is a mix? Requires type on each diamond.
-        // console.warn("Filtering by 'Natural' type is not fully implemented without 'type' property on each diamond.");
-      } else if (activeFilters['ds-type'] === 'Lab Grown' && window.diamondPaginationInfo.totalLabDiamonds !== undefined) {
-        // console.warn("Filtering by 'Lab Grown' type is not fully implemented without 'type' property on each diamond.");
-      }
-    }
-    console.log('[DEBUG] After type filter, count:', filteredDiamonds.length);
-
-    // Shape filter (multi-select)
-    if (activeFilters['ds-shape'] && activeFilters['ds-shape'].length > 0) {
-      filteredDiamonds = filteredDiamonds.filter(d => {
-        const diamondShape = d.cut ? d.cut.toUpperCase() : '';
-        return activeFilters['ds-shape'].includes(diamondShape);
-      });
-    }
-    console.log('[DEBUG] After shape filter, count:', filteredDiamonds.length);
-
-    // Price filter
-    if (sliderValues.price) {
-      console.log('[DEBUG] Price slider values:', sliderValues.price);
-      const minPrice = parseFloat(String(sliderValues.price[0]).replace(/,/g, ''));
-      const maxPrice = parseFloat(String(sliderValues.price[1]).replace(/,/g, ''));
-      if (!isNaN(minPrice)) {
-        filteredDiamonds = filteredDiamonds.filter(d => d.totalPrice !== null && d.totalPrice >= minPrice);
-      }
-      if (!isNaN(maxPrice)) {
-        filteredDiamonds = filteredDiamonds.filter(d => d.totalPrice !== null && d.totalPrice <= maxPrice);
-      }
-    }
-    console.log('[DEBUG] After price filter, count:', filteredDiamonds.length);
-
-    // Carat filter
-    if (sliderValues.carat) {
-      console.log('[DEBUG] Carat slider values:', sliderValues.carat);
-      const minCarat = parseFloat(sliderValues.carat[0]);
-      const maxCarat = parseFloat(sliderValues.carat[1]);
-      if (!isNaN(minCarat)) {
-        filteredDiamonds = filteredDiamonds.filter(d => d.carat !== null && d.carat >= minCarat);
-      }
-      if (!isNaN(maxCarat)) {
-        filteredDiamonds = filteredDiamonds.filter(d => d.carat !== null && d.carat <= maxCarat);
-      }
-    }
-    console.log('[DEBUG] After carat filter, count:', filteredDiamonds.length);
-
-    // Colour filter
-    if (sliderValues.colour) {
-      console.log('[DEBUG] Colour slider values:', sliderValues.colour);
-      const colorLabels = FILTER_LABELS.colour;
-      const minColorIndex = colorLabels.indexOf(sliderValues.colour[0]);
-      const maxColorIndex = colorLabels.indexOf(sliderValues.colour[1]);
-      console.log('[DEBUG] Color range indices:', minColorIndex, 'to', maxColorIndex);
-      filteredDiamonds = filteredDiamonds.filter(d => {
-        if (!d.color) {
-          console.log('[DEBUG] Diamond missing color:', d.itemId);
-          return true; // Include diamonds without color info for now
-        }
-        const diamondColorIndex = colorLabels.indexOf(d.color.toUpperCase());
-        if (diamondColorIndex === -1) {
-          console.log('[DEBUG] Color not in labels:', d.color, 'for diamond:', d.itemId);
-          return true; // Include diamonds with unrecognized colors for now
-        }
-        const isInRange = diamondColorIndex >= minColorIndex && diamondColorIndex <= maxColorIndex;
-        console.log('[DEBUG] Diamond', d.itemId, 'color:', d.color, 'index:', diamondColorIndex, 'in range:', isInRange);
-        return isInRange;
-      });
-    }
-    console.log('[DEBUG] After colour filter, count:', filteredDiamonds.length);
-
-    // Clarity filter
-    if (sliderValues.clarity) {
-      console.log('[DEBUG] Clarity slider values:', sliderValues.clarity);
-      const clarityLabels = FILTER_LABELS.clarity;
-      const minClarityIndex = clarityLabels.indexOf(sliderValues.clarity[0]);
-      const maxClarityIndex = clarityLabels.indexOf(sliderValues.clarity[1]);
-      console.log('[DEBUG] Clarity range indices:', minClarityIndex, 'to', maxClarityIndex);
-      filteredDiamonds = filteredDiamonds.filter(d => {
-        if (!d.clarity) {
-          console.log('[DEBUG] Diamond missing clarity:', d.itemId);
-          return true; // Include diamonds without clarity info for now
-        }
-        const diamondClarityIndex = clarityLabels.indexOf(d.clarity.toUpperCase());
-        if (diamondClarityIndex === -1) {
-          console.log('[DEBUG] Clarity not in labels:', d.clarity, 'for diamond:', d.itemId);
-          return true; // Include diamonds with unrecognized clarity for now
-        }
-        const isInRange = diamondClarityIndex >= minClarityIndex && diamondClarityIndex <= maxClarityIndex;
-        console.log('[DEBUG] Diamond', d.itemId, 'clarity:', d.clarity, 'index:', diamondClarityIndex, 'in range:', isInRange);
-        return isInRange;
-      });
-    }
-    console.log('[DEBUG] After clarity filter, count:', filteredDiamonds.length);
-
-    // Cut filter
-    if (sliderValues.cut) {
-      console.log('[DEBUG] Cut slider values:', sliderValues.cut);
-      const cutLabels = FILTER_LABELS.cut;
-      const minCutIndex = cutLabels.indexOf(sliderValues.cut[0]);
-      const maxCutIndex = cutLabels.indexOf(sliderValues.cut[1]);
-      filteredDiamonds = filteredDiamonds.filter(d => {
-        // Check both cutGrade and cut properties
-        const cutValue = d.cutGrade || d.cut;
-        if (!cutValue) {
-          console.log('[DEBUG] Diamond missing cut info:', d.itemId, 'cutGrade:', d.cutGrade, 'cut:', d.cut);
-          return true; // Include diamonds without cut info for now
-        }
-        const diamondCutIndex = cutLabels.indexOf(cutValue);
-        if (diamondCutIndex === -1) {
-          console.log('[DEBUG] Cut value not in labels:', cutValue, 'for diamond:', d.itemId);
-          return true; // Include diamonds with unrecognized cut values for now
-        }
-        return diamondCutIndex >= minCutIndex && diamondCutIndex <= maxCutIndex;
-      });
-    }
-    console.log('[DEBUG] After cut filter, count:', filteredDiamonds.length);
-
-    renderDiamonds(filteredDiamonds);
+    console.log('[FILTERS] Rendering diamonds (server-side filtering active). Count:', window.allDiamonds.length);
+    renderDiamonds(window.allDiamonds);
   }
 
   function setupFilterButtonGroups() {
@@ -712,16 +618,21 @@ if (typeof window !== 'undefined') {
               button.setAttribute('aria-pressed', 'true');
             }
           }
-          console.log('[DEBUG] Filter button clicked. Group:', groupId, 'Value:', value, 'New activeFilters:', JSON.parse(JSON.stringify(activeFilters)));
-          fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch to apply filters
+          // Trigger fresh fetch for active filter groups (shape, type, price, carat)
+          if (groupId === 'ds-shape' || groupId === 'ds-type') {
+            console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
+            fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch with new filters
+          } else {
+            // For other filters that might trigger re-fetching (if any are still active)
+            fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch to apply filters
+          }
         });
       });
     });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Start both processes simultaneously
-    fetchDiamondData(); // Initial fetch
+    // Initialize sliders - they will trigger the initial fetch with proper filters when ready
     initializeSliders(); // Initialize sliders immediately
 
     const applyFiltersButton = document.getElementById('ds-apply-filters');
@@ -806,7 +717,6 @@ if (typeof window !== 'undefined') {
 
       // Check if scrolled to near the bottom
       if (window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 600) { // Changed 300px to 600px threshold
-        console.log('Reached bottom of page, fetching more diamonds...');
         fetchDiamondData(window.diamondPaginationInfo.currentPage + 1, window.diamondPaginationInfo.limit, true);
       }
     });
