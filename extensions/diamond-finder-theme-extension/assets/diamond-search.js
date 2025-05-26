@@ -226,6 +226,8 @@ if (typeof window !== 'undefined') {
         minCaratSelect.addEventListener('change', function () {
           if (this.value) {
             caratSlider.noUiSlider.set([this.value, null]);
+            // Trigger filtering after updating the slider
+            debounceFetch();
           }
         });
       }
@@ -234,6 +236,8 @@ if (typeof window !== 'undefined') {
         maxCaratSelect.addEventListener('change', function () {
           if (this.value) {
             caratSlider.noUiSlider.set([null, this.value]);
+            // Trigger filtering after updating the slider
+            debounceFetch();
           }
         });
       }
