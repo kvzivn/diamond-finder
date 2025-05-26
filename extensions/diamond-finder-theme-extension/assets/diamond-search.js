@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   // Default filter ranges - centralized configuration
   const DEFAULT_FILTER_RANGES = {
     price: [200, 5000000],
-    carat: [2.00, 30.00],     // Start from 0.1 to include smaller diamonds
+    carat: [1.00, 20.00],     // Start from 0.1 to include smaller diamonds
     colour: ['K', 'D'],      // Default: K to D
     clarity: ['I3', 'FL'],   // Default: I3 to FL (covers all clarity grades)
     cut: ['Good', 'Astor']    // Default: Good to Astor
@@ -57,6 +57,16 @@ if (typeof window !== 'undefined') {
     if (initialLoadComplete) return; // Prevent multiple calls
 
     console.log('[DEBUG] Applying initial filters with default ranges');
+
+    // Set "ROUND" shape filter as active by default
+    const roundShapeButton = document.getElementById('ds-shape-round');
+    if (roundShapeButton) {
+      roundShapeButton.dataset.active = 'true';
+      roundShapeButton.setAttribute('aria-pressed', 'true');
+      // Note: activeFilters['ds-shape'] will be populated correctly by setupFilterButtonGroups
+      // because setupFilterButtonGroups reads the data-active attribute.
+    }
+
     setupFilterButtonGroups(); // Initialize filter states from buttons
     applyAllFilters(true); // Use initial default values
     initialLoadComplete = true;
@@ -458,7 +468,7 @@ if (typeof window !== 'undefined') {
       // Return the centralized default values
       return {
         price: DEFAULT_FILTER_RANGES.price.map(String), // Convert to strings for consistency
-        carat: DEFAULT_FILTER_RANGES.carat.map(String),
+        carat: DEFAULT_FILTER_RANGES.carat.map(val => val.toFixed(2)),
         colour: DEFAULT_FILTER_RANGES.colour,
         clarity: DEFAULT_FILTER_RANGES.clarity,
         cut: DEFAULT_FILTER_RANGES.cut
@@ -649,20 +659,18 @@ if (typeof window !== 'undefined') {
     filterGroups.forEach(group => {
       const groupId = group.dataset.filterGroup;
       const isMultiSelect = group.dataset.multiselect === 'true';
-      const buttons = group.querySelectorAll('.filter-button');
+      const buttons = group.querySelectorAll('button'); // Changed selector
 
       if (!isMultiSelect) {
-        // Initialize activeFilters[groupId] to null or a default if one is pre-selected.
-        // The actual active state is read from the button's data-active attribute in applyAllFilters.
         activeFilters[groupId] = null;
-        buttons.forEach(btn => { // Check if any button is already active
+        buttons.forEach(btn => {
             if (btn.dataset.active === 'true') {
                 activeFilters[groupId] = btn.dataset.value;
             }
         });
       } else {
         activeFilters[groupId] = [];
-        buttons.forEach(btn => { // For multi-select, populate from currently active buttons
+        buttons.forEach(btn => {
             if (btn.dataset.active === 'true') {
                 activeFilters[groupId].push(btn.dataset.value);
             }
@@ -676,43 +684,36 @@ if (typeof window !== 'undefined') {
             const index = activeFilters[groupId].indexOf(value);
             if (index > -1) {
               activeFilters[groupId].splice(index, 1);
-              button.classList.remove('tw-bg-gray-700', 'tw-text-white', 'tw-border-gray-700'); // Updated active classes
-              button.setAttribute('aria-pressed', 'false');
               button.dataset.active = 'false';
+              button.setAttribute('aria-pressed', 'false');
             } else {
               activeFilters[groupId].push(value);
-              button.classList.add('tw-bg-gray-700', 'tw-text-white', 'tw-border-gray-700'); // Updated active classes
-              button.setAttribute('aria-pressed', 'true');
               button.dataset.active = 'true';
+              button.setAttribute('aria-pressed', 'true');
             }
           } else {
-            // Single select behavior
-            // Deselect previous button if a new one is selected
             if (activeFilters[groupId] && activeFilters[groupId] !== value) {
-                const previousActiveButton = group.querySelector(`.filter-button[data-value="${activeFilters[groupId]}"]`);
+                const previousActiveButton = group.querySelector(`button[data-value="${activeFilters[groupId]}"]`);
                 if (previousActiveButton) {
-                    previousActiveButton.classList.remove('tw-bg-gray-700', 'tw-text-white', 'tw-border-gray-700');
-                    previousActiveButton.setAttribute('aria-pressed', 'false');
                     previousActiveButton.dataset.active = 'false';
+                    previousActiveButton.setAttribute('aria-pressed', 'false');
                 }
             }
 
             if (activeFilters[groupId] === value) {
-              // Optional: If clicking the already active button, deactivate it (for single-select)
+              // Clicking the already active button toggles it off for single-select (optional behavior)
+              // If you want it to stay selected, remove this block
               // activeFilters[groupId] = null;
-              // button.classList.remove('tw-bg-gray-700', 'tw-text-white', 'tw-border-gray-700');
-              // button.setAttribute('aria-pressed', 'false');
               // button.dataset.active = 'false';
+              // button.setAttribute('aria-pressed', 'false');
             } else {
               activeFilters[groupId] = value;
-              button.classList.add('tw-bg-gray-700', 'tw-text-white', 'tw-border-gray-700');
-              button.setAttribute('aria-pressed', 'true');
               button.dataset.active = 'true';
+              button.setAttribute('aria-pressed', 'true');
             }
           }
-          // Instead of calling applyAllFilters() here, it's called by the general 'Apply Filters' button
-          // or other input change events. If immediate filtering is desired on button click:
-          // fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch from page 1 with new filters
+          console.log('[DEBUG] Filter button clicked. Group:', groupId, 'Value:', value, 'New activeFilters:', JSON.parse(JSON.stringify(activeFilters)));
+          fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch to apply filters
         });
       });
     });
