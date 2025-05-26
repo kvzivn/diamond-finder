@@ -1,100 +1,49 @@
-.diamond-filters-ui input[type="range"]::-webkit-slider-runnable-track {
-	width: 100%;
-	height: 2px;
-	cursor: pointer;
-	background: #D1D5DB;
-	border-radius: 1px;
-	border: 0px solid #000000;
+/* noUiSlider Styles */
+.diamond-filters-ui .noUi-target {
+    height: 2px;
+    background: #D1D5DB;
+    border-radius: 1px;
+    border: none;
+    box-shadow: none;
 }
 
-.diamond-filters-ui input[type="range"]::-moz-range-track {
-	width: 100%;
-	height: 2px;
-	cursor: pointer;
-	background: #D1D5DB;
-	border-radius: 1px;
-	border: 0px solid #000000;
+.diamond-filters-ui .noUi-connect {
+    background: #626262; /* Updated to dark gray */
+    height: 2px;
 }
 
-.diamond-filters-ui input[type="range"]::-ms-track {
-	width: 100%;
-	height: 2px;
-	cursor: pointer;
-	background: transparent; /* IE/Edge track needs to be transparent */
-	border-color: transparent;
-	color: transparent;
-	border-width: 1px 0; /* IE/Edge needs border for height */
-}
-.diamond-filters-ui input[type="range"]::-ms-fill-lower {
-	background: #D1D5DB;
-	border: 0px solid #000000;
-	border-radius: 2px;
-}
-.diamond-filters-ui input[type="range"]::-ms-fill-upper {
-	background: #D1D5DB;
-	border: 0px solid #000000;
-	border-radius: 2px;
+.diamond-filters-ui .noUi-handle {
+    width: 1rem;
+    height: 1rem;
+    background: #626262; /* Dark gray */
+    border-radius: 50%;
+    border: none;
+    box-shadow: none; /* Remove default noUiSlider shadow if any */
+    cursor: pointer;
+    /* Vertically center the handle on the track */
+    /* Assuming 1rem = 16px for this calculation: (2px track - 16px handle) / 2 = -7px */
+    /* If 1rem is different, this might need adjustment e.g. calc((2px - 1rem) / 2) */
+    top: -7px;
 }
 
-/* Center thumb on track */
-.diamond-filters-ui input[type="range"]::-webkit-slider-thumb {
-	-webkit-appearance: none;
-	appearance: none;
-	width: 16px;
-	height: 16px;
-	background: #4F46E5; /* gray */
-	cursor: pointer;
-	border-radius: 50%;
-	margin-top: -7px; /* (track_height - thumb_height) / 2 + any offset adjustment */
+/* Remove the default box around the handle, if any */
+.diamond-filters-ui .noUi-handle:focus {
+    outline: none;
 }
 
-.diamond-filters-ui input[type="range"]::-moz-range-thumb {
-	width: 16px;
-	height: 16px;
-	background: #4F46E5; /* gray */
-	cursor: pointer;
-	border-radius: 50%;
-	border: none;
+/* Ensure handles don't have ::before and ::after pseudo-elements if they interfere with styling */
+.diamond-filters-ui .noUi-handle::before,
+.diamond-filters-ui .noUi-handle::after {
+    display: none;
 }
 
-.diamond-filters-ui input[type="range"]::-ms-thumb {
-	width: 16px;
-	height: 16px;
-	background: #4F46E5; /* gray */
-	cursor: pointer;
-	border-radius: 50%;
-	border: 0px solid #000000;
-	/* margin-top: 0px; IE thumbs usually align well by default once styled */
-}
-
-/* Specific styles for the Colour slider track */
-.diamond-filters-ui input[type="range"]#ds-colour-slider::-webkit-slider-runnable-track {
-	background: linear-gradient(to right,
-		#D1D5DB 0%, #D1D5DB calc(12.5% - 1px), #9CA3AF calc(12.5% - 1px), #9CA3AF 12.5%,
-		#D1D5DB 12.5%, #D1D5DB calc(25% - 1px), #9CA3AF calc(25% - 1px), #9CA3AF 25%,
-		#D1D5DB 25%, #D1D5DB calc(37.5% - 1px), #9CA3AF calc(37.5% - 1px), #9CA3AF 37.5%,
-		#D1D5DB 37.5%, #D1D5DB calc(50% - 1px), #9CA3AF calc(50% - 1px), #9CA3AF 50%,
-		#D1D5DB 50%, #D1D5DB calc(62.5% - 1px), #9CA3AF calc(62.5% - 1px), #9CA3AF 62.5%,
-		#D1D5DB 62.5%, #D1D5DB calc(75% - 1px), #9CA3AF calc(75% - 1px), #9CA3AF 75%,
-		#D1D5DB 75%, #D1D5DB calc(87.5% - 1px), #9CA3AF calc(87.5% - 1px), #9CA3AF 87.5%,
-		#D1D5DB 87.5%, #D1D5DB 100%
-	);
-}
-
-.diamond-filters-ui input[type="range"]#ds-colour-slider::-moz-range-track {
-	background: linear-gradient(to right,
-		#D1D5DB 0%, #D1D5DB calc(12.5% - 1px), #9CA3AF calc(12.5% - 1px), #9CA3AF 12.5%,
-		#D1D5DB 12.5%, #D1D5DB calc(25% - 1px), #9CA3AF calc(25% - 1px), #9CA3AF 25%,
-		#D1D5DB 25%, #D1D5DB calc(37.5% - 1px), #9CA3AF calc(37.5% - 1px), #9CA3AF 37.5%,
-		#D1D5DB 37.5%, #D1D5DB calc(50% - 1px), #9CA3AF calc(50% - 1px), #9CA3AF 50%,
-		#D1D5DB 50%, #D1D5DB calc(62.5% - 1px), #9CA3AF calc(62.5% - 1px), #9CA3AF 62.5%,
-		#D1D5DB 62.5%, #D1D5DB calc(75% - 1px), #9CA3AF calc(75% - 1px), #9CA3AF 75%,
-		#D1D5DB 75%, #D1D5DB calc(87.5% - 1px), #9CA3AF calc(87.5% - 1px), #9CA3AF 87.5%,
-		#D1D5DB 87.5%, #D1D5DB 100%
-	);
-}
-
-/* Adjust thumb position for the thicker track on Colour slider */
-.diamond-filters-ui input[type="range"]#ds-colour-slider::-webkit-slider-thumb {
-	margin-top: -6px; /* (16px thumb height - 4px track height) / 2 = 6px */
+/* Tooltip styling (optional, but good for consistency if used) */
+.diamond-filters-ui .noUi-tooltip {
+    border: 1px solid #D1D5DB;
+    border-radius: 3px;
+    background: white;
+    color: #374151;
+    padding: 2px 5px;
+    font-size: 0.75rem; /* 12px */
+    white-space: nowrap;
 }
