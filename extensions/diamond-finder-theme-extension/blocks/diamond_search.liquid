@@ -6,21 +6,23 @@
   <div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
     <!-- Top Row: Natural/Lab Grown Tabs -->
     <div class="tw-flex tw-justify-center tw-mb-6">
-      <div class="tw-flex tw-gap-2 tw-w-64" data-filter-group="ds-type" data-multiselect="false">
+      <div class="tw-flex tw-bg-gray-300 tw-rounded-full tw-w-80" data-filter-group="ds-type" data-multiselect="false">
         <button
           type="button"
-          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-gray-500 data-[active='true']:tw-bg-gray-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-gray-700 transition-colors duration-150 ease-in-out"
+          class="tw-flex-1 tw-px-6 tw-py-3 tw-rounded-full tw-text-sm tw-font-medium tw-transition-all tw-duration-200 focus:tw-outline-none data-[active='true']:tw-bg-gray-800 data-[active='true']:tw-text-white data-[active='false']:tw-text-slate-700 data-[active='false']:hover:tw-text-slate-900"
           data-value="Natural"
-          aria-pressed="false"
+          aria-pressed="true"
+          data-active="true"
           id="ds-type-natural"
         >
           Natural
         </button>
         <button
           type="button"
-          class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-1 focus:tw-ring-gray-500 data-[active='true']:tw-bg-gray-700 data-[active='true']:tw-text-white data-[active='true']:tw-border-gray-700 transition-colors duration-150 ease-in-out"
+          class="tw-flex-1 tw-px-6 tw-py-3 tw-rounded-full tw-text-sm tw-font-medium tw-transition-all tw-duration-200 focus:tw-outline-none data-[active='true']:tw-bg-gray-800 data-[active='true']:tw-text-white data-[active='false']:tw-text-slate-700 data-[active='false']:hover:tw-text-slate-900"
           data-value="Lab Grown"
           aria-pressed="false"
+          data-active="false"
           id="ds-type-lab-grown"
         >
           Lab Grown
@@ -55,14 +57,20 @@
       <!-- Carat Filter -->
       <div>
         <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Carat <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
-        <div class="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-mb-2">
+        <div class="tw-flex tw-justify-between tw-mb-2">
           <div>
             <label for="ds-min-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Carat</label>
-            <input type="number" id="ds-min-carat" step="0.01" placeholder="1.00" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+            <select id="ds-min-carat" class="tw-w-22 focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2" style="width: 5.5rem;">
+              <option value="">Select Min Carat</option>
+              {% render 'carat-options-min' %}
+            </select>
           </div>
           <div>
             <label for="ds-max-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Carat</label>
-            <input type="number" id="ds-max-carat" step="0.01" placeholder="8.00" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
+            <select id="ds-max-carat" class="tw-w-22 focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2" style="width: 5.5rem;">
+              <option value="">Select Max Carat</option>
+              {% render 'carat-options-max' %}
+            </select>
           </div>
         </div>
         <div id="ds-carat-slider" class="tw-mt-8"></div>
@@ -98,7 +106,7 @@
         <label for="ds-clarity-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Clarity <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
 
         <div id="ds-clarity-slider-noui" class="tw-mt-8"></div>
-        <div class="tw-flex tw-justify-between tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-clarity-labels">
+        <div class="tw-flex tw-justify-around tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-clarity-labels">
           <span>SI2</span><span>SI1</span><span>VS2</span><span>VS1</span><span>VVS2</span><span>VVS1</span><span>IF</span><span>FL</span>
         </div>
       </div>
@@ -108,7 +116,7 @@
         <label for="ds-cut-grade-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut Grade <span class="tw-ml-1 tw-text-gray-400">ⓘ</span></label>
 
         <div id="ds-cut-grade-slider-noui" class="tw-mt-8"></div>
-        <div class="tw-flex tw-justify-between tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-cut-grade-labels">
+        <div class="tw-flex tw-justify-around tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-cut-grade-labels">
           <span>Good</span><span>Very Good</span><span>Excellent</span><span>Astor</span>
         </div>
       </div>
@@ -148,14 +156,10 @@
     </div>
   </div>
 
-  <div id="diamond-grid-area" class="tw-bg-white">
+  <div id="diamond-grid-area" class="tw-bg-white tw-transition-opacity tw-duration-300">
     <!-- JS will put initial loading message here -->
     <!-- Products will be dynamically inserted here by renderDiamonds -->
     <!-- The initial loading message from the original HTML structure will be handled by JS -->
-  </div>
-
-  <div id="ds-load-more-indicator" class="tw-text-center tw-py-6" style="display: none;">
-    <p>Loading more diamonds...</p>
   </div>
 </div>
 

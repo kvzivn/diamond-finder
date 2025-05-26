@@ -10,6 +10,7 @@
 .diamond-filters-ui .noUi-connect {
     background: #626262; /* Updated to dark gray */
     height: 2px;
+    width: 100%;
 }
 
 .diamond-filters-ui .noUi-handle {
@@ -20,10 +21,7 @@
     border: none;
     box-shadow: none; /* Remove default noUiSlider shadow if any */
     cursor: pointer;
-    /* Vertically center the handle on the track */
-    /* Assuming 1rem = 16px for this calculation: (2px track - 16px handle) / 2 = -7px */
-    /* If 1rem is different, this might need adjustment e.g. calc((2px - 1rem) / 2) */
-    top: -7px;
+    top: -6px;
 }
 
 /* Remove the default box around the handle, if any */

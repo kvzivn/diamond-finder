@@ -18,9 +18,9 @@ if (typeof window !== 'undefined') {
   const DEFAULT_FILTER_RANGES = {
     price: [200, 5000000],
     carat: [0.50, 20.00],     // Start from 0.1 to include smaller diamonds
-    colour: ['K', 'D'],      // Default: K to D
-    clarity: ['I3', 'FL'],   // Default: I3 to FL (covers all clarity grades)
-    cutGrade: ['Good', 'Astor'] // Changed from cut to cutGrade, reflects quality
+    colour: ['K', 'E'],      // Default: K to D
+    clarity: ['I3', 'IF'],   // Default: I3 to FL (covers all clarity grades)
+    cutGrade: ['Good', 'Excellent'] // Changed from cut to cutGrade, reflects quality
   };
 
   // Label definitions - centralized for consistency
@@ -54,6 +54,21 @@ if (typeof window !== 'undefined') {
   function applyInitialFilters() {
     if (initialLoadComplete) return; // Prevent multiple calls
 
+    // Set "Natural" as the default type filter
+    activeFilters['ds-type'] = 'Natural';
+    const naturalTypeButton = document.getElementById('ds-type-natural');
+    if (naturalTypeButton) {
+      naturalTypeButton.dataset.active = 'true';
+      naturalTypeButton.setAttribute('aria-pressed', 'true');
+    } else {
+      console.warn('[TYPE] Natural type button not found!');
+    }
+    const labTypeButton = document.getElementById('ds-type-lab-grown');
+    if (labTypeButton) {
+        labTypeButton.dataset.active = 'false';
+        labTypeButton.setAttribute('aria-pressed', 'false');
+    }
+
     // Set "ROUND" shape filter as active by default
     const roundShapeButton = document.getElementById('ds-shape-round');
     if (roundShapeButton) {
@@ -72,7 +87,7 @@ if (typeof window !== 'undefined') {
 
     // Now that filters are set up, fetch fresh data with the correct filters
     console.log('[INITIAL] Active filters after setup:', activeFilters);
-    console.log('[INITIAL] Fetching diamonds with default ROUND filter');
+    console.log('[INITIAL] Fetching diamonds with default Natural & ROUND filter');
     fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
 
     initialLoadComplete = true;
@@ -139,19 +154,36 @@ if (typeof window !== 'undefined') {
       markSliderInitialized('price');
     }
 
-    // Initialize Carat Slider
+        // Initialize Carat Slider
     if (caratSlider && minCaratInput && maxCaratInput) {
+      // Create array of all valid carat values matching the select options
+      const caratValues = [];
+      // 0.10 to 10.00 in 0.05 increments
+      for (let i = 0.10; i <= 10.00; i += 0.05) {
+        caratValues.push(parseFloat(i.toFixed(2)));
+      }
+      // Add the larger values
+      caratValues.push(15.00, 20.00, 25.00, 30.00);
+
+      // Helper function to snap to valid carat values
+      function snapToValidCaratValue(value) {
+        return caratValues.reduce((prev, curr) =>
+          Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+        );
+      }
+
       window.noUiSlider.create(caratSlider, {
         start: DEFAULT_FILTER_RANGES.carat,
         connect: true,
-        step: 0.01,
+        step: 0.05, // Use 0.05 as base step
         range: {
-          'min': [0.1],
-          'max': [30.00]
+          'min': 0.10,
+          'max': 30.00
         },
         format: {
             to: function(value) {
-                return value.toFixed(2);
+                const snapped = snapToValidCaratValue(value);
+                return snapped.toFixed(2);
             },
             from: function(value) {
                 return Number(value);
@@ -162,8 +194,18 @@ if (typeof window !== 'undefined') {
       caratSlider.noUiSlider.on('update', function (values, handle) {
         if (handle === 0) {
           minCaratInput.value = values[handle];
+          // Update the min carat select dropdown
+          const minCaratSelect = document.getElementById('ds-min-carat');
+          if (minCaratSelect) {
+            minCaratSelect.value = values[handle];
+          }
         } else {
           maxCaratInput.value = values[handle];
+          // Update the max carat select dropdown
+          const maxCaratSelect = document.getElementById('ds-max-carat');
+          if (maxCaratSelect) {
+            maxCaratSelect.value = values[handle];
+          }
         }
       });
 
@@ -176,16 +218,35 @@ if (typeof window !== 'undefined') {
         caratSlider.noUiSlider.set([null, this.value]);
       });
 
+      // Add event listeners for the select dropdowns
+      const minCaratSelect = document.getElementById('ds-min-carat');
+      const maxCaratSelect = document.getElementById('ds-max-carat');
+
+      if (minCaratSelect) {
+        minCaratSelect.addEventListener('change', function () {
+          if (this.value) {
+            caratSlider.noUiSlider.set([this.value, null]);
+          }
+        });
+      }
+
+      if (maxCaratSelect) {
+        maxCaratSelect.addEventListener('change', function () {
+          if (this.value) {
+            caratSlider.noUiSlider.set([null, this.value]);
+          }
+        });
+      }
+
       markSliderInitialized('carat');
     }
 
     // Initialize Colour Slider
     if (colourSlider) {
       const colorLabels = FILTER_LABELS.colour;
-      const defaultColorStart = [0, 7]; // K to D
 
       window.noUiSlider.create(colourSlider, {
-        start: defaultColorStart,
+        start: DEFAULT_FILTER_RANGES.colour,
         connect: true,
         step: 1,
         range: {
@@ -213,10 +274,9 @@ if (typeof window !== 'undefined') {
         // Initialize Clarity Slider
     if (claritySlider) {
       const clarityLabels = FILTER_LABELS.clarity;
-      const defaultClarityStart = [0, 10]; // I3 to FL (covers full range)
 
       window.noUiSlider.create(claritySlider, {
-        start: defaultClarityStart,
+        start: DEFAULT_FILTER_RANGES.clarity,
         connect: true,
         step: 1,
         range: {
@@ -233,8 +293,6 @@ if (typeof window !== 'undefined') {
         }
       });
 
-      // claritySlider.noUiSlider.on('change', debounceFetch); // DISABLED: Clarity filter no longer affects results
-
       // Verify slider initialization
       setTimeout(() => {
         markSliderInitialized('clarity');
@@ -243,23 +301,10 @@ if (typeof window !== 'undefined') {
 
     // Initialize Cut Grade Slider (formerly Cut Slider)
     if (cutGradeSlider) {
-      console.log('[DEBUG] Initializing cutGradeSlider. Current slider instance:', cutGradeSlider.noUiSlider);
-      const cutGradeLabels = FILTER_LABELS.cutGrade; // Use cutGrade labels
-      // Ensure defaultCutGradeStart aligns with FILTER_LABELS.cutGrade and DEFAULT_FILTER_RANGES.cutGrade
-      const defaultCutGradeStart = [
-        cutGradeLabels.indexOf(DEFAULT_FILTER_RANGES.cutGrade[0]),
-        cutGradeLabels.indexOf(DEFAULT_FILTER_RANGES.cutGrade[1])
-      ];
-      console.log('[DEBUG] cutGradeSlider defaultCutGradeStart:', defaultCutGradeStart, 'Based on:', DEFAULT_FILTER_RANGES.cutGrade);
-
-      // Check if a slider instance already exists and destroy it to prevent errors/duplicates
-      if (cutGradeSlider.noUiSlider) {
-        console.log('[DEBUG] Destroying existing cutGradeSlider instance before re-creating.');
-        cutGradeSlider.noUiSlider.destroy();
-      }
+      const cutGradeLabels = FILTER_LABELS.cutGrade;
 
       window.noUiSlider.create(cutGradeSlider, {
-        start: defaultCutGradeStart,
+        start: DEFAULT_FILTER_RANGES.cutGrade,
         connect: true,
         step: 1,
         range: {
@@ -286,9 +331,15 @@ if (typeof window !== 'undefined') {
   }
 
   function showLoadMoreIndicator(show) {
-    const indicator = document.getElementById('ds-load-more-indicator');
-    if (indicator) {
-      indicator.style.display = show ? 'block' : 'none';
+    const gridArea = document.getElementById('diamond-grid-area');
+    if (gridArea) {
+      if (show) {
+        // Add pulse animation to the grid area
+        gridArea.classList.add('tw-opacity-60');
+      } else {
+        // Remove pulse animation from the grid area
+        gridArea.classList.remove('tw-opacity-60');
+      }
     }
   }
 
@@ -297,6 +348,9 @@ if (typeof window !== 'undefined') {
     const resultsCountEl = document.getElementById('ds-results-count');
 
     if (!gridArea) return;
+
+    // Remove pulse animation if it's active (for both initial load and load more)
+    gridArea.classList.remove('tw-opacity-60');
 
     // Always clear previous results from the grid area.
     gridArea.innerHTML = '';
@@ -433,8 +487,9 @@ if (typeof window !== 'undefined') {
     const gridArea = document.getElementById('diamond-grid-area');
 
     if (!isLoadMore) {
+      // For initial load, add pulse animation instead of replacing content
       if (gridArea) {
-        gridArea.innerHTML = '<p class="tw-text-center tw-py-10 tw-text-gray-500">Loading available diamonds...</p>';
+        gridArea.classList.add('tw-opacity-60');
       }
     } else {
       isLoadingMore = true;
@@ -498,12 +553,18 @@ if (typeof window !== 'undefined') {
     } catch (error) {
       console.error('Failed to fetch diamond data:', error);
       if (gridArea && !isLoadMore) { // Only show main error if not loading more
+        gridArea.classList.remove('tw-opacity-60'); // Remove pulse animation on error
         gridArea.innerHTML = '<p class="tw-text-center tw-text-red-500 tw-py-10">Failed to load diamonds. Please try again later.</p>';
       }
     } finally {
       if (isLoadMore) {
         isLoadingMore = false;
         showLoadMoreIndicator(false);
+      } else {
+        // For initial load, ensure pulse animation is removed
+        if (gridArea) {
+          gridArea.classList.remove('tw-opacity-60');
+        }
       }
     }
   }
@@ -585,6 +646,7 @@ if (typeof window !== 'undefined') {
 
       buttons.forEach(button => {
         button.addEventListener('click', () => {
+          console.log(`[BUTTON] Clicked ${groupId} button with value: ${button.dataset.value}`);
           const value = button.dataset.value;
           if (isMultiSelect) {
             const index = activeFilters[groupId].indexOf(value);
@@ -598,26 +660,20 @@ if (typeof window !== 'undefined') {
               button.setAttribute('aria-pressed', 'true');
             }
           } else {
-            if (activeFilters[groupId] && activeFilters[groupId] !== value) {
-                const previousActiveButton = group.querySelector(`button[data-value="${activeFilters[groupId]}"]`);
-                if (previousActiveButton) {
-                    previousActiveButton.dataset.active = 'false';
-                    previousActiveButton.setAttribute('aria-pressed', 'false');
-                }
+            // For single-select, always deactivate the previous button and activate the clicked one
+            const previousActiveButton = group.querySelector(`button[data-active="true"]`);
+            if (previousActiveButton) {
+                previousActiveButton.dataset.active = 'false';
+                previousActiveButton.setAttribute('aria-pressed', 'false');
             }
 
-            if (activeFilters[groupId] === value) {
-              // Clicking the already active button toggles it off for single-select (optional behavior)
-              // If you want it to stay selected, remove this block
-              // activeFilters[groupId] = null;
-              // button.dataset.active = 'false';
-              // button.setAttribute('aria-pressed', 'false');
-            } else {
-              activeFilters[groupId] = value;
-              button.dataset.active = 'true';
-              button.setAttribute('aria-pressed', 'true');
-            }
+            // Always activate the clicked button
+            activeFilters[groupId] = value;
+            button.dataset.active = 'true';
+            button.setAttribute('aria-pressed', 'true');
           }
+          console.log(`[BUTTON] Updated activeFilters[${groupId}] to:`, activeFilters[groupId]);
+
           // Trigger fresh fetch for active filter groups (shape, type, price, carat)
           if (groupId === 'ds-shape' || groupId === 'ds-type') {
             console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
