@@ -3,23 +3,23 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://tool-suspect-trim-procedure.trycloudflare.com"
+application_url = "https://evaluating-technique-escape-distinction.trycloudflare.com"
 embedded = true
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-04"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
   topics = [ "app/scopes_update" ]
   uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -27,10 +27,15 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://tool-suspect-trim-procedure.trycloudflare.com/auth/callback",
-  "https://tool-suspect-trim-procedure.trycloudflare.com/auth/shopify/callback",
-  "https://tool-suspect-trim-procedure.trycloudflare.com/api/auth/callback"
+  "https://evaluating-technique-escape-distinction.trycloudflare.com/auth/callback",
+  "https://evaluating-technique-escape-distinction.trycloudflare.com/auth/shopify/callback",
+  "https://evaluating-technique-escape-distinction.trycloudflare.com/api/auth/callback"
 ]
+
+[app_proxy]
+url = "https://evaluating-technique-escape-distinction.trycloudflare.com"
+subpath = "api"
+prefix = "apps"
 
 [pos]
 embedded = false

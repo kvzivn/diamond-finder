@@ -34,7 +34,7 @@ function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
     'Certificate Path': 'certificatePath', // Natural
     'Certificate URL': 'certificateUrl', // Lab
     'Image Path': 'imagePath', // Natural
-    'Image URL': 'imageUrl', // Lab
+    'Image URL': 'imagePath', // Lab - Unified to imagePath
     'Online Report': 'onlineReport', // Natural
     'Online Report URL': 'onlineReportUrl', // Lab
     'Video URL': 'videoUrl',
