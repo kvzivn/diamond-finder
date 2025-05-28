@@ -83,9 +83,17 @@ if (typeof window !== 'undefined') {
       });
     }
 
-    // Set default certificate filter - "ALL" (which means all certificates are included)
-    activeFilters['ds-certificate'] = 'ALL';
+    // Set default certificate filter - all certificates are selected initially
+    activeFilters['ds-certificate'] = ['GIA', 'IGI', 'HRD'];
+    activeFilters['ds-certificate-initial-state'] = true; // Flag to track initial state
     console.log('[CERTIFICATE] Setting default certificate filter:', activeFilters['ds-certificate']);
+
+    // Don't mark certificate buttons as active visually in initial state
+    const certificateButtons = document.querySelectorAll('[data-filter-group="ds-certificate"] button');
+    certificateButtons.forEach(button => {
+      button.dataset.active = 'false';
+      button.setAttribute('aria-pressed', 'false');
+    });
 
     setupFilterButtonGroups(); // Initialize filter states from buttons
 
@@ -488,14 +496,14 @@ if (typeof window !== 'undefined') {
       }
     }
 
-    // Add certificate filters - handle single certificate selection or ALL
+    // Add certificate filters - handle multiple certificate selection
     if (activeFilters['ds-certificate']) {
-      if (activeFilters['ds-certificate'] === 'ALL') {
-        // When "ALL" is selected, include all certificates
-        params.append('gradingLab', 'GIA,IGI,HRD');
-      } else {
-        // When specific certificate is selected, only include that one
-        params.append('gradingLab', activeFilters['ds-certificate']);
+      if (Array.isArray(activeFilters['ds-certificate']) && activeFilters['ds-certificate'].length > 0) {
+        // When specific certificates are selected, include them as comma-separated list
+        params.append('gradingLab', activeFilters['ds-certificate'].join(','));
+      } else if (activeFilters['ds-certificate'].length === 0) {
+        // If no certificates are selected, filter out all
+        params.append('gradingLab', 'NONE');
       }
     } else if (!initialLoadComplete) {
       // For initial load, default to all certificates
@@ -651,20 +659,20 @@ if (typeof window !== 'undefined') {
     const certificateGroup = document.querySelector('[data-filter-group="ds-certificate"]');
     if (!certificateGroup) return;
 
-    const activeCertificate = activeFilters['ds-certificate'];
+    const activeCertificates = activeFilters['ds-certificate'];
+    const isInitialState = activeFilters['ds-certificate-initial-state'];
 
-    // Remove existing state classes
-    certificateGroup.classList.remove('all-active', 'specific-active');
+    // Update button states based on active certificates
+    const buttons = certificateGroup.querySelectorAll('button');
+    buttons.forEach(button => {
+      const value = button.dataset.value;
+      // In initial state, all buttons appear inactive even though all certificates are active
+      const isActive = !isInitialState && Array.isArray(activeCertificates) && activeCertificates.includes(value);
+      button.dataset.active = isActive ? 'true' : 'false';
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
 
-    // If "ALL" is selected or no specific certificate is selected
-    if (!activeCertificate || activeCertificate === 'ALL') {
-      certificateGroup.classList.add('all-active');
-      console.log('[CERTIFICATE] Visual state: all-active');
-    } else {
-      // Specific certificate is selected
-      certificateGroup.classList.add('specific-active');
-      console.log('[CERTIFICATE] Visual state: specific-active', activeCertificate);
-    }
+    console.log('[CERTIFICATE] Updated visual state, active certificates:', activeCertificates, 'Initial state:', isInitialState);
   }
 
   function setupFilterButtonGroups() {
@@ -678,45 +686,102 @@ if (typeof window !== 'undefined') {
 
       console.log(`[SETUP] Setting up ${groupId} with ${buttons.length} buttons, multiselect: ${isMultiSelect}`);
 
-      // All filter groups are now single-select (including certificates)
-      activeFilters[groupId] = activeFilters[groupId] || null;
-      buttons.forEach(btn => {
-          if (btn.dataset.active === 'true') {
-              activeFilters[groupId] = btn.dataset.value;
-              console.log(`[SETUP] ${groupId} active button: ${btn.dataset.value}`);
+      // Handle multi-select for certificates
+      if (isMultiSelect && groupId === 'ds-certificate') {
+        // Initialize as array if not already set
+        if (!Array.isArray(activeFilters[groupId])) {
+          activeFilters[groupId] = [];
+          // Get initially active buttons (but in initial state, we already set all as active)
+          if (!activeFilters['ds-certificate-initial-state']) {
+            buttons.forEach(btn => {
+              if (btn.dataset.active === 'true') {
+                activeFilters[groupId].push(btn.dataset.value);
+              }
+            });
           }
-      });
+        }
+      } else {
+        // Single-select filters
+        activeFilters[groupId] = activeFilters[groupId] || null;
+        buttons.forEach(btn => {
+            if (btn.dataset.active === 'true') {
+                activeFilters[groupId] = btn.dataset.value;
+                console.log(`[SETUP] ${groupId} active button: ${btn.dataset.value}`);
+            }
+        });
+      }
 
       buttons.forEach(button => {
+        // Check if this button already has an event listener to prevent duplicates
+        if (button.hasAttribute('data-listener-attached')) {
+          return; // Skip if already has event listener
+        }
+
+        // Mark this button as having an event listener attached
+        button.setAttribute('data-listener-attached', 'true');
+
         button.addEventListener('click', () => {
           console.log(`[BUTTON] Clicked ${groupId} button with value: ${button.dataset.value}`);
           const value = button.dataset.value;
 
-          // For single-select, always deactivate the previous button and activate the clicked one
-          const previousActiveButton = group.querySelector(`button[data-active="true"]`);
-          if (previousActiveButton) {
-              previousActiveButton.dataset.active = 'false';
-              previousActiveButton.setAttribute('aria-pressed', 'false');
-          }
+          if (isMultiSelect && groupId === 'ds-certificate') {
+            // Multi-select logic for certificates
+            if (!Array.isArray(activeFilters[groupId])) {
+              activeFilters[groupId] = [];
+            }
 
-          // Always activate the clicked button
-          activeFilters[groupId] = value;
-          button.dataset.active = 'true';
-          button.setAttribute('aria-pressed', 'true');
-          console.log(`[BUTTON] Set ${groupId} to: ${value}`);
+            // Check if we're in initial state
+            if (activeFilters['ds-certificate-initial-state']) {
+              // First click after initial state - clear all and select only the clicked one
+              activeFilters['ds-certificate-initial-state'] = false;
+              activeFilters[groupId] = [value];
+              button.dataset.active = 'true';
+              button.setAttribute('aria-pressed', 'true');
+              console.log(`[BUTTON] Exited initial state, selected only ${value}`);
+            } else {
+              // Normal multi-select behavior
+              const currentIndex = activeFilters[groupId].indexOf(value);
 
-          // Update visual state for certificate filters
-          if (groupId === 'ds-certificate') {
+              if (currentIndex > -1) {
+                // Certificate is currently selected, remove it
+                activeFilters[groupId].splice(currentIndex, 1);
+                button.dataset.active = 'false';
+                button.setAttribute('aria-pressed', 'false');
+                console.log(`[BUTTON] Removed ${value} from ${groupId}, remaining:`, activeFilters[groupId]);
+              } else {
+                // Certificate is not selected, add it
+                activeFilters[groupId].push(value);
+                button.dataset.active = 'true';
+                button.setAttribute('aria-pressed', 'true');
+                console.log(`[BUTTON] Added ${value} to ${groupId}, total:`, activeFilters[groupId]);
+              }
+            }
+
+            // Update visual state for certificate filters
             updateCertificateFilterVisualState();
-          }
 
-          // Trigger fresh fetch for active filter groups (shape, type, price, carat, certificate)
-          if (groupId === 'ds-shape' || groupId === 'ds-type' || groupId === 'ds-certificate') {
+            // Trigger fresh fetch
             console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
-            fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch with new filters
+            fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
           } else {
-            // For other filters that might trigger re-fetching (if any are still active)
-            fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch to apply filters
+            // Single-select logic (existing code)
+            const previousActiveButton = group.querySelector(`button[data-active="true"]`);
+            if (previousActiveButton) {
+                previousActiveButton.dataset.active = 'false';
+                previousActiveButton.setAttribute('aria-pressed', 'false');
+            }
+
+            // Always activate the clicked button
+            activeFilters[groupId] = value;
+            button.dataset.active = 'true';
+            button.setAttribute('aria-pressed', 'true');
+            console.log(`[BUTTON] Set ${groupId} to: ${value}`);
+
+            // Trigger fresh fetch for active filter groups (shape, type, price, carat)
+            if (groupId === 'ds-shape' || groupId === 'ds-type') {
+              console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
+              fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch with new filters
+            }
           }
         });
       });
@@ -833,18 +898,6 @@ if (typeof window !== 'undefined') {
           // Small delay to ensure DOM is ready
           setTimeout(() => {
             setupFilterButtonGroups();
-
-            // Sync certificate button states with activeFilters
-            if (activeFilters['ds-certificate']) {
-              const certificateButtons = document.querySelectorAll('[data-filter-group="ds-certificate"] button');
-              certificateButtons.forEach(button => {
-                const value = button.dataset.value;
-                const isActive = activeFilters['ds-certificate'] === value;
-                button.dataset.active = isActive ? 'true' : 'false';
-                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-              });
-              console.log('[CERTIFICATE] Synced button states with activeFilters:', activeFilters['ds-certificate']);
-            }
 
             // Update certificate filter visual state
             updateCertificateFilterVisualState();
