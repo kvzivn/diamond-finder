@@ -133,7 +133,7 @@ export async function fetchDiamondsFromApi(type: DiamondType): Promise<Diamond[]
 
   if (type === 'natural') {
     endpoint = `${IDEX_API_BASE_URL}/fullfeed`;
-    dataFormat = 'format_20230628_extended';
+    dataFormat = 'format_20220525_basis';
     headers = NATURAL_DIAMOND_HEADERS;
   } else if (type === 'lab') {
     endpoint = `${IDEX_API_BASE_URL}/labgrownfullfile`;

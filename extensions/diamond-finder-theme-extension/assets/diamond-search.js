@@ -83,6 +83,10 @@ if (typeof window !== 'undefined') {
       });
     }
 
+    // Set default certificate filter - "ALL" (which means all certificates are included)
+    activeFilters['ds-certificate'] = 'ALL';
+    console.log('[CERTIFICATE] Setting default certificate filter:', activeFilters['ds-certificate']);
+
     setupFilterButtonGroups(); // Initialize filter states from buttons
 
     // Now that filters are set up, fetch fresh data with the correct filters
@@ -484,6 +488,23 @@ if (typeof window !== 'undefined') {
       }
     }
 
+    // Add certificate filters - handle single certificate selection or ALL
+    if (activeFilters['ds-certificate']) {
+      if (activeFilters['ds-certificate'] === 'ALL') {
+        // When "ALL" is selected, include all certificates
+        params.append('gradingLab', 'GIA,IGI,HRD');
+      } else {
+        // When specific certificate is selected, only include that one
+        params.append('gradingLab', activeFilters['ds-certificate']);
+      }
+    } else if (!initialLoadComplete) {
+      // For initial load, default to all certificates
+      params.append('gradingLab', 'GIA,IGI,HRD');
+    } else {
+      // If no certificate is selected after initial load, pass a special value to filter out all
+      params.append('gradingLab', 'NONE');
+    }
+
     return params.toString();
   }
 
@@ -625,61 +646,72 @@ if (typeof window !== 'undefined') {
     renderDiamonds(window.allDiamonds);
   }
 
+  // Function to update certificate filter visual states
+  function updateCertificateFilterVisualState() {
+    const certificateGroup = document.querySelector('[data-filter-group="ds-certificate"]');
+    if (!certificateGroup) return;
+
+    const activeCertificate = activeFilters['ds-certificate'];
+
+    // Remove existing state classes
+    certificateGroup.classList.remove('all-active', 'specific-active');
+
+    // If "ALL" is selected or no specific certificate is selected
+    if (!activeCertificate || activeCertificate === 'ALL') {
+      certificateGroup.classList.add('all-active');
+      console.log('[CERTIFICATE] Visual state: all-active');
+    } else {
+      // Specific certificate is selected
+      certificateGroup.classList.add('specific-active');
+      console.log('[CERTIFICATE] Visual state: specific-active', activeCertificate);
+    }
+  }
+
   function setupFilterButtonGroups() {
     const filterGroups = document.querySelectorAll('[data-filter-group]');
+    console.log('[SETUP] Found filter groups:', filterGroups.length);
+
     filterGroups.forEach(group => {
       const groupId = group.dataset.filterGroup;
       const isMultiSelect = group.dataset.multiselect === 'true';
       const buttons = group.querySelectorAll('button'); // Changed selector
 
-      if (!isMultiSelect) {
-        activeFilters[groupId] = null;
-        buttons.forEach(btn => {
-            if (btn.dataset.active === 'true') {
-                activeFilters[groupId] = btn.dataset.value;
-            }
-        });
-      } else {
-        activeFilters[groupId] = [];
-        buttons.forEach(btn => {
-            if (btn.dataset.active === 'true') {
-                activeFilters[groupId].push(btn.dataset.value);
-            }
-        });
-      }
+      console.log(`[SETUP] Setting up ${groupId} with ${buttons.length} buttons, multiselect: ${isMultiSelect}`);
+
+      // All filter groups are now single-select (including certificates)
+      activeFilters[groupId] = activeFilters[groupId] || null;
+      buttons.forEach(btn => {
+          if (btn.dataset.active === 'true') {
+              activeFilters[groupId] = btn.dataset.value;
+              console.log(`[SETUP] ${groupId} active button: ${btn.dataset.value}`);
+          }
+      });
 
       buttons.forEach(button => {
         button.addEventListener('click', () => {
           console.log(`[BUTTON] Clicked ${groupId} button with value: ${button.dataset.value}`);
           const value = button.dataset.value;
-          if (isMultiSelect) {
-            const index = activeFilters[groupId].indexOf(value);
-            if (index > -1) {
-              activeFilters[groupId].splice(index, 1);
-              button.dataset.active = 'false';
-              button.setAttribute('aria-pressed', 'false');
-            } else {
-              activeFilters[groupId].push(value);
-              button.dataset.active = 'true';
-              button.setAttribute('aria-pressed', 'true');
-            }
-          } else {
-            // For single-select, always deactivate the previous button and activate the clicked one
-            const previousActiveButton = group.querySelector(`button[data-active="true"]`);
-            if (previousActiveButton) {
-                previousActiveButton.dataset.active = 'false';
-                previousActiveButton.setAttribute('aria-pressed', 'false');
-            }
 
-            // Always activate the clicked button
-            activeFilters[groupId] = value;
-            button.dataset.active = 'true';
-            button.setAttribute('aria-pressed', 'true');
+          // For single-select, always deactivate the previous button and activate the clicked one
+          const previousActiveButton = group.querySelector(`button[data-active="true"]`);
+          if (previousActiveButton) {
+              previousActiveButton.dataset.active = 'false';
+              previousActiveButton.setAttribute('aria-pressed', 'false');
           }
-          console.log(`[BUTTON] Updated activeFilters[${groupId}] to:`, activeFilters[groupId]);
 
-          // Trigger fresh fetch for active filter groups (shape, type, price, carat)
-          if (groupId === 'ds-shape' || groupId === 'ds-type') {
+          // Always activate the clicked button
+          activeFilters[groupId] = value;
+          button.dataset.active = 'true';
+          button.setAttribute('aria-pressed', 'true');
+          console.log(`[BUTTON] Set ${groupId} to: ${value}`);
+
+          // Update visual state for certificate filters
+          if (groupId === 'ds-certificate') {
+            updateCertificateFilterVisualState();
+          }
+
+          // Trigger fresh fetch for active filter groups (shape, type, price, carat, certificate)
+          if (groupId === 'ds-shape' || groupId === 'ds-type' || groupId === 'ds-certificate') {
             console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
             fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch with new filters
           } else {
@@ -780,5 +812,45 @@ if (typeof window !== 'undefined') {
         fetchDiamondData(window.diamondPaginationInfo.currentPage + 1, window.diamondPaginationInfo.limit, true);
       }
     });
+
+    // Advanced filters toggle
+    const advancedFiltersToggle = document.getElementById('ds-advanced-filters-toggle');
+    const advancedFiltersContent = document.getElementById('ds-advanced-filters-content');
+
+    if (advancedFiltersToggle && advancedFiltersContent) {
+      advancedFiltersToggle.addEventListener('click', () => {
+        advancedFiltersContent.classList.toggle('tw-hidden');
+
+        // Rotate the chevron icon
+        const svg = advancedFiltersToggle.querySelector('svg');
+        if (svg) {
+          svg.style.transform = advancedFiltersContent.classList.contains('tw-hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+          svg.style.transition = 'transform 0.3s ease';
+        }
+
+        // If showing the advanced filters, set up the filter button groups for certificate filter
+        if (!advancedFiltersContent.classList.contains('tw-hidden')) {
+          // Small delay to ensure DOM is ready
+          setTimeout(() => {
+            setupFilterButtonGroups();
+
+            // Sync certificate button states with activeFilters
+            if (activeFilters['ds-certificate']) {
+              const certificateButtons = document.querySelectorAll('[data-filter-group="ds-certificate"] button');
+              certificateButtons.forEach(button => {
+                const value = button.dataset.value;
+                const isActive = activeFilters['ds-certificate'] === value;
+                button.dataset.active = isActive ? 'true' : 'false';
+                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+              });
+              console.log('[CERTIFICATE] Synced button states with activeFilters:', activeFilters['ds-certificate']);
+            }
+
+            // Update certificate filter visual state
+            updateCertificateFilterVisualState();
+          }, 10);
+        }
+      });
+    }
   });
 }

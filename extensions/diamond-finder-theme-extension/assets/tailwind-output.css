@@ -643,12 +643,12 @@ video {
   display: block;
 }
 
-.tw-inline-block {
-  display: inline-block;
-}
-
 .tw-flex {
   display: flex;
+}
+
+.tw-inline-flex {
+  display: inline-flex;
 }
 
 .tw-grid {
@@ -691,16 +691,16 @@ video {
   flex: 1 1 0%;
 }
 
-.tw-transform {
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
 .tw-grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
 .tw-grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tw-grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .tw-grid-cols-5 {
@@ -717,10 +717,6 @@ video {
 
 .tw-items-center {
   align-items: center;
-}
-
-.tw-justify-end {
-  justify-content: flex-end;
 }
 
 .tw-justify-center {
@@ -813,11 +809,6 @@ video {
 
 .tw-border-transparent {
   border-color: transparent;
-}
-
-.tw-bg-blue-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
 }
 
 .tw-bg-gray-200 {
@@ -1003,12 +994,6 @@ video {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.tw-shadow-md {
-  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
 .tw-shadow-sm {
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
@@ -1039,23 +1024,12 @@ video {
   transition-duration: 150ms;
 }
 
-.tw-transition-transform {
-  transition-property: transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
 .tw-duration-200 {
   transition-duration: 200ms;
 }
 
 .tw-duration-300 {
   transition-duration: 300ms;
-}
-
-.hover\:tw-bg-blue-700:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:tw-bg-gray-100:hover {
@@ -1087,11 +1061,6 @@ video {
 .focus\:tw-ring-gray-500:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(107 114 128 / var(--tw-ring-opacity, 1));
-}
-
-.tw-group:hover .group-hover\:tw-rotate-180 {
-  --tw-rotate: 180deg;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .data-\[active\=\'true\'\]\:tw-border[data-active='true'] {

@@ -1,0 +1,31 @@
+{%- assign option_pairs = options_str | split: '|' -%}
+<div class="tw-grid tw-grid-cols-4 tw-gap-2 certificate-filter-group all-active" data-filter-group="{{ group_id }}" data-multiselect="false">
+  <!-- Add "All" button first for returning to default state -->
+  <button
+    type="button"
+    class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-bg-white tw-border tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none transition-colors duration-150 ease-in-out certificate-filter-btn"
+    data-value="ALL"
+    aria-pressed="true"
+    data-active="true"
+    id="{{ group_id }}-all"
+  >
+    All
+  </button>
+  {%- for pair_str in option_pairs -%}
+    {%- assign parts = pair_str | split: ':' -%}
+    {%- assign label = parts[0] -%}
+    {%- assign value = parts[1] | default: label -%}
+    {%- assign id_val = value | downcase | replace: ' ', '-' -%}
+    {%- assign id = group_id | append: '-' | append: id_val -%}
+    <button
+      type="button"
+      class="tw-w-full tw-px-3 tw-py-1.5 md:tw-px-4 md:tw-py-2 tw-bg-white tw-border tw-rounded-md tw-text-sm tw-font-medium hover:tw-bg-gray-100 focus:tw-outline-none transition-colors duration-150 ease-in-out certificate-filter-btn"
+      data-value="{{ value }}"
+      aria-pressed="false"
+      data-active="false"
+      id="{{ id }}"
+    >
+      {{ label }}
+    </button>
+  {%- endfor -%}
+</div>

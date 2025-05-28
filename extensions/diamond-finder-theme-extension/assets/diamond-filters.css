@@ -45,3 +45,22 @@
     font-size: 0.75rem; /* 12px */
     white-space: nowrap;
 }
+
+/* Certificate Filter Button Styles */
+.certificate-filter-btn {
+    border-color: transparent !important;
+}
+
+/* When "All" is active (default state), show all buttons as inactive */
+.certificate-filter-group.all-active .certificate-filter-btn {
+    border-color: transparent !important;
+}
+
+/* When a specific certificate is selected, show active state only for that one */
+.certificate-filter-group.specific-active .certificate-filter-btn[data-active="true"] {
+    border-color: #374151 !important; /* gray-700 */
+}
+
+.certificate-filter-group.specific-active .certificate-filter-btn[data-active="false"] {
+    border-color: transparent !important;
+}

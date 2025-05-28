@@ -10,6 +10,7 @@ function applyFilters(diamonds: Diamond[], filters: {
   minCarat?: number;
   maxCarat?: number;
   type?: string;
+  gradingLab?: string;
 }): Diamond[] {
   let filtered = [...diamonds];
 
@@ -37,6 +38,20 @@ function applyFilters(diamonds: Diamond[], filters: {
     filtered = filtered.filter(d => d.carat !== null && d.carat !== undefined && d.carat <= filters.maxCarat!);
   }
 
+  // Grading Lab filter
+  if (filters.gradingLab) {
+    if (filters.gradingLab === 'NONE') {
+      // If 'NONE' is passed, filter out all diamonds
+      filtered = [];
+    } else {
+      const allowedLabs = filters.gradingLab.split(',').map(lab => lab.trim().toUpperCase());
+      filtered = filtered.filter(d => {
+        const diamondLab = d.gradingLab ? d.gradingLab.toUpperCase() : '';
+        return allowedLabs.includes(diamondLab);
+      });
+    }
+  }
+
   return filtered;
 }
 
@@ -58,6 +73,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     minCarat: url.searchParams.get("minCarat") ? parseFloat(url.searchParams.get("minCarat")!) : undefined,
     maxCarat: url.searchParams.get("maxCarat") ? parseFloat(url.searchParams.get("maxCarat")!) : undefined,
     type: url.searchParams.get("type") || undefined,
+    gradingLab: url.searchParams.get("gradingLab") || undefined,
   };
 
   console.log('API Route (/all): Received filters:', JSON.stringify(filters, null, 2));

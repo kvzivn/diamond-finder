@@ -122,18 +122,20 @@
       </div>
     </div>
 
-    {% comment %} <div class="tw-mt-6 tw-text-center">
-      <button type="button" id="ds-advanced-filters-toggle" class="tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
-        Advanced Filters <span class="tw-inline-block tw-transform group-hover:tw-rotate-180 tw-transition-transform"></span>
+    <div class="tw-mt-6 tw-text-center">
+      <button type="button" id="ds-advanced-filters-toggle" class="tw-inline-flex tw-items-center tw-justify-center tw-mx-auto tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
+        Advanced Filters <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" class="tw-ml-1"><path stroke="none" d="M0 0h24v24H0z"></path><path d="m6 9 6 6 6-6"></path></svg>
       </button>
     </div>
 
     <div id="ds-advanced-filters-content" class="tw-hidden tw-mt-4 tw-border-t tw-pt-4">
-      <p class="tw-text-gray-500">Advanced filter options will appear here.</p>
-    </div> {% endcomment %}
-
-    <div class="tw-flex tw-justify-end tw-mt-6 tw-hidden"> <!-- Hidden for now, as per image only advanced filters button is visible initially -->
-      <button type="button" id="ds-apply-filters" class="tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-white tw-font-semibold tw-py-2 tw-px-6 tw-rounded-md tw-shadow-md tw-transition-colors">Search Diamonds</button>
+      <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8">
+        <!-- Certificate Filter -->
+        <div>
+          <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Certificate</label>
+          {% render 'certificate-filter-group', group_id: 'ds-certificate', options_str: "GIA|IGI|HRD" %}
+        </div>
+      </div>
     </div>
   </div>
 
