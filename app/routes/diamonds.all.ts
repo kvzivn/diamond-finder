@@ -7,6 +7,8 @@ function applyFilters(diamonds: Diamond[], filters: {
   shape?: string;
   minPrice?: number;
   maxPrice?: number;
+  minPriceSek?: number;
+  maxPriceSek?: number;
   minCarat?: number;
   maxCarat?: number;
   type?: string;
@@ -22,11 +24,18 @@ function applyFilters(diamonds: Diamond[], filters: {
     });
   }
 
-  // Price filters
-  if (filters.minPrice !== undefined) {
+  // SEK Price filters (prioritize SEK over USD)
+  if (filters.minPriceSek !== undefined) {
+    filtered = filtered.filter(d => d.totalPriceSek !== null && d.totalPriceSek !== undefined && d.totalPriceSek >= filters.minPriceSek!);
+  } else if (filters.minPrice !== undefined) {
+    // Fallback to USD price if SEK not available
     filtered = filtered.filter(d => d.totalPrice !== null && d.totalPrice !== undefined && d.totalPrice >= filters.minPrice!);
   }
-  if (filters.maxPrice !== undefined) {
+
+  if (filters.maxPriceSek !== undefined) {
+    filtered = filtered.filter(d => d.totalPriceSek !== null && d.totalPriceSek !== undefined && d.totalPriceSek <= filters.maxPriceSek!);
+  } else if (filters.maxPrice !== undefined) {
+    // Fallback to USD price if SEK not available
     filtered = filtered.filter(d => d.totalPrice !== null && d.totalPrice !== undefined && d.totalPrice <= filters.maxPrice!);
   }
 
@@ -70,6 +79,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     shape: url.searchParams.get("shape") || undefined,
     minPrice: url.searchParams.get("minPrice") ? parseFloat(url.searchParams.get("minPrice")!) : undefined,
     maxPrice: url.searchParams.get("maxPrice") ? parseFloat(url.searchParams.get("maxPrice")!) : undefined,
+    minPriceSek: url.searchParams.get("minPriceSek") ? parseFloat(url.searchParams.get("minPriceSek")!) : undefined,
+    maxPriceSek: url.searchParams.get("maxPriceSek") ? parseFloat(url.searchParams.get("maxPriceSek")!) : undefined,
     minCarat: url.searchParams.get("minCarat") ? parseFloat(url.searchParams.get("minCarat")!) : undefined,
     maxCarat: url.searchParams.get("maxCarat") ? parseFloat(url.searchParams.get("maxCarat")!) : undefined,
     type: url.searchParams.get("type") || undefined,

@@ -16,7 +16,7 @@ if (typeof window !== 'undefined') {
 
   // Default filter ranges - centralized configuration
   const DEFAULT_FILTER_RANGES = {
-    price: [200, 5000000],
+    price: [2000, 10000000], // Updated to SEK range (roughly 200 USD to 5M USD * 10.5 exchange rate)
     carat: [0.50, 20.00],     // Start from 0.1 to include smaller diamonds
     colour: ['K', 'E'],      // Default: K to D
     clarity: ['I3', 'IF'],   // Default: I3 to FL (covers all clarity grades)
@@ -130,23 +130,24 @@ if (typeof window !== 'undefined') {
       window.noUiSlider.create(priceSlider, {
         start: DEFAULT_FILTER_RANGES.price,
         connect: true,
-        step: 100,
+        step: 1000, // Increased step for SEK values
         range: {
-          'min': [DEFAULT_FILTER_RANGES.price[0]],
-          'max': [DEFAULT_FILTER_RANGES.price[1]]
+          'min': 2500,
+          'max': 10000000
         },
         format: {
           to: function (value) {
-            return formatNumber(Math.round(value));
+            // Format as SEK with space separators
+            return Math.round(value).toLocaleString('sv-SE').replace(/,/g, ' ');
           },
           from: function (value) {
-            return Number(value.replace(/,/g, ''));
+            return Number(value.replace(/\s/g, ''));
           }
         }
       });
 
       priceSlider.noUiSlider.on('update', function (values, handle) {
-        const value = values[handle].replace(/,/g, '');
+        const value = values[handle].replace(/\s/g, '');
         if (handle === 0) {
           minPriceInput.value = value;
         } else {
@@ -420,8 +421,21 @@ if (typeof window !== 'undefined') {
 
             const price = document.createElement('p');
             price.className = 'tw-text-lg tw-font-bold text-gray-900';
-            const displayPrice = diamond.totalPrice !== null && typeof diamond.totalPrice === 'number' ? diamond.totalPrice.toLocaleString() : 'Price N/A';
-            const displayCurrency = 'USD';
+
+            // Use Swedish price if available, otherwise fallback to USD
+            let displayPrice = 'Price N/A';
+            let displayCurrency = 'SEK';
+
+            if (diamond.totalPriceSek !== null && typeof diamond.totalPriceSek === 'number') {
+              // Round to nearest 100 and format with spaces as thousands separators
+              const roundedPrice = Math.round(diamond.totalPriceSek / 100) * 100;
+              displayPrice = roundedPrice.toLocaleString('sv-SE').replace(/,/g, ' ');
+            } else if (diamond.totalPrice !== null && typeof diamond.totalPrice === 'number') {
+              // Fallback to USD if SEK not available
+              displayPrice = diamond.totalPrice.toLocaleString();
+              displayCurrency = 'USD';
+            }
+
             price.textContent = `${displayPrice} ${displayCurrency}`.trim();
 
             const certInfo = document.createElement('p');
@@ -477,10 +491,11 @@ if (typeof window !== 'undefined') {
     if (priceSliderEl && priceSliderEl.noUiSlider) {
       const priceValues = priceSliderEl.noUiSlider.get();
       if (priceValues && priceValues.length === 2) {
-        const minPrice = parseFloat(String(priceValues[0]).replace(/,/g, ''));
-        const maxPrice = parseFloat(String(priceValues[1]).replace(/,/g, ''));
-        if (!isNaN(minPrice)) params.append('minPrice', minPrice.toString());
-        if (!isNaN(maxPrice)) params.append('maxPrice', maxPrice.toString());
+        const minPrice = parseFloat(String(priceValues[0]).replace(/\s/g, ''));
+        const maxPrice = parseFloat(String(priceValues[1]).replace(/\s/g, ''));
+        // Send SEK prices to the server
+        if (!isNaN(minPrice)) params.append('minPriceSek', minPrice.toString());
+        if (!isNaN(maxPrice)) params.append('maxPriceSek', maxPrice.toString());
       }
     }
 
@@ -819,14 +834,14 @@ if (typeof window !== 'undefined') {
 
                         let numVal1, numVal2;
                         if (el.id.includes('price')) {
-                            numVal1 = parseFloat(val1_str.replace(/,/g, ''));
-                            numVal2 = parseFloat(val2_str.replace(/,/g, ''));
+                            numVal1 = parseFloat(val1_str.replace(/\s/g, ''));
+                            numVal2 = parseFloat(val2_str.replace(/\s/g, ''));
                         } else { // carat
                             numVal1 = parseFloat(val1_str);
                             numVal2 = parseFloat(val2_str);
                         }
 
-                        let inputValue = parseFloat(el.value.replace(/,/g, ''));
+                        let inputValue = parseFloat(el.value.replace(/\s/g, ''));
 
                         if (isNaN(inputValue)) {
                            // If input is not a valid number, don't attempt to set slider

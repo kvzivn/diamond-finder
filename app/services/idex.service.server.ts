@@ -5,7 +5,7 @@ const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 
 // --- CSV Headers --- //
 const NATURAL_DIAMOND_HEADERS = [
-  'Item ID #', 'Supplier Stock Ref.', 'Cut', 'Carat', 'Color', 'Natural Fancy Color', 'Natural Fancy Color Intensity', 'Natural Fancy Color Overtone', 'Treated Color', 'Clarity', 'Cut Grade', 'Grading Lab', 'Certificate Number', 'Certificate Path', 'Image Path', 'Online Report', 'Video URL', '3DViewer URL', 'Price Per Carat', 'Total Price', '% Off IDEX List', 'Polish', 'Symmetry', 'Measurements Length', 'Measurements Width', 'Measurements Height', 'Depth', 'Table', 'Crown Height', 'Crown Angle', 'Pavilion Depth', 'Pavilion Angle', 'Girdle From', 'Girdle To', 'Culet Size', 'Culet Condition', 'Graining', 'Fluorescence Intensity', 'Fluorescence Color', 'Enhancement', 'Country', 'State / Region', 'Pair Stock Ref.', 'Asking Price For Pair', 'Shade', 'Milky', 'Black Inclusion', 'Eye Clean', 'Provenance Report', 'Provenance Number', 'Brand', 'Guaranteed Availability', '_EMPTY_FIELD_'
+  'Item ID #', 'Cut', 'Carat', 'Color', 'Natural Fancy Color', 'Natural Fancy Color Intensity', 'Natural Fancy Color Overtone', 'Treated Color', 'Clarity', 'Make (Cut Grade)', 'Grading Lab', 'Certificate Number', 'Certificate Path', 'Image Path', 'Online Report', 'Price Per Carat', 'Total Price', '% Off IDEX List', 'Polish', 'Symmetry', 'Measurements (LengthxWidthxHeight)', 'Depth', 'Table', 'Crown Height', 'Pavilion Depth', 'Girdle (From / To)', 'Culet Size', 'Culet Condition', 'Graining', 'Fluorescence Intensity', 'Fluorescence Color', 'Enhancement', 'Country', 'State / Region', 'Pair Stock Ref.', '_EMPTY_FIELD_'
 ];
 
 const LAB_GROWN_DIAMOND_HEADERS = [
@@ -29,14 +29,15 @@ function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
     'Treated Color': 'treatedColor',
     'Clarity': 'clarity',
     'Cut Grade': 'cutGrade',
+    'Make (Cut Grade)': 'cutGrade',
     'Grading Lab': 'gradingLab',
     'Certificate Number': 'certificateNumber',
-    'Certificate Path': 'certificatePath', // Natural
-    'Certificate URL': 'certificateUrl', // Lab
-    'Image Path': 'imagePath', // Natural
-    'Image URL': 'imagePath', // Lab - Unified to imagePath
-    'Online Report': 'onlineReport', // Natural
-    'Online Report URL': 'onlineReportUrl', // Lab
+    'Certificate Path': 'certificatePath',
+    'Certificate URL': 'certificateUrl',
+    'Image Path': 'imagePath',
+    'Image URL': 'imagePath',
+    'Online Report': 'onlineReport',
+    'Online Report URL': 'onlineReportUrl',
     'Video URL': 'videoUrl',
     '3DViewer URL': 'threeDViewerUrl',
     'Price Per Carat': 'pricePerCarat',
@@ -47,6 +48,7 @@ function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
     'Measurements Length': 'measurementsLength',
     'Measurements Width': 'measurementsWidth',
     'Measurements Height': 'measurementsHeight',
+    'Measurements (LengthxWidthxHeight)': '_EMPTY_FIELD_',
     'Depth': 'depthPercent',
     'Table': 'tablePercent',
     'Crown Height': 'crownHeight',
@@ -55,18 +57,19 @@ function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
     'Pavilion Angle': 'pavilionAngle',
     'Girdle From': 'girdleFrom',
     'Girdle To': 'girdleTo',
+    'Girdle (From / To)': '_EMPTY_FIELD_',
     'Culet Size': 'culetSize',
     'Culet Condition': 'culetCondition',
     'Graining': 'graining',
     'Fluorescence Intensity': 'fluorescenceIntensity',
     'Fluorescence Color': 'fluorescenceColor',
     'Enhancement': 'enhancement',
-    'Country': 'country', // Natural
-    'Country Code': 'countryCode', // Lab
-    'Country Name': 'countryName', // Lab
-    'State / Region': 'stateRegion', // Natural
-    'State Code': 'stateCode', // Lab
-    'State Name': 'stateName', // Lab
+    'Country': 'country',
+    'Country Code': 'countryCode',
+    'Country Name': 'countryName',
+    'State / Region': 'stateRegion',
+    'State Code': 'stateCode',
+    'State Name': 'stateName',
     'Pair Stock Ref.': 'pairStockRef',
     'Pair Stock Ref': 'pairStockRef',
     'Pair Separable': 'pairSeparable',
@@ -98,25 +101,78 @@ function parseCSV(csvString: string, headers: string[]): Diamond[] {
   return lines.map(line => {
     const values = line.split(',');
     const diamond: Partial<Diamond> = {};
-    diamondKeys.forEach((key, index) => {
-      if (key === '_EMPTY_FIELD_') return;
-      if (values[index] !== undefined && values[index].trim() !== '') {
-        const value = values[index].trim();
-        // Basic type conversion - extend as needed
-        if (key === 'carat' || key === 'pricePerCarat' || key === 'totalPrice' || key === 'percentOffIdexList' ||
-            key === 'measurementsLength' || key === 'measurementsWidth' || key === 'measurementsHeight' ||
-            key === 'depthPercent' || key === 'tablePercent' || key === 'crownHeight' || key === 'crownAngle' ||
-            key === 'pavilionDepth' || key === 'pavilionAngle' || key === 'askingPriceForPair' || key === 'askingPricePerCaratForPair') {
-          (diamond as any)[key] = parseFloat(value);
-        } else if (key === 'pairSeparable') {
-          (diamond as any)[key] = value.toLowerCase() === 'yes' ? true : (value.toLowerCase() === 'no' ? false : value);
-        } else {
-          (diamond as any)[key] = value;
+
+    headers.forEach((header, index) => {
+      const key = diamondKeys[index];
+      if (key === '_EMPTY_FIELD_' && header !== 'Measurements (LengthxWidthxHeight)' && header !== 'Girdle (From / To)') return;
+
+      const rawValue = values[index];
+      if (rawValue !== undefined && rawValue.trim() !== '') {
+        const value = rawValue.trim();
+
+        if (header === 'Measurements (LengthxWidthxHeight)') {
+          const parts = value.split('x');
+          if (parts.length === 3) {
+            diamond.measurementsLength = parseFloat(parts[0]);
+            diamond.measurementsWidth = parseFloat(parts[1]);
+            diamond.measurementsHeight = parseFloat(parts[2]);
+          }
+        } else if (header === 'Girdle (From / To)') {
+          const parts = value.split('/');
+          if (parts.length === 2) {
+            diamond.girdleFrom = parts[0].trim();
+            diamond.girdleTo = parts[1].trim();
+          }
+        } else if (key !== '_EMPTY_FIELD_') {
+          // Basic type conversion - extend as needed
+          if (key === 'carat' || key === 'pricePerCarat' || key === 'totalPrice' || key === 'percentOffIdexList' ||
+              key === 'measurementsLength' || key === 'measurementsWidth' || key === 'measurementsHeight' || // Already handled if header was 'Measurements (LengthxWidthxHeight)'
+              key === 'depthPercent' || key === 'tablePercent' || key === 'crownHeight' || key === 'crownAngle' ||
+              key === 'pavilionDepth' || key === 'pavilionAngle' || key === 'askingPriceForPair' || key === 'askingPricePerCaratForPair') {
+            (diamond as any)[key] = parseFloat(value);
+          } else if (key === 'pairSeparable') {
+            (diamond as any)[key] = value.toLowerCase() === 'yes' ? true : (value.toLowerCase() === 'no' ? false : value);
+          } else {
+            (diamond as any)[key] = value;
+          }
         }
       }
     });
     return diamond as Diamond; // Assuming essential fields like itemId will be present
   }).filter(d => d.itemId); // Ensure a diamond has an itemId
+}
+
+// Function to fetch USD to SEK exchange rate from Open Exchange Rates API
+async function getUsdToSekExchangeRate(): Promise<number> {
+  const appId = process.env.EXCHANGE_RATE_APP_ID;
+
+  if (!appId) {
+    throw new Error('EXCHANGE_RATE_APP_ID is not configured in environment variables.');
+  }
+
+  console.log('[ExchangeRateService] Fetching USD to SEK exchange rate from Open Exchange Rates...');
+
+  try {
+    const response = await fetch(`https://openexchangerates.org/api/latest.json?app_id=${appId}&symbols=SEK`);
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Failed to fetch exchange rate: ${response.status} - ${errorBody}`);
+    }
+
+    const data = await response.json();
+    const sekRate = data.rates?.SEK;
+
+    if (!sekRate || typeof sekRate !== 'number') {
+      throw new Error('SEK rate not found in API response');
+    }
+
+    console.log(`[ExchangeRateService] Current USD to SEK rate: ${sekRate}`);
+    return sekRate;
+  } catch (error) {
+    console.error('[ExchangeRateService] Error fetching exchange rate:', error);
+    throw error;
+  }
 }
 
 export async function fetchDiamondsFromApi(type: DiamondType): Promise<Diamond[]> {
@@ -183,7 +239,26 @@ export async function fetchDiamondsFromApi(type: DiamondType): Promise<Diamond[]
   const csvString = await csvFile.async('string');
 
   console.log(`Parsing CSV data for ${type} diamonds...`);
-  const diamonds = parseCSV(csvString, headers);
+  let diamonds = parseCSV(csvString, headers);
+
+  // Fetch exchange rate and convert prices to SEK
+  try {
+    const exchangeRate = await getUsdToSekExchangeRate();
+
+    // Convert USD prices to SEK
+    diamonds = diamonds.map(diamond => {
+      const diamondWithSek = { ...diamond };
+      if (typeof diamond.totalPrice === 'number') {
+        diamondWithSek.totalPriceSek = parseFloat((diamond.totalPrice * exchangeRate).toFixed(2));
+      }
+      return diamondWithSek;
+    });
+
+    console.log(`[IDEX SERVICE] Applied USD to SEK conversion for ${diamonds.length} diamonds using rate: ${exchangeRate}`);
+  } catch (error) {
+    console.error('[IDEX SERVICE] Failed to fetch exchange rate or apply currency conversion. Proceeding with USD prices only.', error);
+    // Continue without SEK conversion - diamonds will only have USD prices
+  }
 
   // Log the first few diamond objects and total count for inspection
   if (diamonds.length > 0) {

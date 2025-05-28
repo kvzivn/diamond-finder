@@ -22,6 +22,7 @@ export interface Diamond {
   threeDViewerUrl?: string; // 3DViewer URL
   pricePerCarat?: number; // Price Per Carat
   totalPrice?: number; // Total Price
+  totalPriceSek?: number; // Total Price in Swedish Krona
   percentOffIdexList?: number; // % Off IDEX List (Natural)
   polish?: string; // Polish
   symmetry?: string; // Symmetry
