@@ -1,6 +1,6 @@
 /* noUiSlider Styles */
 .diamond-filters-ui .noUi-target {
-    height: 2px;
+    height: 3px;
     background: #D1D5DB;
     border-radius: 1px;
     border: none;
@@ -44,4 +44,29 @@
     padding: 2px 5px;
     font-size: 0.75rem; /* 12px */
     white-space: nowrap;
+}
+
+.diamond-filters-ui .noUi-handle-lower {
+    right: -12px;
+}
+.diamond-filters-ui .noUi-handle-upper {
+    right: 0;
+}
+
+.label-container span {
+    position:relative;
+    text-align: center;
+    width: 100%;
+}
+
+.label-container span:not(:last-child):before {
+    display: block;
+    position: absolute;
+    content: "";
+    background: white;
+    height: 3px;
+    width: 2px;
+    right: 0;
+    top: -16px;
+
 }

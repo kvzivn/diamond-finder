@@ -304,7 +304,7 @@ if (typeof window !== 'undefined') {
         step: 1,
         range: {
           'min': 0,
-          'max': 7
+          'max': 9
         },
         format: {
           to: function (value) {
@@ -332,7 +332,7 @@ if (typeof window !== 'undefined') {
         step: 1,
         range: {
           'min': 0,
-          'max': 10
+          'max': 8
         },
         format: {
           to: function (value) {
@@ -360,7 +360,7 @@ if (typeof window !== 'undefined') {
         step: 1,
         range: {
           'min': 0,
-          'max': cutGradeLabels.length - 1 // Max index of cutGradeLabels
+          'max': 4 // Max index of cutGradeLabels
         },
         format: {
           to: function (value) {

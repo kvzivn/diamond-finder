@@ -740,9 +740,9 @@ video {
        column-gap: 2.5rem;
 }
 
-.tw-gap-x-2 {
-  -moz-column-gap: 0.5rem;
-       column-gap: 0.5rem;
+.tw-gap-x-12 {
+  -moz-column-gap: 3rem;
+       column-gap: 3rem;
 }
 
 .tw-gap-y-8 {
@@ -964,6 +964,10 @@ video {
 
 .tw-opacity-0 {
   opacity: 0;
+}
+
+.tw-opacity-20 {
+  opacity: 0.2;
 }
 
 .tw-opacity-60 {
