@@ -18,15 +18,15 @@ if (typeof window !== 'undefined') {
   const DEFAULT_FILTER_RANGES = {
     price: [2000, 10000000], // Updated to SEK range (roughly 200 USD to 5M USD * 10.5 exchange rate)
     carat: [0.50, 20.00],     // Start from 0.1 to include smaller diamonds
-    colour: ['K', 'E'],      // Default: K to D
-    clarity: ['I3', 'IF'],   // Default: I3 to FL (covers all clarity grades)
-    cutGrade: ['Good', 'Excellent'] // Changed from cut to cutGrade, reflects quality
+    colour: ['K', 'D'],      // Default: K to D
+    clarity: ['I3', 'FL'],   // Default: I3 to FL (covers all clarity grades)
+    cutGrade: ['Good', 'Astor'] // Changed from cut to cutGrade, reflects quality
   };
 
   // Label definitions - centralized for consistency
   const FILTER_LABELS = {
     colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
-    clarity: ['I3', 'I2', 'I1', 'SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
+    clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
     cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor'] // Changed from cut to cutGrade
   };
 
@@ -304,7 +304,7 @@ if (typeof window !== 'undefined') {
         step: 1,
         range: {
           'min': 0,
-          'max': 9
+          'max': 8
         },
         format: {
           to: function (value) {
@@ -918,23 +918,61 @@ if (typeof window !== 'undefined') {
         }
     });
 
-    const colorSlider = document.getElementById('ds-colour-slider');
+    const colorSlider = document.getElementById('ds-colour-slider-noui');
     const colorImagesDiv = document.getElementById('ds-colour-images');
 
     if (colorSlider && colorImagesDiv) {
+      let isSliderDragging = false;
+
       const showImages = () => {
         colorImagesDiv.style.opacity = '1';
         colorImagesDiv.style.pointerEvents = 'auto';
       };
+
       const hideImages = () => {
-        colorImagesDiv.style.opacity = '0';
-        colorImagesDiv.style.pointerEvents = 'none';
+        // Only hide if not currently dragging
+        if (!isSliderDragging) {
+          colorImagesDiv.style.opacity = '0';
+          colorImagesDiv.style.pointerEvents = 'none';
+        }
       };
-      colorSlider.addEventListener('mousedown', showImages);
-      colorSlider.addEventListener('touchstart', showImages);
-      document.addEventListener('mouseup', hideImages);
-      colorSlider.addEventListener('blur', hideImages);
-      document.addEventListener('touchend', hideImages);
+
+      // Use noUiSlider events to track drag state
+      if (colorSlider.noUiSlider) {
+        colorSlider.noUiSlider.on('start', function() {
+          isSliderDragging = true;
+          showImages();
+        });
+
+        colorSlider.noUiSlider.on('end', function() {
+          isSliderDragging = false;
+          hideImages();
+        });
+      } else {
+        // Fallback for when slider isn't initialized yet
+        setTimeout(() => {
+          if (colorSlider.noUiSlider) {
+            colorSlider.noUiSlider.on('start', function() {
+              isSliderDragging = true;
+              showImages();
+            });
+
+            colorSlider.noUiSlider.on('end', function() {
+              isSliderDragging = false;
+              hideImages();
+            });
+          }
+        }, 100);
+      }
+
+      // Keep images visible when hovering over the images themselves
+      colorImagesDiv.addEventListener('mouseenter', showImages);
+      colorImagesDiv.addEventListener('mouseleave', () => {
+        // Only hide if not dragging
+        if (!isSliderDragging) {
+          hideImages();
+        }
+      });
     }
 
     // Infinite scroll listener

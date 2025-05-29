@@ -33,7 +33,7 @@
     <!-- Main Filter Grid -->
     <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8 tw-pb-8">
       <!-- Shape Filter -->
-      <div class="tw-opacity-20">
+      <div>
         <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Shape</label>
         {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Princess:PRINCESS|Cushion:CUSHION|Emerald:EMERALD|Oval:OVAL|Radiant:RADIANT|Asscher:ASSCHER|Marquise:MARQUISE|Heart:HEART|Pear:PEAR", multiselect: "false", custom_class: "shape-buttons tw-grid tw-grid-cols-5 tw-gap-2" %}
       </div>
@@ -80,11 +80,11 @@
       <div>
         <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Colour</label>
         <div class="tw-relative">
-          <div id="ds-colour-images" class="tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-flex tw-justify-between tw-items-end tw-bg-white tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300">
-            {% assign color_grades_for_images = "L,K,J,I,H,G,F,E,D" | split: ',' %}
+          <div id="ds-colour-images" class="tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-flex tw-justify-between tw-items-end tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-3 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10">
+            {% assign color_grades_for_images = "K,J,I,H,G,F,E,D" | split: ',' %}
             {% for grade_img_filename in color_grades_for_images %}
-              <div class="tw-w-1/9 tw-text-center">
-                <img src="{{ '/' | append: grade_img_filename | append: '.jpg' | asset_url }}" alt="{{ grade_img_filename }} color" class="tw-mx-auto tw-h-10 tw-w-auto" width="40" height="40">
+              <div class="tw-text-center">
+                <img src="{{ '/' | append: grade_img_filename | append: '.jpg' | asset_url }}" alt="{{ grade_img_filename }} color" class="tw-mx-auto tw-h-12 tw-w-auto tw-rounded-sm" width="48" height="48">
               </div>
             {% endfor %}
           </div>
@@ -92,7 +92,7 @@
           <div id="ds-colour-slider-noui" class="tw-mt-8"></div>
 
           <div class="label-container tw-flex tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-colour-labels">
-            {% assign color_grades_for_labels = "L,K,J,I,H,G,F,E,D" | split: ',' %}
+            {% assign color_grades_for_labels = "K,J,I,H,G,F,E,D" | split: ',' %}
             {% for grade_label in color_grades_for_labels %}
             <span class="tw-flex-1 tw-text-center">{{ grade_label }}</span>
             {% endfor %}
