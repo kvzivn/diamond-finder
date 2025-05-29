@@ -141,21 +141,16 @@
 
   <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
     <p class="tw-text-base tw-text-gray-700">Results - <span id="ds-results-count">0</span> Diamonds</p>
-    <div class="tw-flex tw-items-center tw-space-x-2">
-      <div class="tw-flex tw-border tw-border-gray-300 tw-rounded">
-        <button id="ds-view-list" class="tw-p-2 tw-border-r tw-border-gray-300"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="tw-w-5 tw-h-5"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg></button>
-        <button id="ds-view-grid" class="tw-p-2 tw-bg-gray-200"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" class="tw-w-5 tw-h-5"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 14a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 14a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></button>
-      </div>
+
       <div>
         <label for="ds-sort-by" class="tw-sr-only">Sort by</label>
-        <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-10 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-rounded-md">
-          <option>Price: low to high</option>
-          <option>Price: high to low</option>
-          <option>Carat: low to high</option>
-          <option>Carat: high to low</option>
+        <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-2 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-rounded-md">
+          <option value="Price: low to high">Price: low to high</option>
+          <option value="Price: high to low">Price: high to low</option>
+          <option value="Carat: low to high">Carat: low to high</option>
+          <option value="Carat: high to low">Carat: high to low</option>
         </select>
       </div>
-    </div>
   </div>
 
   <div id="diamond-grid-area" class="tw-bg-white tw-transition-opacity tw-duration-300">

@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://sells-fighter-blues-opened.trycloudflare.com"
+application_url = "https://bare-direct-bathroom-herbal.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,13 +27,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://sells-fighter-blues-opened.trycloudflare.com/auth/callback",
-  "https://sells-fighter-blues-opened.trycloudflare.com/auth/shopify/callback",
-  "https://sells-fighter-blues-opened.trycloudflare.com/api/auth/callback"
+  "https://bare-direct-bathroom-herbal.trycloudflare.com/auth/callback",
+  "https://bare-direct-bathroom-herbal.trycloudflare.com/auth/shopify/callback",
+  "https://bare-direct-bathroom-herbal.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://sells-fighter-blues-opened.trycloudflare.com"
+url = "https://bare-direct-bathroom-herbal.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

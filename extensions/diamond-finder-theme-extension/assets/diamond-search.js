@@ -30,9 +30,52 @@ if (typeof window !== 'undefined') {
     cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor'] // Changed from cut to cutGrade
   };
 
-  // Helper function to format numbers with commas for tooltips
-  function formatNumber(value) {
-    return Number(value).toLocaleString('en-US');
+  // Add sorting state management
+  let currentSort = 'price-low-high'; // Default sort
+
+  // Function to sort diamonds based on selected criteria
+  function sortDiamonds(diamonds, sortType) {
+    const diamondsCopy = [...diamonds]; // Create a copy to avoid mutating original array
+
+    switch (sortType) {
+      case 'price-low-high':
+        return diamondsCopy.sort((a, b) => {
+          const priceA = a.totalPriceSek || a.totalPrice || 0;
+          const priceB = b.totalPriceSek || b.totalPrice || 0;
+          return priceA - priceB;
+        });
+
+      case 'price-high-low':
+        return diamondsCopy.sort((a, b) => {
+          const priceA = a.totalPriceSek || a.totalPrice || 0;
+          const priceB = b.totalPriceSek || b.totalPrice || 0;
+          return priceB - priceA;
+        });
+
+      case 'carat-low-high':
+        return diamondsCopy.sort((a, b) => {
+          const caratA = a.carat || 0;
+          const caratB = b.carat || 0;
+          return caratA - caratB;
+        });
+
+      case 'carat-high-low':
+        return diamondsCopy.sort((a, b) => {
+          const caratA = a.carat || 0;
+          const caratB = b.carat || 0;
+          return caratB - caratA;
+        });
+
+      default:
+        return diamondsCopy; // No sorting applied
+    }
+  }
+
+  // Function to log current applied filters
+  function logCurrentAppliedFilters(logMessagePrefix = "[FILTERS APPLIED]") {
+    const sliderValues = getSliderValues();
+    const allCurrentFilters = { ...activeFilters, sliders: sliderValues };
+    console.log(logMessagePrefix, allCurrentFilters);
   }
 
   // Check if all sliders are initialized
@@ -60,8 +103,6 @@ if (typeof window !== 'undefined') {
     if (naturalTypeButton) {
       naturalTypeButton.dataset.active = 'true';
       naturalTypeButton.setAttribute('aria-pressed', 'true');
-    } else {
-      console.warn('[TYPE] Natural type button not found!');
     }
     const labTypeButton = document.getElementById('ds-type-lab-grown');
     if (labTypeButton) {
@@ -74,19 +115,11 @@ if (typeof window !== 'undefined') {
     if (roundShapeButton) {
       roundShapeButton.dataset.active = 'true';
       roundShapeButton.setAttribute('aria-pressed', 'true');
-      console.log('[SHAPE] Set ROUND button as active by default');
-    } else {
-      console.warn('[SHAPE] ROUND shape button not found! Available buttons:');
-      const shapeButtons = document.querySelectorAll('[data-filter-group="ds-shape"] button');
-      shapeButtons.forEach(btn => {
-        console.log('[SHAPE] Button ID:', btn.id, 'Value:', btn.dataset.value);
-      });
     }
 
     // Set default certificate filter - all certificates are selected initially
     activeFilters['ds-certificate'] = ['GIA', 'IGI', 'HRD'];
     activeFilters['ds-certificate-initial-state'] = true; // Flag to track initial state
-    console.log('[CERTIFICATE] Setting default certificate filter:', activeFilters['ds-certificate']);
 
     // Don't mark certificate buttons as active visually in initial state
     const certificateButtons = document.querySelectorAll('[data-filter-group="ds-certificate"] button');
@@ -97,9 +130,11 @@ if (typeof window !== 'undefined') {
 
     setupFilterButtonGroups(); // Initialize filter states from buttons
 
+    // Log initial filters
+    const initialSliderValues = getSliderValues(true);
+    console.log("[INITIAL FILTERS]", { ...activeFilters, sliders: initialSliderValues });
+
     // Now that filters are set up, fetch fresh data with the correct filters
-    console.log('[INITIAL] Active filters after setup:', activeFilters);
-    console.log('[INITIAL] Fetching diamonds with default Natural & ROUND filter');
     fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
 
     initialLoadComplete = true;
@@ -121,6 +156,7 @@ if (typeof window !== 'undefined') {
     const debounceFetch = () => {
       clearTimeout(sliderChangeTimeout);
       sliderChangeTimeout = setTimeout(() => {
+        logCurrentAppliedFilters();
         fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
       }, 500); // 500ms debounce
     };
@@ -280,8 +316,6 @@ if (typeof window !== 'undefined') {
         }
       });
 
-      // colourSlider.noUiSlider.on('change', debounceFetch); // DISABLED: Colour filter no longer affects results
-
       // Verify slider initialization
       setTimeout(() => {
         markSliderInitialized('colour');
@@ -338,8 +372,6 @@ if (typeof window !== 'undefined') {
         }
       });
 
-      // cutGradeSlider.noUiSlider.on('change', debounceFetch); // DISABLED: Cut grade filter no longer affects results
-
       // Verify slider initialization
       setTimeout(() => {
         markSliderInitialized('cutGrade'); // Mark cutGrade as initialized
@@ -372,14 +404,17 @@ if (typeof window !== 'undefined') {
     // Always clear previous results from the grid area.
     gridArea.innerHTML = '';
 
-    if (!diamondsToRender || diamondsToRender.length === 0) {
+    // Apply sorting to diamonds before rendering
+    const sortedDiamonds = sortDiamonds(diamondsToRender, currentSort);
+
+    if (!sortedDiamonds || sortedDiamonds.length === 0) {
         gridArea.innerHTML = '<p class="tw-text-center tw-text-gray-500 tw-py-10">No diamonds match your criteria.</p>';
     } else {
         const grid = document.createElement('div');
         grid.className = 'tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-6';
         gridArea.appendChild(grid);
 
-        diamondsToRender.forEach(diamond => {
+        sortedDiamonds.forEach(diamond => {
             const diamondCard = document.createElement('div');
             diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-shadow hover:tw-shadow-md tw-transition-shadow tw-overflow-hidden';
 
@@ -466,7 +501,7 @@ if (typeof window !== 'undefined') {
       const totalFiltered = window.diamondPaginationInfo.totalDiamonds; // Total matching the current filters
       resultsCountEl.textContent = `Showing ${currentlyShown} of ${totalFiltered} diamonds`;
     } else if (resultsCountEl) {
-      resultsCountEl.textContent = `${diamondsToRender.length} diamonds`; // Fallback if pagination info not ready or for initial state
+      resultsCountEl.textContent = `${sortedDiamonds.length} diamonds`; // Fallback if pagination info not ready or for initial state
     }
   }
 
@@ -484,6 +519,11 @@ if (typeof window !== 'undefined') {
     // Add type filter
     if (activeFilters['ds-type']) {
       params.append('type', activeFilters['ds-type']);
+    }
+
+    // Add sorting parameter
+    if (currentSort) {
+      params.append('sort', currentSort);
     }
 
     // Add price filters from sliders
@@ -549,8 +589,6 @@ if (typeof window !== 'undefined') {
       const baseUrl = `/apps/api/diamonds/all?page=${page}&limit=${limit}`;
       const url = filterParams ? `${baseUrl}&${filterParams}` : baseUrl;
 
-      console.log('[FETCH] Requesting diamonds with URL:', url);
-
       const response = await fetch(url);
       if (!response.ok) {
         const errorText = await response.text();
@@ -559,6 +597,7 @@ if (typeof window !== 'undefined') {
       const data = await response.json();
 
       const newDiamonds = data.diamonds || [];
+      console.log("[NEWLY FETCHED DIAMONDS]", newDiamonds);
 
       if (isLoadMore) {
         window.allDiamonds = [...window.allDiamonds, ...newDiamonds];
@@ -587,13 +626,6 @@ if (typeof window !== 'undefined') {
           totalNaturalDiamonds: data.totalNaturalDiamonds,
           totalLabDiamonds: data.totalLabDiamonds,
         };
-
-                console.log('[DIAMONDS] Fetched:', window.allDiamonds.length, 'diamonds');
-        if (window.allDiamonds.length > 0) {
-          // Show all unique shapes in the dataset
-          const uniqueShapes = [...new Set(window.allDiamonds.map(d => d.cut).filter(Boolean))];
-          console.log('[SHAPES] Available in dataset:', uniqueShapes);
-        }
 
         // Render the fetched diamonds
         applyAllFilters(); // Regular call, uses current slider values
@@ -665,7 +697,6 @@ if (typeof window !== 'undefined') {
     // rendering the diamonds that were already filtered by the server
     // This is kept for initial load and any local-only operations
 
-    console.log('[FILTERS] Rendering diamonds (server-side filtering active). Count:', window.allDiamonds.length);
     renderDiamonds(window.allDiamonds);
   }
 
@@ -686,20 +717,15 @@ if (typeof window !== 'undefined') {
       button.dataset.active = isActive ? 'true' : 'false';
       button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
-
-    console.log('[CERTIFICATE] Updated visual state, active certificates:', activeCertificates, 'Initial state:', isInitialState);
   }
 
   function setupFilterButtonGroups() {
     const filterGroups = document.querySelectorAll('[data-filter-group]');
-    console.log('[SETUP] Found filter groups:', filterGroups.length);
 
     filterGroups.forEach(group => {
       const groupId = group.dataset.filterGroup;
       const isMultiSelect = group.dataset.multiselect === 'true';
       const buttons = group.querySelectorAll('button'); // Changed selector
-
-      console.log(`[SETUP] Setting up ${groupId} with ${buttons.length} buttons, multiselect: ${isMultiSelect}`);
 
       // Handle multi-select for certificates
       if (isMultiSelect && groupId === 'ds-certificate') {
@@ -721,7 +747,6 @@ if (typeof window !== 'undefined') {
         buttons.forEach(btn => {
             if (btn.dataset.active === 'true') {
                 activeFilters[groupId] = btn.dataset.value;
-                console.log(`[SETUP] ${groupId} active button: ${btn.dataset.value}`);
             }
         });
       }
@@ -736,7 +761,6 @@ if (typeof window !== 'undefined') {
         button.setAttribute('data-listener-attached', 'true');
 
         button.addEventListener('click', () => {
-          console.log(`[BUTTON] Clicked ${groupId} button with value: ${button.dataset.value}`);
           const value = button.dataset.value;
 
           if (isMultiSelect && groupId === 'ds-certificate') {
@@ -752,7 +776,6 @@ if (typeof window !== 'undefined') {
               activeFilters[groupId] = [value];
               button.dataset.active = 'true';
               button.setAttribute('aria-pressed', 'true');
-              console.log(`[BUTTON] Exited initial state, selected only ${value}`);
             } else {
               // Normal multi-select behavior
               const currentIndex = activeFilters[groupId].indexOf(value);
@@ -762,21 +785,26 @@ if (typeof window !== 'undefined') {
                 activeFilters[groupId].splice(currentIndex, 1);
                 button.dataset.active = 'false';
                 button.setAttribute('aria-pressed', 'false');
-                console.log(`[BUTTON] Removed ${value} from ${groupId}, remaining:`, activeFilters[groupId]);
+
+                // Check if all certificates are now deselected
+                if (activeFilters[groupId].length === 0) {
+                  // Return to initial state - all certificates active but appear deselected
+                  activeFilters['ds-certificate-initial-state'] = true;
+                  activeFilters[groupId] = ['GIA', 'IGI', 'HRD'];
+                }
               } else {
                 // Certificate is not selected, add it
                 activeFilters[groupId].push(value);
                 button.dataset.active = 'true';
                 button.setAttribute('aria-pressed', 'true');
-                console.log(`[BUTTON] Added ${value} to ${groupId}, total:`, activeFilters[groupId]);
               }
             }
 
             // Update visual state for certificate filters
             updateCertificateFilterVisualState();
 
-            // Trigger fresh fetch
-            console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
+            // Log applied filters and trigger fresh fetch
+            logCurrentAppliedFilters();
             fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
           } else {
             // Single-select logic (existing code)
@@ -790,11 +818,10 @@ if (typeof window !== 'undefined') {
             activeFilters[groupId] = value;
             button.dataset.active = 'true';
             button.setAttribute('aria-pressed', 'true');
-            console.log(`[BUTTON] Set ${groupId} to: ${value}`);
 
             // Trigger fresh fetch for active filter groups (shape, type, price, carat)
             if (groupId === 'ds-shape' || groupId === 'ds-type') {
-              console.log(`[DEBUG] ${groupId} filter changed, fetching fresh diamonds from server`);
+              logCurrentAppliedFilters();
               fetchDiamondData(1, window.diamondPaginationInfo.limit || 24); // Re-fetch with new filters
             }
           }
@@ -809,10 +836,39 @@ if (typeof window !== 'undefined') {
 
     const applyFiltersButton = document.getElementById('ds-apply-filters');
     if (applyFiltersButton) {
-      // applyFiltersButton.addEventListener('click', applyAllFilters);
       // Modified: When 'Apply Filters' is clicked, re-fetch from page 1
       applyFiltersButton.addEventListener('click', () => {
+        logCurrentAppliedFilters();
         fetchDiamondData(1, window.diamondPaginationInfo.limit || 24);
+      });
+    }
+
+    // Add sort dropdown event listener
+    const sortDropdown = document.getElementById('ds-sort-by');
+    if (sortDropdown) {
+      // Set initial value and setup mapping
+      const sortMapping = {
+        'Price: low to high': 'price-low-high',
+        'Price: high to low': 'price-high-low',
+        'Carat: low to high': 'carat-low-high',
+        'Carat: high to low': 'carat-high-low'
+      };
+
+      // Set default selection
+      sortDropdown.value = 'Price: low to high';
+      currentSort = 'price-low-high';
+
+      sortDropdown.addEventListener('change', function() {
+        const selectedValue = this.value;
+        const mappedSort = sortMapping[selectedValue];
+
+        if (mappedSort) {
+          currentSort = mappedSort;
+          console.log(`[SORT CHANGED] New sort: ${currentSort}`);
+
+          // Re-render current diamonds with new sorting
+          renderDiamonds(window.allDiamonds);
+        }
       });
     }
 
