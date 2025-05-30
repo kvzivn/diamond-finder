@@ -3,164 +3,23 @@
 {{ 'diamond-filters.css' | asset_url | stylesheet_tag }}
 
 <div class="tw-p-4 md:tw-p-8">
-  <div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
-    <!-- Top Row: Natural/Lab Grown Tabs -->
-    <div class="tw-flex tw-justify-center tw-mb-6">
-      <div class="tw-flex tw-bg-gray-300 tw-rounded-full tw-w-80" data-filter-group="ds-type" data-multiselect="false">
-        <button
-          type="button"
-          class="tw-flex-1 tw-px-6 tw-py-3 tw-rounded-full tw-text-sm tw-font-medium tw-transition-all tw-duration-200 focus:tw-outline-none data-[active='true']:tw-bg-gray-800 data-[active='true']:tw-text-white data-[active='false']:tw-text-slate-700 data-[active='false']:hover:tw-text-slate-900"
-          data-value="Natural"
-          aria-pressed="true"
-          data-active="true"
-          id="ds-type-natural"
-        >
-          Natural
-        </button>
-        <button
-          type="button"
-          class="tw-flex-1 tw-px-6 tw-py-3 tw-rounded-full tw-text-sm tw-font-medium tw-transition-all tw-duration-200 focus:tw-outline-none data-[active='true']:tw-bg-gray-800 data-[active='true']:tw-text-white data-[active='false']:tw-text-slate-700 data-[active='false']:hover:tw-text-slate-900"
-          data-value="Lab Grown"
-          aria-pressed="false"
-          data-active="false"
-          id="ds-type-lab-grown"
-        >
-          Lab Grown
-        </button>
-      </div>
-    </div>
+  <!-- Filters Section -->
+  {% render 'diamond-search-filters' %}
 
-    <!-- Main Filter Grid -->
-    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8 tw-pb-8">
-      <!-- Shape Filter -->
-      <div>
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Shape</label>
-        {% render 'filter-button-group', group_id: 'ds-shape', options_str: "Round:ROUND|Princess:PRINCESS|Cushion:CUSHION|Emerald:EMERALD|Oval:OVAL|Radiant:RADIANT|Asscher:ASSCHER|Marquise:MARQUISE|Heart:HEART|Pear:PEAR", multiselect: "false", custom_class: "shape-buttons tw-grid tw-grid-cols-5 tw-gap-2" %}
-      </div>
-
-      <!-- Price Filter -->
-      <div>
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Price (SEK)</label>
-        <div class="tw-grid tw-grid-cols-2 tw-gap-x-12 tw-mb-2">
-          <div>
-            <label for="ds-min-price" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Price</label>
-            <input type="text" id="ds-min-price" placeholder="2 000 SEK" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
-          </div>
-          <div>
-            <label for="ds-max-price" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Price</label>
-            <input type="text" id="ds-max-price" placeholder="50 000 000 SEK" class="tw-w-full focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2">
-          </div>
-        </div>
-        <div id="ds-price-slider" class="tw-mt-8"></div>
-      </div>
-
-      <!-- Carat Filter -->
-      <div>
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Carat</label>
-        <div class="tw-flex tw-justify-between tw-mb-2">
-          <div>
-            <label for="ds-min-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Carat</label>
-            <select id="ds-min-carat" class="tw-w-22 focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2" style="width: 5.5rem;">
-              <option value="">Select Min Carat</option>
-              {% render 'carat-options-min' %}
-            </select>
-          </div>
-          <div>
-            <label for="ds-max-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Carat</label>
-            <select id="ds-max-carat" class="tw-w-22 focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2" style="width: 5.5rem;">
-              <option value="">Select Max Carat</option>
-              {% render 'carat-options-max' %}
-            </select>
-          </div>
-        </div>
-        <div id="ds-carat-slider" class="tw-mt-8"></div>
-      </div>
-
-      <!-- Colour Filter -->
-      <div>
-        <label for="ds-colour-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Colour</label>
-        <div class="tw-relative">
-          <div id="ds-colour-images" class="tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-flex tw-justify-between tw-items-end tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-3 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10">
-            {% assign color_grades_for_images = "K,J,I,H,G,F,E,D" | split: ',' %}
-            {% for grade_img_filename in color_grades_for_images %}
-              <div class="tw-text-center">
-                <img src="{{ '/' | append: grade_img_filename | append: '.jpg' | asset_url }}" alt="{{ grade_img_filename }} color" class="tw-mx-auto tw-h-12 tw-w-auto tw-rounded-sm" width="48" height="48">
-              </div>
-            {% endfor %}
-          </div>
-
-          <div id="ds-colour-slider-noui" class="tw-mt-8"></div>
-
-          <div class="label-container tw-flex tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-colour-labels">
-            {% assign color_grades_for_labels = "K,J,I,H,G,F,E,D" | split: ',' %}
-            {% for grade_label in color_grades_for_labels %}
-            <span class="tw-flex-1 tw-text-center">{{ grade_label }}</span>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-
-      <!-- Clarity Filter -->
-      <div>
-        <label for="ds-clarity-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Clarity</label>
-
-        <div id="ds-clarity-slider-noui" class="tw-mt-8"></div>
-        <div class="label-container tw-flex tw-justify-around tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-clarity-labels">
-          <span>SI2</span><span>SI1</span><span>VS2</span><span>VS1</span><span>VVS2</span><span>VVS1</span><span>IF</span><span>FL</span>
-        </div>
-      </div>
-
-      <!-- Cut Grade Filter -->
-      <div>
-        <label for="ds-cut-grade-slider" class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Cut Grade</label>
-
-        <div id="ds-cut-grade-slider-noui" class="tw-mt-8"></div>
-        <div class="label-container tw-flex tw-justify-around tw-mt-4 tw-text-sm tw-text-gray-500" id="ds-cut-grade-labels">
-          <span>Good</span><span>Very Good</span><span>Excellent</span><span>Astor</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="tw-mt-6 tw-text-center">
-      <button type="button" id="ds-advanced-filters-toggle" class="tw-inline-flex tw-items-center tw-justify-center tw-mx-auto tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
-        Advanced Filters <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" class="tw-ml-1"><path stroke="none" d="M0 0h24v24H0z"></path><path d="m6 9 6 6 6-6"></path></svg>
-      </button>
-    </div>
-
-    <div id="ds-advanced-filters-content" class="tw-hidden tw-mt-4 tw-pt-4">
-      <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8">
-        <!-- Certificate Filter -->
-        <div>
-          <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Certificate</label>
-          {% render 'certificate-filter-group', group_id: 'ds-certificate', options_str: "GIA|IGI|HRD" %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
-    <p class="tw-text-base tw-text-gray-700">Results - <span id="ds-results-count">0</span> Diamonds</p>
-
-      <div>
-        <label for="ds-sort-by" class="tw-sr-only">Sort by</label>
-        <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-2 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-rounded-md">
-          <option value="Price: low to high">Price: low to high</option>
-          <option value="Price: high to low">Price: high to low</option>
-          <option value="Carat: low to high">Carat: low to high</option>
-          <option value="Carat: high to low">Carat: high to low</option>
-        </select>
-      </div>
-  </div>
-
-  <div id="diamond-grid-area" class="tw-bg-white tw-transition-opacity tw-duration-300">
-    <!-- JS will put initial loading message here -->
-    <!-- Products will be dynamically inserted here by renderDiamonds -->
-    <!-- The initial loading message from the original HTML structure will be handled by JS -->
-  </div>
+  <!-- Results Section -->
+  {% render 'diamond-search-results' %}
 </div>
 
-<script src="{{ 'diamond-search.js' | asset_url }}" defer="defer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js" defer></script>
+<!-- Load noUiSlider first -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js" async></script>
+
+<!-- Load JavaScript Modules in Order -->
+<script src="{{ 'diamond-state.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-api.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-renderer.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-filters.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-ui.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-search-main.js' | asset_url }}" defer="defer"></script>
 
 {% schema %}
 {

@@ -1,0 +1,20 @@
+<div>
+  <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Carat</label>
+  <div class="tw-flex tw-justify-between tw-mb-2">
+    <div>
+      <label for="ds-min-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Min Carat</label>
+      <select id="ds-min-carat" class="tw-w-22 focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2" style="width: 5.5rem;">
+        <option value="">Select Min Carat</option>
+        {% render 'carat-options-min' %}
+      </select>
+    </div>
+    <div>
+      <label for="ds-max-carat" class="tw-block tw-text-xs tw-font-medium tw-text-gray-500 tw-mb-1">Max Carat</label>
+      <select id="ds-max-carat" class="tw-w-22 focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-block tw-shadow-sm tw-text-base tw-border-gray-300 tw-rounded-md tw-p-2" style="width: 5.5rem;">
+        <option value="">Select Max Carat</option>
+        {% render 'carat-options-max' %}
+      </select>
+    </div>
+  </div>
+  <div id="ds-carat-slider" class="tw-mt-8"></div>
+</div>

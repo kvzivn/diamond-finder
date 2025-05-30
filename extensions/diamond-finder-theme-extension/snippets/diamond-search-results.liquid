@@ -1,0 +1,19 @@
+<!-- Diamond Search Results Section -->
+<div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
+  <p class="tw-text-base tw-text-gray-700">Results - <span id="ds-results-count">0</span> Diamonds</p>
+
+  <div>
+    <label for="ds-sort-by" class="tw-sr-only">Sort by</label>
+    <select id="ds-sort-by" name="ds-sort-by" class="tw-block tw-w-full tw-pl-3 tw-pr-2 tw-py-2 tw-text-base tw-border-gray-300 focus:tw-outline-none focus:tw-ring-gray-500 focus:tw-border-gray-500 tw-rounded-md">
+      <option value="Price: low to high">Price: low to high</option>
+      <option value="Price: high to low">Price: high to low</option>
+      <option value="Carat: low to high">Carat: low to high</option>
+      <option value="Carat: high to low">Carat: high to low</option>
+    </select>
+  </div>
+</div>
+
+<div id="diamond-grid-area" class="tw-bg-white tw-transition-opacity tw-duration-300">
+  <!-- JS will put initial loading message here -->
+  <!-- Products will be dynamically inserted here by renderDiamonds -->
+</div>
