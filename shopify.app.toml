@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://bare-direct-bathroom-herbal.trycloudflare.com"
+application_url = "https://notes-japan-choose-hamilton.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,13 +27,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://bare-direct-bathroom-herbal.trycloudflare.com/auth/callback",
-  "https://bare-direct-bathroom-herbal.trycloudflare.com/auth/shopify/callback",
-  "https://bare-direct-bathroom-herbal.trycloudflare.com/api/auth/callback"
+  "https://notes-japan-choose-hamilton.trycloudflare.com/auth/callback",
+  "https://notes-japan-choose-hamilton.trycloudflare.com/auth/shopify/callback",
+  "https://notes-japan-choose-hamilton.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://bare-direct-bathroom-herbal.trycloudflare.com"
+url = "https://notes-japan-choose-hamilton.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 
