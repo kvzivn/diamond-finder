@@ -13,6 +13,8 @@ function applyFilters(diamonds: Diamond[], filters: {
   maxCarat?: number;
   type?: string;
   gradingLab?: string;
+  minFluorescence?: string;
+  maxFluorescence?: string;
 }): Diamond[] {
   let filtered = [...diamonds];
 
@@ -61,6 +63,47 @@ function applyFilters(diamonds: Diamond[], filters: {
     }
   }
 
+  // Fluorescence filter
+  if (filters.minFluorescence || filters.maxFluorescence) {
+    const fluorescenceLabels = ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'];
+
+    filtered = filtered.filter(d => {
+      const diamondFluorescence = d.fluorescenceIntensity ? d.fluorescenceIntensity.trim() : '';
+
+      // Find the index of the diamond's fluorescence in our scale
+      const diamondFluorescenceIndex = fluorescenceLabels.findIndex(label =>
+        label.toLowerCase() === diamondFluorescence.toLowerCase()
+      );
+
+      // If the diamond's fluorescence is not in our defined scale, exclude it
+      if (diamondFluorescenceIndex === -1) return false;
+
+      let withinRange = true;
+
+      // Check minimum fluorescence
+      if (filters.minFluorescence) {
+        const minIndex = fluorescenceLabels.findIndex(label =>
+          label.toLowerCase() === filters.minFluorescence!.toLowerCase()
+        );
+        if (minIndex !== -1 && diamondFluorescenceIndex < minIndex) {
+          withinRange = false;
+        }
+      }
+
+      // Check maximum fluorescence
+      if (filters.maxFluorescence) {
+        const maxIndex = fluorescenceLabels.findIndex(label =>
+          label.toLowerCase() === filters.maxFluorescence!.toLowerCase()
+        );
+        if (maxIndex !== -1 && diamondFluorescenceIndex > maxIndex) {
+          withinRange = false;
+        }
+      }
+
+      return withinRange;
+    });
+  }
+
   return filtered;
 }
 
@@ -85,6 +128,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     maxCarat: url.searchParams.get("maxCarat") ? parseFloat(url.searchParams.get("maxCarat")!) : undefined,
     type: url.searchParams.get("type") || undefined,
     gradingLab: url.searchParams.get("gradingLab") || undefined,
+    minFluorescence: url.searchParams.get("minFluorescence") || undefined,
+    maxFluorescence: url.searchParams.get("maxFluorescence") || undefined,
   };
 
   console.log('API Route (/all): Received filters:', JSON.stringify(filters, null, 2));

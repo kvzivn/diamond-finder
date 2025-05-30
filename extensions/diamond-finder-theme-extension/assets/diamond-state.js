@@ -21,7 +21,8 @@ if (typeof window !== 'undefined') {
       carat: false,
       colour: false,
       clarity: false,
-      cutGrade: false
+      cutGrade: false,
+      fluorescence: false
     },
 
     // Configuration constants
@@ -30,13 +31,15 @@ if (typeof window !== 'undefined') {
       carat: [0.50, 20.00],
       colour: ['K', 'D'],
       clarity: ['I3', 'FL'],
-      cutGrade: ['Good', 'Astor']
+      cutGrade: ['Good', 'Astor'],
+      fluorescence: ['Very Strong', 'None']
     },
 
     FILTER_LABELS: {
       colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
-      cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor']
+      cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor'],
+      fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None']
     }
   };
 

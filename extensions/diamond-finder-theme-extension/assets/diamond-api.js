@@ -63,6 +63,18 @@ if (typeof window !== 'undefined') {
         params.append('gradingLab', 'NONE');
       }
 
+      // Add fluorescence filters from sliders
+      const fluorescenceSliderEl = document.getElementById('ds-fluorescence-slider-noui');
+      if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
+        const fluorescenceValues = fluorescenceSliderEl.noUiSlider.get();
+        if (fluorescenceValues && fluorescenceValues.length === 2) {
+          const minFluorescence = fluorescenceValues[0];
+          const maxFluorescence = fluorescenceValues[1];
+          if (minFluorescence) params.append('minFluorescence', minFluorescence);
+          if (maxFluorescence) params.append('maxFluorescence', maxFluorescence);
+        }
+      }
+
       return params.toString();
     },
 

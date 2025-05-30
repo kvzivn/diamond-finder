@@ -61,6 +61,11 @@ if (typeof window !== 'undefined') {
         values.cutGrade = cutGradeSliderEl.noUiSlider.get();
       }
 
+      const fluorescenceSliderEl = document.getElementById('ds-fluorescence-slider-noui');
+      if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
+        values.fluorescence = fluorescenceSliderEl.noUiSlider.get();
+      }
+
       return values;
     },
 
@@ -72,6 +77,7 @@ if (typeof window !== 'undefined') {
         this.initializeColourSlider();
         this.initializeClaritySlider();
         this.initializeCutGradeSlider();
+        this.initializeFluorescenceSlider();
       });
     },
 
@@ -325,6 +331,46 @@ if (typeof window !== 'undefined') {
 
       setTimeout(() => {
         state.markSliderInitialized('cutGrade');
+      }, 10);
+    },
+
+    // Initialize fluorescence slider
+    initializeFluorescenceSlider() {
+      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
+        console.error('[DIAMOND FILTERS] noUiSlider not available for fluorescence slider');
+        return;
+      }
+
+      const state = window.DiamondSearchState;
+      const fluorescenceSlider = document.getElementById('ds-fluorescence-slider-noui');
+
+      if (!fluorescenceSlider) return;
+
+      const fluorescenceLabels = state.FILTER_LABELS.fluorescence;
+
+      window.noUiSlider.create(fluorescenceSlider, {
+        start: state.DEFAULT_FILTER_RANGES.fluorescence,
+        connect: true,
+        step: 1,
+        range: {
+          'min': 0,
+          'max': 4
+        },
+        format: {
+          to: function (value) {
+            return fluorescenceLabels[Math.round(value)];
+          },
+          from: function (value) {
+            return fluorescenceLabels.indexOf(value);
+          }
+        }
+      });
+
+      const debounceFetch = this.createDebouncedFetch();
+      fluorescenceSlider.noUiSlider.on('change', debounceFetch);
+
+      setTimeout(() => {
+        state.markSliderInitialized('fluorescence');
       }, 10);
     },
 
