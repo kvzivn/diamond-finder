@@ -146,7 +146,7 @@ if (typeof window !== 'undefined') {
 
     // Setup input-based filters
     setupInputFilters() {
-      const inputBasedFilterElements = ['ds-min-carat', 'ds-max-carat', 'ds-min-price', 'ds-max-price'];
+      const inputBasedFilterElements = ['ds-min-carat', 'ds-max-carat', 'ds-min-price', 'ds-max-price', 'ds-min-table', 'ds-max-table', 'ds-min-ratio', 'ds-max-ratio'];
 
       inputBasedFilterElements.forEach(id => {
         const el = document.getElementById(id);
@@ -155,7 +155,17 @@ if (typeof window !== 'undefined') {
         el.addEventListener('input', () => {
           clearTimeout(el.filterTimeout);
           el.filterTimeout = setTimeout(() => {
-            const sliderId = el.id.includes('price') ? 'ds-price-slider' : 'ds-carat-slider';
+            let sliderId;
+            if (el.id.includes('price')) {
+              sliderId = 'ds-price-slider';
+            } else if (el.id.includes('carat')) {
+              sliderId = 'ds-carat-slider';
+            } else if (el.id.includes('table')) {
+              sliderId = 'ds-table-slider';
+            } else if (el.id.includes('ratio')) {
+              sliderId = 'ds-ratio-slider';
+            }
+
             const sliderElement = document.getElementById(sliderId);
 
             if (sliderElement && sliderElement.noUiSlider) {
@@ -167,12 +177,22 @@ if (typeof window !== 'undefined') {
               if (el.id.includes('price')) {
                 numVal1 = parseFloat(val1_str.replace(/\s/g, ''));
                 numVal2 = parseFloat(val2_str.replace(/\s/g, ''));
+              } else if (el.id.includes('table')) {
+                numVal1 = parseFloat(val1_str.replace('%', ''));
+                numVal2 = parseFloat(val2_str.replace('%', ''));
               } else {
                 numVal1 = parseFloat(val1_str);
                 numVal2 = parseFloat(val2_str);
               }
 
-              let inputValue = parseFloat(el.value.replace(/\s/g, ''));
+              let inputValue;
+              if (el.id.includes('table')) {
+                inputValue = parseFloat(el.value.replace('%', ''));
+              } else if (el.id.includes('ratio')) {
+                inputValue = parseFloat(el.value);
+              } else {
+                inputValue = parseFloat(el.value.replace(/\s/g, ''));
+              }
 
               if (isNaN(inputValue)) return;
 

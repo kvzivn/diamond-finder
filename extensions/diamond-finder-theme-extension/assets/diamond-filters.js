@@ -32,7 +32,9 @@ if (typeof window !== 'undefined') {
           clarity: state.DEFAULT_FILTER_RANGES.clarity,
           cutGrade: state.DEFAULT_FILTER_RANGES.cutGrade,
           fluorescence: state.DEFAULT_FILTER_RANGES.fluorescence,
-          polish: state.DEFAULT_FILTER_RANGES.polish
+          polish: state.DEFAULT_FILTER_RANGES.polish,
+          table: state.DEFAULT_FILTER_RANGES.table.map(val => val + '%'),
+          ratio: state.DEFAULT_FILTER_RANGES.ratio.map(val => val.toFixed(2))
         };
       }
 
@@ -73,6 +75,16 @@ if (typeof window !== 'undefined') {
         values.polish = polishSliderEl.noUiSlider.get();
       }
 
+      const tableSliderEl = document.getElementById('ds-table-slider');
+      if (tableSliderEl && tableSliderEl.noUiSlider) {
+        values.table = tableSliderEl.noUiSlider.get();
+      }
+
+      const ratioSliderEl = document.getElementById('ds-ratio-slider');
+      if (ratioSliderEl && ratioSliderEl.noUiSlider) {
+        values.ratio = ratioSliderEl.noUiSlider.get();
+      }
+
       return values;
     },
 
@@ -86,6 +98,8 @@ if (typeof window !== 'undefined') {
         this.initializeCutGradeSlider();
         this.initializeFluorescenceSlider();
         this.initializePolishSlider();
+        this.initializeTableSlider();
+        this.initializeRatioSlider();
       });
     },
 
@@ -420,6 +434,128 @@ if (typeof window !== 'undefined') {
       setTimeout(() => {
         state.markSliderInitialized('polish');
       }, 10);
+    },
+
+    // Initialize table slider
+    initializeTableSlider() {
+      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
+        console.error('[DIAMOND FILTERS] noUiSlider not available for table slider');
+        return;
+      }
+
+      const state = window.DiamondSearchState;
+      const tableSlider = document.getElementById('ds-table-slider');
+      const minTableInput = document.getElementById('ds-min-table');
+      const maxTableInput = document.getElementById('ds-max-table');
+
+      if (!tableSlider || !minTableInput || !maxTableInput) return;
+
+      const debounceFetch = this.createDebouncedFetch();
+
+      window.noUiSlider.create(tableSlider, {
+        start: state.DEFAULT_FILTER_RANGES.table,
+        connect: true,
+        step: 1,
+        range: {
+          'min': 0,
+          'max': 100
+        },
+        format: {
+          to: function (value) {
+            return Math.round(value) + '%';
+          },
+          from: function (value) {
+            return Number(value.replace('%', ''));
+          }
+        }
+      });
+
+      tableSlider.noUiSlider.on('update', function (values, handle) {
+        if (handle === 0) {
+          minTableInput.value = values[handle];
+        } else {
+          maxTableInput.value = values[handle];
+        }
+      });
+
+      tableSlider.noUiSlider.on('change', debounceFetch);
+
+      minTableInput.addEventListener('change', function () {
+        const value = parseFloat(this.value.replace('%', ''));
+        if (!isNaN(value)) {
+          tableSlider.noUiSlider.set([value, null]);
+        }
+      });
+
+      maxTableInput.addEventListener('change', function () {
+        const value = parseFloat(this.value.replace('%', ''));
+        if (!isNaN(value)) {
+          tableSlider.noUiSlider.set([null, value]);
+        }
+      });
+
+      state.markSliderInitialized('table');
+    },
+
+    // Initialize ratio slider
+    initializeRatioSlider() {
+      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
+        console.error('[DIAMOND FILTERS] noUiSlider not available for ratio slider');
+        return;
+      }
+
+      const state = window.DiamondSearchState;
+      const ratioSlider = document.getElementById('ds-ratio-slider');
+      const minRatioInput = document.getElementById('ds-min-ratio');
+      const maxRatioInput = document.getElementById('ds-max-ratio');
+
+      if (!ratioSlider || !minRatioInput || !maxRatioInput) return;
+
+      const debounceFetch = this.createDebouncedFetch();
+
+      window.noUiSlider.create(ratioSlider, {
+        start: state.DEFAULT_FILTER_RANGES.ratio,
+        connect: true,
+        step: 0.01,
+        range: {
+          'min': 0.8,
+          'max': 3.0
+        },
+        format: {
+          to: function (value) {
+            return parseFloat(value).toFixed(2);
+          },
+          from: function (value) {
+            return Number(value);
+          }
+        }
+      });
+
+      ratioSlider.noUiSlider.on('update', function (values, handle) {
+        if (handle === 0) {
+          minRatioInput.value = values[handle];
+        } else {
+          maxRatioInput.value = values[handle];
+        }
+      });
+
+      ratioSlider.noUiSlider.on('change', debounceFetch);
+
+      minRatioInput.addEventListener('change', function () {
+        const value = parseFloat(this.value);
+        if (!isNaN(value)) {
+          ratioSlider.noUiSlider.set([value, null]);
+        }
+      });
+
+      maxRatioInput.addEventListener('change', function () {
+        const value = parseFloat(this.value);
+        if (!isNaN(value)) {
+          ratioSlider.noUiSlider.set([null, value]);
+        }
+      });
+
+      state.markSliderInitialized('ratio');
     },
 
     // Create debounced fetch function

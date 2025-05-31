@@ -23,7 +23,9 @@ if (typeof window !== 'undefined') {
       clarity: false,
       cutGrade: false,
       fluorescence: false,
-      polish: false
+      polish: false,
+      table: false,
+      ratio: false
     },
 
     // Configuration constants
@@ -34,7 +36,9 @@ if (typeof window !== 'undefined') {
       clarity: ['I3', 'FL'],
       cutGrade: ['Good', 'Astor'],
       fluorescence: ['Very Strong', 'None'],
-      polish: ['Good', 'Excellent']
+      polish: ['Good', 'Excellent'],
+      table: [0, 100], // Percentage range
+      ratio: [0.8, 3.0] // Ratio range
     },
 
     FILTER_LABELS: {

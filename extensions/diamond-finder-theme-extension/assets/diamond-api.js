@@ -87,6 +87,30 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Add table filters from sliders
+      const tableSliderEl = document.getElementById('ds-table-slider');
+      if (tableSliderEl && tableSliderEl.noUiSlider) {
+        const tableValues = tableSliderEl.noUiSlider.get();
+        if (tableValues && tableValues.length === 2) {
+          const minTable = parseFloat(tableValues[0]);
+          const maxTable = parseFloat(tableValues[1]);
+          if (!isNaN(minTable)) params.append('minTable', minTable.toString());
+          if (!isNaN(maxTable)) params.append('maxTable', maxTable.toString());
+        }
+      }
+
+      // Add ratio filters from sliders
+      const ratioSliderEl = document.getElementById('ds-ratio-slider');
+      if (ratioSliderEl && ratioSliderEl.noUiSlider) {
+        const ratioValues = ratioSliderEl.noUiSlider.get();
+        if (ratioValues && ratioValues.length === 2) {
+          const minRatio = parseFloat(ratioValues[0]);
+          const maxRatio = parseFloat(ratioValues[1]);
+          if (!isNaN(minRatio)) params.append('minRatio', minRatio.toString());
+          if (!isNaN(maxRatio)) params.append('maxRatio', maxRatio.toString());
+        }
+      }
+
       return params.toString();
     },
 
