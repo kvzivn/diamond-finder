@@ -1,5 +1,5 @@
 {%- assign option_pairs = options_str | split: '|' -%}
-<div class="tw-grid tw-grid-cols-4 tw-gap-4 certificate-filter-group" data-filter-group="{{ group_id }}" data-multiselect="true">
+<div class="tw-grid tw-grid-cols-3 tw-gap-6 certificate-filter-group" data-filter-group="{{ group_id }}" data-multiselect="true">
   {%- for pair_str in option_pairs -%}
     {%- assign parts = pair_str | split: ':' -%}
     {%- assign label = parts[0] -%}
