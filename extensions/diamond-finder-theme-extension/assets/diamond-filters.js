@@ -30,7 +30,9 @@ if (typeof window !== 'undefined') {
           carat: state.DEFAULT_FILTER_RANGES.carat.map(val => val.toFixed(2)),
           colour: state.DEFAULT_FILTER_RANGES.colour,
           clarity: state.DEFAULT_FILTER_RANGES.clarity,
-          cutGrade: state.DEFAULT_FILTER_RANGES.cutGrade
+          cutGrade: state.DEFAULT_FILTER_RANGES.cutGrade,
+          fluorescence: state.DEFAULT_FILTER_RANGES.fluorescence,
+          polish: state.DEFAULT_FILTER_RANGES.polish
         };
       }
 
@@ -66,6 +68,11 @@ if (typeof window !== 'undefined') {
         values.fluorescence = fluorescenceSliderEl.noUiSlider.get();
       }
 
+      const polishSliderEl = document.getElementById('ds-polish-slider-noui');
+      if (polishSliderEl && polishSliderEl.noUiSlider) {
+        values.polish = polishSliderEl.noUiSlider.get();
+      }
+
       return values;
     },
 
@@ -78,6 +85,7 @@ if (typeof window !== 'undefined') {
         this.initializeClaritySlider();
         this.initializeCutGradeSlider();
         this.initializeFluorescenceSlider();
+        this.initializePolishSlider();
       });
     },
 
@@ -371,6 +379,46 @@ if (typeof window !== 'undefined') {
 
       setTimeout(() => {
         state.markSliderInitialized('fluorescence');
+      }, 10);
+    },
+
+    // Initialize polish slider
+    initializePolishSlider() {
+      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
+        console.error('[DIAMOND FILTERS] noUiSlider not available for polish slider');
+        return;
+      }
+
+      const state = window.DiamondSearchState;
+      const polishSlider = document.getElementById('ds-polish-slider-noui');
+
+      if (!polishSlider) return;
+
+      const polishLabels = state.FILTER_LABELS.polish;
+
+      window.noUiSlider.create(polishSlider, {
+        start: state.DEFAULT_FILTER_RANGES.polish,
+        connect: true,
+        step: 1,
+        range: {
+          'min': 0,
+          'max': 2
+        },
+        format: {
+          to: function (value) {
+            return polishLabels[Math.round(value)];
+          },
+          from: function (value) {
+            return polishLabels.indexOf(value);
+          }
+        }
+      });
+
+      const debounceFetch = this.createDebouncedFetch();
+      polishSlider.noUiSlider.on('change', debounceFetch);
+
+      setTimeout(() => {
+        state.markSliderInitialized('polish');
       }, 10);
     },
 

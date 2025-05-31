@@ -22,7 +22,8 @@ if (typeof window !== 'undefined') {
       colour: false,
       clarity: false,
       cutGrade: false,
-      fluorescence: false
+      fluorescence: false,
+      polish: false
     },
 
     // Configuration constants
@@ -32,14 +33,16 @@ if (typeof window !== 'undefined') {
       colour: ['K', 'D'],
       clarity: ['I3', 'FL'],
       cutGrade: ['Good', 'Astor'],
-      fluorescence: ['Very Strong', 'None']
+      fluorescence: ['Very Strong', 'None'],
+      polish: ['Good', 'Excellent']
     },
 
     FILTER_LABELS: {
       colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
       cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor'],
-      fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None']
+      fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
+      polish: ['Good', 'Very Good', 'Excellent']
     }
   };
 

@@ -75,6 +75,18 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Add polish filters from sliders
+      const polishSliderEl = document.getElementById('ds-polish-slider-noui');
+      if (polishSliderEl && polishSliderEl.noUiSlider) {
+        const polishValues = polishSliderEl.noUiSlider.get();
+        if (polishValues && polishValues.length === 2) {
+          const minPolish = polishValues[0];
+          const maxPolish = polishValues[1];
+          if (minPolish) params.append('minPolish', minPolish);
+          if (maxPolish) params.append('maxPolish', maxPolish);
+        }
+      }
+
       return params.toString();
     },
 
