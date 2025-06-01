@@ -284,6 +284,9 @@ if (typeof window !== 'undefined') {
         }
       });
 
+      const debounceFetch = this.createDebouncedFetch();
+      colourSlider.noUiSlider.on('change', debounceFetch);
+
       setTimeout(() => {
         state.markSliderInitialized('colour');
       }, 10);

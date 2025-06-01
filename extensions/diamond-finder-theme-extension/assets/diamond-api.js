@@ -49,6 +49,18 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Add colour filters from sliders
+      const colourSliderEl = document.getElementById('ds-colour-slider-noui');
+      if (colourSliderEl && colourSliderEl.noUiSlider) {
+        const colourValues = colourSliderEl.noUiSlider.get();
+        if (colourValues && colourValues.length === 2) {
+          const minColour = colourValues[0];
+          const maxColour = colourValues[1];
+          if (minColour) params.append('minColour', minColour);
+          if (maxColour) params.append('maxColour', maxColour);
+        }
+      }
+
       // Add certificate filters
       const certificates = state.getFilter('ds-certificate');
       if (certificates) {
