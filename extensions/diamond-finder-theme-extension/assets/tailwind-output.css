@@ -731,10 +731,6 @@ video {
   gap: 0.5rem;
 }
 
-.tw-gap-4 {
-  gap: 1rem;
-}
-
 .tw-gap-6 {
   gap: 1.5rem;
 }
@@ -1054,6 +1050,11 @@ video {
   --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.focus\:tw-border-gray-400:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity, 1));
 }
 
 .focus\:tw-border-gray-500:focus {

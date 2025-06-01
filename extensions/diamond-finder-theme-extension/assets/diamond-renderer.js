@@ -44,7 +44,7 @@ if (typeof window !== 'undefined') {
     // Create individual diamond card element
     createDiamondCard(diamond) {
       const diamondCard = document.createElement('div');
-      diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-shadow hover:tw-shadow-md tw-transition-shadow tw-overflow-hidden';
+      diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-transition-shadow tw-overflow-hidden';
 
       // Image
       const image = document.createElement('img');

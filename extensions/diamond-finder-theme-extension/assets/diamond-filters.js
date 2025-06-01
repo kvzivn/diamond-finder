@@ -33,6 +33,7 @@ if (typeof window !== 'undefined') {
           cutGrade: state.DEFAULT_FILTER_RANGES.cutGrade,
           fluorescence: state.DEFAULT_FILTER_RANGES.fluorescence,
           polish: state.DEFAULT_FILTER_RANGES.polish,
+          symmetry: state.DEFAULT_FILTER_RANGES.symmetry,
           table: state.DEFAULT_FILTER_RANGES.table.map(val => val + '%'),
           ratio: state.DEFAULT_FILTER_RANGES.ratio.map(val => val.toFixed(2))
         };
@@ -75,6 +76,11 @@ if (typeof window !== 'undefined') {
         values.polish = polishSliderEl.noUiSlider.get();
       }
 
+      const symmetrySliderEl = document.getElementById('ds-symmetry-slider-noui');
+      if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
+        values.symmetry = symmetrySliderEl.noUiSlider.get();
+      }
+
       const tableSliderEl = document.getElementById('ds-table-slider');
       if (tableSliderEl && tableSliderEl.noUiSlider) {
         values.table = tableSliderEl.noUiSlider.get();
@@ -98,6 +104,7 @@ if (typeof window !== 'undefined') {
         this.initializeCutGradeSlider();
         this.initializeFluorescenceSlider();
         this.initializePolishSlider();
+        this.initializeSymmetrySlider();
         this.initializeTableSlider();
         this.initializeRatioSlider();
       });
@@ -434,6 +441,46 @@ if (typeof window !== 'undefined') {
       setTimeout(() => {
         state.markSliderInitialized('polish');
       }, 10);
+    },
+
+    // Initialize symmetry slider
+    initializeSymmetrySlider() {
+      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
+        console.error('[DIAMOND FILTERS] noUiSlider not available for symmetry slider');
+        return;
+      }
+
+      const state = window.DiamondSearchState;
+      const symmetrySlider = document.getElementById('ds-symmetry-slider-noui');
+
+      if (!symmetrySlider) return;
+
+      const symmetryLabels = state.FILTER_LABELS.symmetry;
+
+             window.noUiSlider.create(symmetrySlider, {
+         start: state.DEFAULT_FILTER_RANGES.symmetry,
+         connect: true,
+         step: 1,
+         range: {
+           'min': 0,
+           'max': 2
+         },
+         format: {
+           to: function (value) {
+             return symmetryLabels[Math.round(value)];
+           },
+           from: function (value) {
+             return symmetryLabels.indexOf(value);
+           }
+         }
+       });
+
+       const debounceFetch = this.createDebouncedFetch();
+       symmetrySlider.noUiSlider.on('change', debounceFetch);
+
+       setTimeout(() => {
+         state.markSliderInitialized('symmetry');
+       }, 10);
     },
 
     // Initialize table slider

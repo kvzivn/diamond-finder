@@ -87,6 +87,18 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Add symmetry filters from sliders
+      const symmetrySliderEl = document.getElementById('ds-symmetry-slider-noui');
+      if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
+        const symmetryValues = symmetrySliderEl.noUiSlider.get();
+        if (symmetryValues && symmetryValues.length === 2) {
+          const minSymmetry = symmetryValues[0];
+          const maxSymmetry = symmetryValues[1];
+          if (minSymmetry) params.append('minSymmetry', minSymmetry);
+          if (maxSymmetry) params.append('maxSymmetry', maxSymmetry);
+        }
+      }
+
       // Add table filters from sliders
       const tableSliderEl = document.getElementById('ds-table-slider');
       if (tableSliderEl && tableSliderEl.noUiSlider) {

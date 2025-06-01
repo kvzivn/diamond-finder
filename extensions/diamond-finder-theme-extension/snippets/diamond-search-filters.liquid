@@ -1,5 +1,5 @@
 <!-- Diamond Search Filters Section -->
-<div class="diamond-filters-ui tw-mb-8 tw-p-6 tw-bg-gray-50 tw-rounded-lg tw-shadow">
+<div class="diamond-filters-ui tw-mb-8">
   <!-- Top Row: Natural/Lab Grown Tabs -->
   <div class="tw-flex tw-justify-center tw-mb-6">
     <div class="tw-flex tw-bg-gray-300 tw-rounded-full tw-w-80" data-filter-group="ds-type" data-multiselect="false">
@@ -57,17 +57,21 @@
   <!-- Advanced Filters Content -->
   <div id="ds-advanced-filters-content" class="tw-hidden tw-mt-4 tw-pt-4">
     <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8">
+
+      <!-- Polish Filter -->
+      {% render 'diamond-search-polish-filter' %}
+
+      <!-- Symmetry Filter -->
+      {% render 'diamond-search-symmetry-filter' %}
+
+      <!-- Fluorescence Filter -->
+
+      {% render 'diamond-search-fluorescence-filter' %}
       <!-- Certificate Filter -->
       <div>
         <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Certificate</label>
         {% render 'certificate-filter-group', group_id: 'ds-certificate', options_str: "GIA|IGI|HRD" %}
       </div>
-
-      <!-- Fluorescence Filter -->
-      {% render 'diamond-search-fluorescence-filter' %}
-
-      <!-- Polish Filter -->
-      {% render 'diamond-search-polish-filter' %}
 
       <!-- Table Filter -->
       {% render 'diamond-search-table-filter' %}

@@ -24,6 +24,7 @@ if (typeof window !== 'undefined') {
       cutGrade: false,
       fluorescence: false,
       polish: false,
+      symmetry: false,
       table: false,
       ratio: false
     },
@@ -37,6 +38,7 @@ if (typeof window !== 'undefined') {
       cutGrade: ['Good', 'Astor'],
       fluorescence: ['Very Strong', 'None'],
       polish: ['Good', 'Excellent'],
+      symmetry: ['Good', 'Excellent'],
       table: [0, 100], // Percentage range
       ratio: [0.8, 3.0] // Ratio range
     },
@@ -46,7 +48,8 @@ if (typeof window !== 'undefined') {
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
       cutGrade: ['Good', 'Very Good', 'Excellent', 'Astor'],
       fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
-      polish: ['Good', 'Very Good', 'Excellent']
+      polish: ['Good', 'Very Good', 'Excellent'],
+      symmetry: ['Good', 'Very Good', 'Excellent']
     }
   };
 

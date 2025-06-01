@@ -981,8 +981,12 @@ if (typeof window !== 'undefined') {
         return; // Don't load if already loading or if on the last page
       }
 
-      // Check if scrolled to near the bottom
-      if (window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 600) { // Changed 300px to 600px threshold
+      // Only trigger when user is within 100px of the bottom (much closer than before)
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const documentHeight = document.documentElement.offsetHeight;
+      const distanceFromBottom = documentHeight - scrollPosition;
+
+      if (distanceFromBottom <= 100) {
         fetchDiamondData(window.diamondPaginationInfo.currentPage + 1, window.diamondPaginationInfo.limit, true);
       }
     });
