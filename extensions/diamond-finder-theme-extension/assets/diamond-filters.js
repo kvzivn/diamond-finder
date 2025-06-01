@@ -324,6 +324,9 @@ if (typeof window !== 'undefined') {
         }
       });
 
+      const debounceFetch = this.createDebouncedFetch();
+      claritySlider.noUiSlider.on('change', debounceFetch);
+
       setTimeout(() => {
         state.markSliderInitialized('clarity');
       }, 10);

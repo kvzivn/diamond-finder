@@ -61,6 +61,18 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Add clarity filters from sliders
+      const claritySliderEl = document.getElementById('ds-clarity-slider-noui');
+      if (claritySliderEl && claritySliderEl.noUiSlider) {
+        const clarityValues = claritySliderEl.noUiSlider.get();
+        if (clarityValues && clarityValues.length === 2) {
+          const minClarity = clarityValues[0];
+          const maxClarity = clarityValues[1];
+          if (minClarity) params.append('minClarity', minClarity);
+          if (maxClarity) params.append('maxClarity', maxClarity);
+        }
+      }
+
       // Add certificate filters
       const certificates = state.getFilter('ds-certificate');
       if (certificates) {
