@@ -1,7 +1,7 @@
 <!-- Diamond Search Filters Section -->
 <div class="diamond-filters-ui tw-mb-8">
   <!-- Top Row: Natural/Lab Grown Tabs -->
-  <div class="tw-flex tw-justify-center tw-mb-6">
+  <div class="tw-flex tw-justify-center tw-mt-6 tw-mb-12">
     <div class="tw-flex tw-bg-gray-300 tw-rounded-full tw-w-80" data-filter-group="ds-type" data-multiselect="false">
       <button
         type="button"
@@ -11,7 +11,7 @@
         data-active="true"
         id="ds-type-natural"
       >
-        Natural
+        Naturliga
       </button>
       <button
         type="button"
@@ -21,7 +21,7 @@
         data-active="false"
         id="ds-type-lab-grown"
       >
-        Lab Grown
+        Labbodlade
       </button>
     </div>
   </div>
@@ -50,7 +50,7 @@
   <!-- Advanced Filters Toggle -->
   <div class="tw-mt-6 tw-text-center">
     <button type="button" id="ds-advanced-filters-toggle" class="tw-inline-flex tw-items-center tw-justify-center tw-mx-auto tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
-      Advanced Filters <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" class="tw-ml-1"><path stroke="none" d="M0 0h24v24H0z"></path><path d="m6 9 6 6 6-6"></path></svg>
+      Avancerade filter <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" class="tw-ml-1"><path stroke="none" d="M0 0h24v24H0z"></path><path d="m6 9 6 6 6-6"></path></svg>
     </button>
   </div>
 
@@ -69,7 +69,7 @@
       {% render 'diamond-search-fluorescence-filter' %}
       <!-- Certificate Filter -->
       <div>
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Certificate</label>
+        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Certifikat</label>
         {% render 'certificate-filter-group', group_id: 'ds-certificate', options_str: "GIA|IGI|HRD" %}
       </div>
 

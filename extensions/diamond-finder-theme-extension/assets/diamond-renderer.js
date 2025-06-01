@@ -155,9 +155,9 @@ if (typeof window !== 'undefined') {
       if (resultsCountEl && state.paginationInfo && state.paginationInfo.totalDiamonds !== undefined) {
         const currentlyShown = state.allDiamonds.length;
         const totalFiltered = state.paginationInfo.totalDiamonds;
-        resultsCountEl.textContent = `Showing ${currentlyShown} of ${totalFiltered} diamonds`;
+        resultsCountEl.textContent = `Visar ${currentlyShown} av ${totalFiltered.toLocaleString()} diamanter`;
       } else if (resultsCountEl) {
-        resultsCountEl.textContent = `${displayedCount} diamonds`;
+        resultsCountEl.textContent = `${displayedCount} diamanter`;
       }
     }
   };

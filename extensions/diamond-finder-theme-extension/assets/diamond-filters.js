@@ -346,7 +346,7 @@ if (typeof window !== 'undefined') {
         step: 1,
         range: {
           'min': 0,
-          'max': 4
+          'max': 3
         },
         format: {
           to: function (value) {

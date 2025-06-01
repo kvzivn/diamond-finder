@@ -603,6 +603,10 @@ video {
   margin-bottom: 0.25rem;
 }
 
+.tw-mb-12 {
+  margin-bottom: 3rem;
+}
+
 .tw-mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -615,16 +619,16 @@ video {
   margin-bottom: 1rem;
 }
 
-.tw-mb-6 {
-  margin-bottom: 1.5rem;
-}
-
 .tw-mb-8 {
   margin-bottom: 2rem;
 }
 
 .tw-ml-1 {
   margin-left: 0.25rem;
+}
+
+.tw-mt-12 {
+  margin-top: 3rem;
 }
 
 .tw-mt-4 {
@@ -812,11 +816,6 @@ video {
   background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
 }
 
-.tw-bg-gray-50 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
-}
-
 .tw-bg-gray-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
@@ -842,10 +841,6 @@ video {
 
 .tw-p-4 {
   padding: 1rem;
-}
-
-.tw-p-6 {
-  padding: 1.5rem;
 }
 
 .tw-px-3 {
@@ -978,12 +973,6 @@ video {
   opacity: 0.6;
 }
 
-.tw-shadow {
-  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
 .tw-shadow-md {
   --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
@@ -1046,30 +1035,14 @@ video {
   color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 
-.hover\:tw-shadow-md:hover {
-  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
 .focus\:tw-border-gray-400:focus {
   --tw-border-opacity: 1;
   border-color: rgb(156 163 175 / var(--tw-border-opacity, 1));
 }
 
-.focus\:tw-border-gray-500:focus {
-  --tw-border-opacity: 1;
-  border-color: rgb(107 114 128 / var(--tw-border-opacity, 1));
-}
-
 .focus\:tw-outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
-}
-
-.focus\:tw-ring-gray-500:focus {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(107 114 128 / var(--tw-ring-opacity, 1));
 }
 
 .data-\[active\=\'true\'\]\:tw-border[data-active='true'] {
