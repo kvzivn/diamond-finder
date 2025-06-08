@@ -61,15 +61,38 @@ if (typeof window !== 'undefined') {
       title.className = 'tw-text-lg tw-font-semibold tw-mb-1 tw-truncate';
       title.textContent = `${carats}ct ${shape} ${displayType}`;
 
-      // Subtitle with diamond details
-      const subtitleParts = [];
-      if (diamond.color) subtitleParts.push(`Colour: ${diamond.color}`);
-      if (diamond.clarity) subtitleParts.push(`Clarity: ${diamond.clarity}`);
-      if (diamond.cutGrade) subtitleParts.push(`Cut: ${diamond.cutGrade}`);
+            // Subtitle with diamond details
+      const subtitle = document.createElement('div');
+      subtitle.className = 'tw-text-sm tw-text-gray-600 tw-mb-2 tw-flex tw-flex-col tw-gap-1';
 
-      const subtitle = document.createElement('p');
-      subtitle.className = 'tw-text-sm tw-text-gray-600 tw-mb-2';
-      subtitle.textContent = subtitleParts.length > 0 ? subtitleParts.join(', ') : 'Details not specified';
+      const detailsData = [];
+      if (diamond.color) detailsData.push({ label: 'Colour:', value: diamond.color });
+      if (diamond.clarity) detailsData.push({ label: 'Clarity:', value: diamond.clarity });
+      if (diamond.cutGrade) detailsData.push({ label: 'Cut:', value: diamond.cutGrade });
+
+      if (detailsData.length > 0) {
+        detailsData.forEach(detail => {
+          const detailRow = document.createElement('div');
+          detailRow.className = 'tw-flex';
+
+          const label = document.createElement('span');
+          label.className = 'tw-w-1/2';
+          label.textContent = detail.label;
+
+          const value = document.createElement('span');
+          value.className = 'tw-w-1/2 tw-text-right';
+          value.textContent = detail.value;
+
+          detailRow.appendChild(label);
+          detailRow.appendChild(value);
+          subtitle.appendChild(detailRow);
+        });
+      } else {
+        const detailRow = document.createElement('div');
+        detailRow.className = 'tw-text-center';
+        detailRow.textContent = 'Details not specified';
+        subtitle.appendChild(detailRow);
+      }
 
       // Price and certification wrapper
       const priceCertWrapper = document.createElement('div');

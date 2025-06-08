@@ -202,7 +202,7 @@ if (typeof window !== 'undefined') {
         console.error('Failed to fetch diamond data:', error);
         if (gridArea && !isLoadMore) {
           gridArea.classList.remove('tw-opacity-60');
-          gridArea.innerHTML = '<p class="tw-text-center tw-text-red-500 tw-py-10">Failed to load diamonds. Please try again later.</p>';
+          gridArea.innerHTML = '<p class="tw-text-center tw-py-10">Failed to load diamonds. Please try again later.</p>';
         }
       } finally {
         if (isLoadMore) {

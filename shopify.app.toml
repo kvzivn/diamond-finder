@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://penetration-senegal-resulting-excluding.trycloudflare.com"
+application_url = "https://previously-kid-six-asylum.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,13 +27,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://penetration-senegal-resulting-excluding.trycloudflare.com/auth/callback",
-  "https://penetration-senegal-resulting-excluding.trycloudflare.com/auth/shopify/callback",
-  "https://penetration-senegal-resulting-excluding.trycloudflare.com/api/auth/callback"
+  "https://previously-kid-six-asylum.trycloudflare.com/auth/callback",
+  "https://previously-kid-six-asylum.trycloudflare.com/auth/shopify/callback",
+  "https://previously-kid-six-asylum.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://penetration-senegal-resulting-excluding.trycloudflare.com"
+url = "https://previously-kid-six-asylum.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 
