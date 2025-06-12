@@ -44,7 +44,14 @@ if (typeof window !== 'undefined') {
     // Create individual diamond card element
     createDiamondCard(diamond) {
       const diamondCard = document.createElement('div');
-      diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-transition-shadow tw-overflow-hidden';
+      diamondCard.className = 'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-transition-shadow tw-overflow-hidden tw-cursor-pointer hover:tw-shadow-lg';
+      
+      // Make card clickable to show diamond details
+      diamondCard.addEventListener('click', () => {
+        if (window.DiamondDetails) {
+          window.DiamondDetails.showDiamondDetails(diamond);
+        }
+      });
 
       // Image
       const image = document.createElement('img');

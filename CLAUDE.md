@@ -1,0 +1,97 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Architecture Overview
+
+This is a Shopify app for diamond search functionality built with Remix and TypeScript. The application has two main components:
+
+1. **Remix App (`/app`)**: Handles backend API calls, data processing, and serves diamond data to the theme extension
+2. **Shopify Theme Extension (`/extensions/diamond-finder-theme-extension`)**: Frontend JavaScript modules and Liquid templates that provide the diamond search interface in Shopify stores
+
+### Key Architecture Patterns
+
+- **Diamond Data Flow**: IDEX API → Remix backend → Diamond cache service → Theme extension via API routes
+- **Modular Frontend**: The theme extension uses a modular JavaScript architecture with separate files for state management, API calls, rendering, filters, and UI components
+- **Currency Conversion**: Prices are fetched in USD and converted to SEK using Open Exchange Rates API
+- **File Processing**: IDEX API returns ZIP files containing CSV data that is parsed into Diamond objects
+
+## Common Development Commands
+
+```bash
+# Development
+npm run dev              # Start Shopify app development with tunneling
+npm run build           # Build the Remix application
+npm run setup           # Generate Prisma client and run migrations
+
+# Linting and Formatting
+npm run lint            # Run ESLint
+
+# Database
+npm run prisma          # Access Prisma CLI
+npx prisma generate     # Generate Prisma client
+npx prisma migrate deploy # Deploy migrations
+
+# Theme Extension Assets
+npm run tailwind:build  # Build Tailwind CSS for theme extension
+npm run tailwind:watch  # Watch and rebuild Tailwind CSS
+
+# Shopify CLI
+npm run deploy          # Deploy app to Shopify
+npm run generate        # Generate new Shopify app components
+```
+
+## Key Services and Models
+
+### Diamond Service (`app/services/idex.service.server.ts`)
+- Fetches diamond data from IDEX API (natural and lab-grown)
+- Handles ZIP file extraction and CSV parsing  
+- Converts USD prices to SEK using exchange rates
+- Maps CSV headers to Diamond interface properties
+
+### Diamond Model (`app/models/diamond.server.ts`)
+- Defines Diamond interface with 60+ properties
+- Supports both natural and lab-grown diamond types
+- Includes price fields in both USD and SEK
+
+### Diamond Cache Service (`app/services/diamond-cache.server.ts`)
+- Caches diamond data to reduce API calls
+- Manages data freshness and invalidation
+
+## Theme Extension Structure
+
+The theme extension follows a modular architecture documented in `extensions/diamond-finder-theme-extension/README-DIAMOND-SEARCH-ARCHITECTURE.md`:
+
+- **diamond-state.js**: Global state management
+- **diamond-api.js**: API communication and query building  
+- **diamond-renderer.js**: Diamond display and sorting
+- **diamond-filters.js**: Filter component logic
+- **diamond-ui.js**: UI interactions and events
+- **diamond-finder-init.js**: Application initialization
+
+## Environment Variables Required
+
+```bash
+IDEX_API_KEY=           # IDEX API key for diamond data
+IDEX_API_SECRET=        # IDEX API secret
+EXCHANGE_RATE_APP_ID=   # Open Exchange Rates API key for USD→SEK conversion
+```
+
+## Database
+
+Uses Prisma with SQLite for development. Main model is `Session` for Shopify app authentication. Diamond data is not persisted in database - it's cached in memory via the cache service.
+
+## API Routes
+
+- `/diamonds/all` - Returns all cached diamond data
+- `/diamonds/natural` - Returns natural diamonds only  
+- `/diamonds/lab` - Returns lab-grown diamonds only
+- `/admin/trigger-refresh` - Forces refresh of diamond cache
+
+## Development Notes
+
+- Diamond data is fetched as compressed CSV files from IDEX API
+- Frontend uses infinite scroll and debounced filtering for performance
+- All prices are stored in USD and converted to SEK for display
+- Theme extension supports advanced filtering by shape, price, carat, color, clarity, cut grade, and certificates
+- CSS is built using Tailwind and output to the theme extension assets

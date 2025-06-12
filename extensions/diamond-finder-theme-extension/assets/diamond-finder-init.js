@@ -23,6 +23,9 @@ if (typeof window !== 'undefined') {
       // Setup UI components
       window.DiamondUI.initialize();
 
+      // Setup diamond details functionality
+      window.DiamondDetails.initialize();
+
       // Setup additional event handlers
       this.setupAdditionalEventHandlers();
 
@@ -54,13 +57,13 @@ if (typeof window !== 'undefined') {
 
   // Auto-initialize when all modules are loaded
   if (window.DiamondSearchState && window.DiamondAPI && window.DiamondRenderer &&
-      window.DiamondFilters && window.DiamondUI) {
+      window.DiamondFilters && window.DiamondUI && window.DiamondDetails) {
     window.DiamondSearchApp.initialize();
   } else {
     // Fallback: wait a bit for all modules to load
     setTimeout(() => {
       if (window.DiamondSearchState && window.DiamondAPI && window.DiamondRenderer &&
-          window.DiamondFilters && window.DiamondUI) {
+          window.DiamondFilters && window.DiamondUI && window.DiamondDetails) {
         window.DiamondSearchApp.initialize();
       } else {
         console.warn("[DIAMOND SEARCH] Some modules failed to load");

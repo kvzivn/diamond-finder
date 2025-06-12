@@ -132,16 +132,39 @@ if (typeof window !== 'undefined') {
     // Setup infinite scroll
     setupInfiniteScroll() {
       const state = window.DiamondSearchState;
+      let scrollTimeout;
+      let lastTriggerTime = 0;
+      const MIN_TIME_BETWEEN_REQUESTS = 3000;
 
-      window.addEventListener('scroll', () => {
-        if (state.isLoadingMore || !state.paginationInfo || state.paginationInfo.currentPage >= state.paginationInfo.totalPages) {
+      const handleScroll = () => {
+        const now = Date.now();
+        
+        if (state.isLoadingMore || 
+            !state.paginationInfo?.currentPage || 
+            !state.paginationInfo?.totalPages ||
+            state.paginationInfo.currentPage >= state.paginationInfo.totalPages ||
+            now - lastTriggerTime < MIN_TIME_BETWEEN_REQUESTS) {
           return;
         }
 
-        if (window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 600) {
+        const diamondGrid = document.getElementById('diamond-grid-area');
+        if (!diamondGrid) return;
+
+        const gridRect = diamondGrid.getBoundingClientRect();
+        const triggerThreshold = window.innerHeight + 300;
+
+        if (gridRect.bottom <= triggerThreshold) {
+          lastTriggerTime = now;
           window.DiamondAPI.fetchDiamondData(state.paginationInfo.currentPage + 1, state.paginationInfo.limit, true);
         }
-      });
+      };
+
+      const debouncedScrollHandler = () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(handleScroll, 300);
+      };
+
+      window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
     },
 
     // Setup input-based filters

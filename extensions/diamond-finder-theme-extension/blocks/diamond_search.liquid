@@ -3,11 +3,17 @@
 {{ 'diamond-filters.css' | asset_url | stylesheet_tag }}
 
 <div class="tw-p-4 md:tw-p-8">
-  <!-- Filters Section -->
-  {% render 'diamond-search-filters' %}
+  <!-- Main Search View -->
+  <div id="diamond-search-view">
+    <!-- Filters Section -->
+    {% render 'diamond-search-filters' %}
 
-  <!-- Results Section -->
-  {% render 'diamond-search-results' %}
+    <!-- Results Section -->
+    {% render 'diamond-search-results' %}
+  </div>
+
+  <!-- Diamond Details View -->
+  {% render 'diamond-details-view' %}
 </div>
 
 <!-- Load noUiSlider first -->
@@ -19,6 +25,7 @@
 <script src="{{ 'diamond-renderer.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'diamond-filters.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'diamond-ui.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'diamond-details.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'diamond-finder-init.js' | asset_url }}" defer="defer"></script>
 
 {% schema %}
