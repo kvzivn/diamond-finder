@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://times-defence-fuji-charts.trycloudflare.com"
+application_url = "https://here-consistent-nylon-lid.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,13 +27,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://times-defence-fuji-charts.trycloudflare.com/auth/callback",
-  "https://times-defence-fuji-charts.trycloudflare.com/auth/shopify/callback",
-  "https://times-defence-fuji-charts.trycloudflare.com/api/auth/callback"
+  "https://here-consistent-nylon-lid.trycloudflare.com/auth/callback",
+  "https://here-consistent-nylon-lid.trycloudflare.com/auth/shopify/callback",
+  "https://here-consistent-nylon-lid.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://times-defence-fuji-charts.trycloudflare.com"
+url = "https://here-consistent-nylon-lid.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

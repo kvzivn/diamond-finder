@@ -1,41 +1,52 @@
 <!-- Diamond Details View (initially hidden) -->
-<div id="diamond-details-view" class="tw-hidden">
-  <div class="tw-max-w-6xl tw-mx-auto tw-p-6">
-    <div class="tw-mb-6">
-      <button id="back-to-gallery" class="tw-inline-flex tw-items-center tw-text-gray-600 hover:tw-text-gray-800 tw-text-lg tw-cursor-pointer">
-        ← Back to Gallery
+<div id='diamond-details-view' class='tw-hidden'>
+  <div class='tw-max-w-6xl tw-mx-auto tw-p-6'>
+    <div class='tw-mb-4'>
+      <button
+        id='back-to-gallery'
+        class='tw-inline-flex tw-items-center tw-text-gray-600 hover:tw-text-gray-800 tw-text-lg tw-cursor-pointer'
+      >
+        <svg
+          class='tw-w-5 tw-h-5 tw-mr-2 tw-mt-0.5'
+          xmlns='http://www.w3.org/2000/svg'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Gallery
       </button>
     </div>
-
-    <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-12">
+    <div class='tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-12'>
       <!-- Left side - Diamond Image -->
-      <div class="tw-flex tw-justify-center tw-items-center">
-        <div class="tw-w-full tw-max-w-md">
-          <img
-            id="diamond-details-image"
-            src=""
-            alt=""
-            class="tw-w-full tw-h-auto tw-object-contain"
-          />
-        </div>
+      <div class='tw-w-full'>
+        <img
+          id='diamond-details-image'
+          src=''
+          alt=''
+          class='tw-w-full tw-h-auto tw-object-contain tw-border'
+          width='100%'
+          height='100%'
+        >
       </div>
 
       <!-- Right side - Diamond Details -->
-      <div class="tw-flex tw-flex-col">
-        <div class="tw-mb-6">
-          <h1 id="diamond-details-title" class="tw-text-3xl tw-font-light tw-text-gray-800 tw-mb-2">
+      <div class='tw-flex tw-flex-col'>
+        <div class='tw-flex tw-items-center tw-justify-between tw-mb-6'>
+          <h1 id='diamond-details-title' class='tw-text-3xl tw-font-medium tw-text-gray-800 tw-mb-2'>
             <!-- Title will be populated by JavaScript -->
           </h1>
-          <p id="diamond-details-price" class="tw-text-2xl tw-font-medium tw-text-gray-800">
+          <p id='diamond-details-price' class='tw-text-2xl tw-font-medium tw-text-gray-800'>
             <!-- Price will be populated by JavaScript -->
           </p>
         </div>
 
-        <div id="diamond-details-specs" class="tw-space-y-4 tw-mb-8">
+        <div id='diamond-details-specs' class='tw-space-y-4 tw-mb-8'>
           <!-- Specifications will be populated by JavaScript -->
         </div>
 
-        <button class="tw-w-full tw-bg-gray-800 tw-text-white tw-py-4 tw-px-6 tw-text-lg tw-font-medium hover:tw-bg-gray-700 tw-transition-colors">
+        <button class='tw-w-full tw-bg-gray-800 tw-text-white tw-py-4 tw-px-6 tw-text-lg tw-font-medium hover:tw-bg-gray-700 tw-transition-colors'>
           ADD TO CART
         </button>
       </div>
