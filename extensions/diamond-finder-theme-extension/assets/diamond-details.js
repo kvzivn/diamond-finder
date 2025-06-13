@@ -1,13 +1,11 @@
 // Diamond Details Module
 if (typeof window !== 'undefined') {
-
   window.DiamondDetails = {
-
     // Show diamond details view
     showDiamondDetails(diamond) {
       const searchView = document.getElementById('diamond-search-view');
       const detailsView = document.getElementById('diamond-details-view');
-      
+
       if (!searchView || !detailsView) return;
 
       // Hide search view and show details view
@@ -25,7 +23,7 @@ if (typeof window !== 'undefined') {
     hideDiamondDetails() {
       const searchView = document.getElementById('diamond-search-view');
       const detailsView = document.getElementById('diamond-details-view');
-      
+
       if (!searchView || !detailsView) return;
 
       // Show search view and hide details view
@@ -41,24 +39,32 @@ if (typeof window !== 'undefined') {
       // Update image
       const image = document.getElementById('diamond-details-image');
       if (image) {
-        image.src = diamond.imagePath || "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png";
+        image.src =
+          diamond.imagePath ||
+          'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
         image.alt = `${diamond.carat}ct ${diamond.cut} Diamond`;
       }
 
       // Update title
       const title = document.getElementById('diamond-details-title');
       if (title) {
-        title.textContent = `DIAMOND ${(diamond.cut || 'UNKNOWN').toUpperCase()}`;
+        title.textContent = `${diamond.cut || 'Unknown'} Diamond`;
       }
 
       // Update price
       const price = document.getElementById('diamond-details-price');
       if (price) {
         let displayPrice = 'Price N/A';
-        if (diamond.totalPriceSek !== null && typeof diamond.totalPriceSek === 'number') {
+        if (
+          diamond.totalPriceSek !== null &&
+          typeof diamond.totalPriceSek === 'number'
+        ) {
           const roundedPrice = Math.round(diamond.totalPriceSek / 100) * 100;
           displayPrice = `${roundedPrice.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
-        } else if (diamond.totalPrice !== null && typeof diamond.totalPrice === 'number') {
+        } else if (
+          diamond.totalPrice !== null &&
+          typeof diamond.totalPrice === 'number'
+        ) {
           displayPrice = `${diamond.totalPrice.toLocaleString()} USD`;
         }
         price.textContent = displayPrice;
@@ -77,36 +83,47 @@ if (typeof window !== 'undefined') {
           { label: 'CUT GRADE:', value: diamond.cutGrade || 'None' },
           { label: 'SYMMETRY:', value: diamond.symmetry || 'N/A' },
           { label: 'POLISH:', value: diamond.polish || 'N/A' },
-          { label: 'CERTIFICATE NUMBER:', value: diamond.certificateNumber || 'N/A' },
-          { 
-            label: 'MEASUREMENTS:', 
-            value: (diamond.measurementsLength && diamond.measurementsWidth && diamond.measurementsHeight)
-              ? `${diamond.measurementsLength} × ${diamond.measurementsWidth} × ${diamond.measurementsHeight}`
-              : 'N/A'
+          {
+            label: 'CERTIFICATE NUMBER:',
+            value: diamond.certificateNumber || 'N/A',
+          },
+          {
+            label: 'MEASUREMENTS:',
+            value:
+              diamond.measurementsLength &&
+              diamond.measurementsWidth &&
+              diamond.measurementsHeight
+                ? `${diamond.measurementsLength} × ${diamond.measurementsWidth} × ${diamond.measurementsHeight}`
+                : 'N/A',
           },
           { label: 'TABLE WIDTH %:', value: diamond.tablePercent || 'N/A' },
           { label: 'TOTAL DEPTH %:', value: diamond.depthPercent || 'N/A' },
-          { 
-            label: 'GIRDLE:', 
-            value: (diamond.girdleFrom && diamond.girdleTo)
-              ? `${diamond.girdleFrom} - ${diamond.girdleTo}`
-              : 'N/A'
+          {
+            label: 'GIRDLE:',
+            value:
+              diamond.girdleFrom && diamond.girdleTo
+                ? `${diamond.girdleFrom} - ${diamond.girdleTo}`
+                : 'N/A',
           },
-          { label: 'FLUORESCENCE:', value: diamond.fluorescenceIntensity || 'None' }
+          {
+            label: 'FLUORESCENCE:',
+            value: diamond.fluorescenceIntensity || 'None',
+          },
         ];
 
-        specs.forEach(spec => {
+        specs.forEach((spec) => {
           const specRow = document.createElement('div');
-          specRow.className = 'tw-flex tw-justify-between tw-border-b tw-border-gray-200 tw-pb-2';
-          
+          specRow.className =
+            'tw-flex tw-justify-between tw-border-b tw-border-gray-200 tw-pb-2';
+
           const label = document.createElement('span');
           label.className = 'tw-text-gray-600 tw-font-medium tw-text-sm';
           label.textContent = spec.label;
-          
+
           const value = document.createElement('span');
           value.className = 'tw-text-gray-800 tw-text-sm';
           value.textContent = spec.value;
-          
+
           specRow.appendChild(label);
           specRow.appendChild(value);
           specsContainer.appendChild(specRow);
@@ -122,6 +139,6 @@ if (typeof window !== 'undefined') {
           this.hideDiamondDetails();
         });
       }
-    }
+    },
   };
 }
