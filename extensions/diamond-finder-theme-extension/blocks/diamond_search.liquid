@@ -1,10 +1,10 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css" />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css'>
 {{ 'tailwind-output.css' | asset_url | stylesheet_tag }}
 {{ 'diamond-filters.css' | asset_url | stylesheet_tag }}
 
-<div class="tw-p-4 md:tw-p-8">
+<div class='tw-p-4 md:tw-p-8'>
   <!-- Main Search View -->
-  <div id="diamond-search-view">
+  <div id='diamond-search-view'>
     <!-- Filters Section -->
     {% render 'diamond-search-filters' %}
 
@@ -17,16 +17,17 @@
 </div>
 
 <!-- Load noUiSlider first -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js" async></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js' async></script>
 
 <!-- Load JavaScript Modules in Order -->
-<script src="{{ 'diamond-state.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'diamond-api.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'diamond-renderer.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'diamond-filters.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'diamond-ui.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'diamond-details.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'diamond-finder-init.js' | asset_url }}" defer="defer"></script>
+<script src='{{ 'diamond-state.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-api.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-shape-icons.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-renderer.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-filters.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-ui.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-details.js' | asset_url }}' defer='defer'></script>
+<script src='{{ 'diamond-finder-init.js' | asset_url }}' defer='defer'></script>
 
 {% schema %}
 {
