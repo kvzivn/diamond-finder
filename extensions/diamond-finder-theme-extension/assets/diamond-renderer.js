@@ -151,7 +151,7 @@ if (typeof window !== 'undefined') {
       if (diamond.clarity)
         detailsData.push({ label: 'Klarhet:', value: diamond.clarity });
       if (diamond.cutGrade)
-        detailsData.push({ label: 'Kap:', value: diamond.cutGrade });
+        detailsData.push({ label: 'Slipkvalitet:', value: diamond.cutGrade });
 
       if (detailsData.length > 0) {
         detailsData.forEach((detail) => {
@@ -252,7 +252,7 @@ if (typeof window !== 'undefined') {
 
       if (!sortedDiamonds || sortedDiamonds.length === 0) {
         gridArea.innerHTML =
-          '<p class="tw-text-center tw-text-gray-500 tw-py-10">Inga diamanter matchar dina kriterier.</p>';
+          '<p class="tw-text-center tw-text-gray-500 tw-py-10">Inga diamanter hittades.</p>';
       } else {
         const grid = document.createElement('div');
         grid.className =

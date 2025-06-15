@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://particles-skins-yu-millions.trycloudflare.com"
+application_url = "https://blogs-discussed-begins-challenging.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,13 +27,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://particles-skins-yu-millions.trycloudflare.com/auth/callback",
-  "https://particles-skins-yu-millions.trycloudflare.com/auth/shopify/callback",
-  "https://particles-skins-yu-millions.trycloudflare.com/api/auth/callback"
+  "https://blogs-discussed-begins-challenging.trycloudflare.com/auth/callback",
+  "https://blogs-discussed-begins-challenging.trycloudflare.com/auth/shopify/callback",
+  "https://blogs-discussed-begins-challenging.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://particles-skins-yu-millions.trycloudflare.com"
+url = "https://blogs-discussed-begins-challenging.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

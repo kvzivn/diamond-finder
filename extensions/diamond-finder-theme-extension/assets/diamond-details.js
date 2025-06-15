@@ -181,9 +181,9 @@ if (typeof window !== 'undefined') {
           { label: 'KARAT:', value: diamond.carat || 'Ej tillgänglig' },
           { label: 'FÄRG:', value: diamond.color || 'Ej tillgänglig' },
           { label: 'KLARHET:', value: diamond.clarity || 'Ej tillgänglig' },
-          { label: 'KAP GRAD:', value: diamond.cutGrade || 'Ingen' },
+          { label: 'SLIPKVALITET:', value: diamond.cutGrade || 'Ingen' },
           { label: 'SYMMETRI:', value: diamond.symmetry || 'Ej tillgänglig' },
-          { label: 'POLITYR:', value: diamond.polish || 'Ej tillgänglig' },
+          { label: 'POLERING:', value: diamond.polish || 'Ej tillgänglig' },
           {
             label: 'CERTIFIKAT NUMMER:',
             value: diamond.certificateNumber || 'Ej tillgänglig',
