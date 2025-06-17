@@ -57,44 +57,18 @@ if (typeof window !== 'undefined') {
       const colourSliderEl = document.getElementById('ds-colour-slider-noui');
       if (colourSliderEl && colourSliderEl.noUiSlider) {
         const colourValues = colourSliderEl.noUiSlider.get();
-        console.log(
-          '[COLOUR FILTER DEBUG] Building query - raw slider values:',
-          colourValues
-        );
 
         if (colourValues && colourValues.length === 2) {
           const minColour = colourValues[0];
           const maxColour = colourValues[1];
-          console.log(
-            '[COLOUR FILTER DEBUG] Building query - extracted values:'
-          );
-          console.log('  - minColour:', minColour);
-          console.log('  - maxColour:', maxColour);
 
           if (minColour) {
             params.append('minColour', minColour);
-            console.log(
-              '[COLOUR FILTER DEBUG] Added minColour to query:',
-              minColour
-            );
           }
           if (maxColour) {
             params.append('maxColour', maxColour);
-            console.log(
-              '[COLOUR FILTER DEBUG] Added maxColour to query:',
-              maxColour
-            );
           }
-        } else {
-          console.log(
-            '[COLOUR FILTER DEBUG] No valid colour values found - colourValues:',
-            colourValues
-          );
         }
-      } else {
-        console.log(
-          '[COLOUR FILTER DEBUG] Colour slider element not found or not initialized'
-        );
       }
 
       // Add clarity filters from sliders
@@ -189,10 +163,6 @@ if (typeof window !== 'undefined') {
         }
       }
 
-      console.log(
-        '[COLOUR FILTER DEBUG] Final query params object:',
-        Object.fromEntries(params)
-      );
       return params.toString();
     },
 
@@ -212,14 +182,9 @@ if (typeof window !== 'undefined') {
 
       try {
         const filterParams = this.buildFilterQueryString();
-        console.log(
-          '[COLOUR FILTER DEBUG] Complete query string being sent to server:',
-          filterParams
-        );
 
         const baseUrl = `/apps/api/diamonds/all?page=${page}&limit=${limit}`;
         const url = filterParams ? `${baseUrl}&${filterParams}` : baseUrl;
-        console.log('[COLOUR FILTER DEBUG] Final API URL:', url);
 
         const response = await fetch(url);
         if (!response.ok) {

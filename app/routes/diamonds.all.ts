@@ -86,14 +86,7 @@ function applyFilters(
 
   // Colour filters
   if (filters.minColour || filters.maxColour) {
-    console.log('[COLOUR FILTER DEBUG] Server-side colour filtering:');
-    console.log('  - minColour:', filters.minColour);
-    console.log('  - maxColour:', filters.maxColour);
-
     const colourLabels = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'];
-    console.log('  - Available colour labels:', colourLabels);
-
-    const beforeFilterCount = filtered.length;
 
     filtered = filtered.filter((d) => {
       const diamondColour = d.color ? d.color.trim() : '';
@@ -103,12 +96,8 @@ function applyFilters(
         (label) => label.toLowerCase() === diamondColour.toLowerCase()
       );
 
-      // If the diamond's colour is not in our defined scale, log and exclude it
+      // If the diamond's colour is not in our defined scale, exclude it
       if (diamondColourIndex === -1) {
-        console.log(
-          '[COLOUR FILTER DEBUG] Diamond with unknown colour excluded:',
-          diamondColour
-        );
         return false;
       }
 
@@ -136,25 +125,6 @@ function applyFilters(
 
       return withinRange;
     });
-
-    const afterFilterCount = filtered.length;
-    console.log(
-      `[COLOUR FILTER DEBUG] Colour filtering results: ${beforeFilterCount} -> ${afterFilterCount} diamonds`
-    );
-    console.log(
-      '[COLOUR FILTER DEBUG] Logic: minColour is inclusive, maxColour is exclusive'
-    );
-    if (filters.minColour && filters.maxColour) {
-      const minIndex = colourLabels.findIndex(
-        (label) => label.toLowerCase() === filters.minColour!.toLowerCase()
-      );
-      const maxIndex = colourLabels.findIndex(
-        (label) => label.toLowerCase() === filters.maxColour!.toLowerCase()
-      );
-      console.log(
-        `[COLOUR FILTER DEBUG] Including colours from index ${minIndex} (${filters.minColour}) up to but not including index ${maxIndex} (${filters.maxColour})`
-      );
-    }
   }
 
   // Grading Lab filter
@@ -276,9 +246,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     'API Route (/all): Received filters:',
     JSON.stringify(filters, null, 2)
   );
-  console.log('[COLOUR FILTER DEBUG] Server received colour filters:');
-  console.log('  - minColour:', filters.minColour);
-  console.log('  - maxColour:', filters.maxColour);
 
   let naturalDiamonds: Diamond[] = getCachedDiamonds('natural') || [];
   let labDiamonds: Diamond[] = getCachedDiamonds('lab') || [];
