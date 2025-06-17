@@ -1,20 +1,26 @@
 // Diamond Filters Module
 if (typeof window !== 'undefined') {
-
   window.DiamondFilters = {
-
     // Wait for noUiSlider to be available
     waitForNoUiSlider(callback, maxAttempts = 100) {
       let attempts = 0;
       const checkInterval = setInterval(() => {
         attempts++;
-        if (typeof window !== 'undefined' && window.noUiSlider && typeof window.noUiSlider.create === 'function') {
+        if (
+          typeof window !== 'undefined' &&
+          window.noUiSlider &&
+          typeof window.noUiSlider.create === 'function'
+        ) {
           clearInterval(checkInterval);
-          console.log('[DIAMOND FILTERS] noUiSlider loaded successfully');
+
           callback();
         } else if (attempts >= maxAttempts) {
           clearInterval(checkInterval);
-          console.error('[DIAMOND FILTERS] noUiSlider library failed to load after', maxAttempts * 50, 'ms');
+          console.error(
+            '[DIAMOND FILTERS] noUiSlider library failed to load after',
+            maxAttempts * 50,
+            'ms'
+          );
           // Try to load a fallback or show an error message
         }
       }, 50);
@@ -27,15 +33,15 @@ if (typeof window !== 'undefined') {
       if (useInitialDefaults) {
         return {
           price: state.DEFAULT_FILTER_RANGES.price.map(String),
-          carat: state.DEFAULT_FILTER_RANGES.carat.map(val => val.toFixed(2)),
+          carat: state.DEFAULT_FILTER_RANGES.carat.map((val) => val.toFixed(2)),
           colour: state.DEFAULT_FILTER_RANGES.colour,
           clarity: state.DEFAULT_FILTER_RANGES.clarity,
           cutGrade: state.DEFAULT_FILTER_RANGES.cutGrade,
           fluorescence: state.DEFAULT_FILTER_RANGES.fluorescence,
           polish: state.DEFAULT_FILTER_RANGES.polish,
           symmetry: state.DEFAULT_FILTER_RANGES.symmetry,
-          table: state.DEFAULT_FILTER_RANGES.table.map(val => val + '%'),
-          ratio: state.DEFAULT_FILTER_RANGES.ratio.map(val => val.toFixed(2))
+          table: state.DEFAULT_FILTER_RANGES.table.map((val) => val + '%'),
+          ratio: state.DEFAULT_FILTER_RANGES.ratio.map((val) => val.toFixed(2)),
         };
       }
 
@@ -61,12 +67,16 @@ if (typeof window !== 'undefined') {
         values.clarity = claritySliderEl.noUiSlider.get();
       }
 
-      const cutGradeSliderEl = document.getElementById('ds-cut-grade-slider-noui');
+      const cutGradeSliderEl = document.getElementById(
+        'ds-cut-grade-slider-noui'
+      );
       if (cutGradeSliderEl && cutGradeSliderEl.noUiSlider) {
         values.cutGrade = cutGradeSliderEl.noUiSlider.get();
       }
 
-      const fluorescenceSliderEl = document.getElementById('ds-fluorescence-slider-noui');
+      const fluorescenceSliderEl = document.getElementById(
+        'ds-fluorescence-slider-noui'
+      );
       if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
         values.fluorescence = fluorescenceSliderEl.noUiSlider.get();
       }
@@ -76,7 +86,9 @@ if (typeof window !== 'undefined') {
         values.polish = polishSliderEl.noUiSlider.get();
       }
 
-      const symmetrySliderEl = document.getElementById('ds-symmetry-slider-noui');
+      const symmetrySliderEl = document.getElementById(
+        'ds-symmetry-slider-noui'
+      );
       if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
         values.symmetry = symmetrySliderEl.noUiSlider.get();
       }
@@ -112,8 +124,13 @@ if (typeof window !== 'undefined') {
 
     // Initialize price slider
     initializePriceSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for price slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for price slider'
+        );
         return;
       }
 
@@ -131,8 +148,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1000,
         range: {
-          'min': 2500,
-          'max': 10000000
+          min: 2500,
+          max: 10000000,
         },
         format: {
           to: function (value) {
@@ -140,8 +157,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return Number(value.replace(/\s/g, ''));
-          }
-        }
+          },
+        },
       });
 
       priceSlider.noUiSlider.on('update', function (values, handle) {
@@ -167,8 +184,13 @@ if (typeof window !== 'undefined') {
 
     // Initialize carat slider
     initializeCaratSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for carat slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for carat slider'
+        );
         return;
       }
 
@@ -183,10 +205,10 @@ if (typeof window !== 'undefined') {
 
       // Create array of valid carat values
       const caratValues = [];
-      for (let i = 0.10; i <= 10.00; i += 0.05) {
+      for (let i = 0.1; i <= 10.0; i += 0.05) {
         caratValues.push(parseFloat(i.toFixed(2)));
       }
-      caratValues.push(15.00, 20.00, 25.00, 30.00);
+      caratValues.push(15.0, 20.0, 25.0, 30.0);
 
       function snapToValidCaratValue(value) {
         return caratValues.reduce((prev, curr) =>
@@ -199,18 +221,18 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 0.05,
         range: {
-          'min': 0.10,
-          'max': 30.00
+          min: 0.1,
+          max: 30.0,
         },
         format: {
-          to: function(value) {
+          to: function (value) {
             const snapped = snapToValidCaratValue(value);
             return snapped.toFixed(2);
           },
-          from: function(value) {
+          from: function (value) {
             return Number(value);
-          }
-        }
+          },
+        },
       });
 
       caratSlider.noUiSlider.on('update', function (values, handle) {
@@ -254,15 +276,23 @@ if (typeof window !== 'undefined') {
 
     // Initialize colour slider
     initializeColourSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for colour slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for colour slider'
+        );
         return;
       }
 
       const state = window.DiamondSearchState;
       const colourSlider = document.getElementById('ds-colour-slider-noui');
 
-      if (!colourSlider) return;
+      if (!colourSlider) {
+        console.error('[DIAMOND FILTERS] Colour slider element not found');
+        return;
+      }
 
       const colorLabels = state.FILTER_LABELS.colour;
 
@@ -271,8 +301,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1,
         range: {
-          'min': 0,
-          'max': 8
+          min: 0,
+          max: 8,
         },
         format: {
           to: function (value) {
@@ -280,11 +310,12 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return colorLabels.indexOf(value);
-          }
-        }
+          },
+        },
       });
 
       const debounceFetch = this.createDebouncedFetch();
+
       colourSlider.noUiSlider.on('change', debounceFetch);
 
       setTimeout(() => {
@@ -294,8 +325,13 @@ if (typeof window !== 'undefined') {
 
     // Initialize clarity slider
     initializeClaritySlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for clarity slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for clarity slider'
+        );
         return;
       }
 
@@ -311,8 +347,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1,
         range: {
-          'min': 0,
-          'max': 8
+          min: 0,
+          max: 8,
         },
         format: {
           to: function (value) {
@@ -320,8 +356,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return clarityLabels.indexOf(value);
-          }
-        }
+          },
+        },
       });
 
       const debounceFetch = this.createDebouncedFetch();
@@ -334,13 +370,20 @@ if (typeof window !== 'undefined') {
 
     // Initialize cut grade slider
     initializeCutGradeSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for cut grade slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for cut grade slider'
+        );
         return;
       }
 
       const state = window.DiamondSearchState;
-      const cutGradeSlider = document.getElementById('ds-cut-grade-slider-noui');
+      const cutGradeSlider = document.getElementById(
+        'ds-cut-grade-slider-noui'
+      );
 
       if (!cutGradeSlider) return;
 
@@ -351,8 +394,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1,
         range: {
-          'min': 0,
-          'max': 3
+          min: 0,
+          max: 3,
         },
         format: {
           to: function (value) {
@@ -360,8 +403,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return cutGradeLabels.indexOf(value);
-          }
-        }
+          },
+        },
       });
 
       setTimeout(() => {
@@ -371,13 +414,20 @@ if (typeof window !== 'undefined') {
 
     // Initialize fluorescence slider
     initializeFluorescenceSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for fluorescence slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for fluorescence slider'
+        );
         return;
       }
 
       const state = window.DiamondSearchState;
-      const fluorescenceSlider = document.getElementById('ds-fluorescence-slider-noui');
+      const fluorescenceSlider = document.getElementById(
+        'ds-fluorescence-slider-noui'
+      );
 
       if (!fluorescenceSlider) return;
 
@@ -388,8 +438,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1,
         range: {
-          'min': 0,
-          'max': 4
+          min: 0,
+          max: 4,
         },
         format: {
           to: function (value) {
@@ -397,8 +447,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return fluorescenceLabels.indexOf(value);
-          }
-        }
+          },
+        },
       });
 
       const debounceFetch = this.createDebouncedFetch();
@@ -411,8 +461,13 @@ if (typeof window !== 'undefined') {
 
     // Initialize polish slider
     initializePolishSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for polish slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for polish slider'
+        );
         return;
       }
 
@@ -428,8 +483,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1,
         range: {
-          'min': 0,
-          'max': 2
+          min: 0,
+          max: 2,
         },
         format: {
           to: function (value) {
@@ -437,8 +492,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return polishLabels.indexOf(value);
-          }
-        }
+          },
+        },
       });
 
       const debounceFetch = this.createDebouncedFetch();
@@ -451,8 +506,13 @@ if (typeof window !== 'undefined') {
 
     // Initialize symmetry slider
     initializeSymmetrySlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for symmetry slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for symmetry slider'
+        );
         return;
       }
 
@@ -463,36 +523,41 @@ if (typeof window !== 'undefined') {
 
       const symmetryLabels = state.FILTER_LABELS.symmetry;
 
-             window.noUiSlider.create(symmetrySlider, {
-         start: state.DEFAULT_FILTER_RANGES.symmetry,
-         connect: true,
-         step: 1,
-         range: {
-           'min': 0,
-           'max': 2
-         },
-         format: {
-           to: function (value) {
-             return symmetryLabels[Math.round(value)];
-           },
-           from: function (value) {
-             return symmetryLabels.indexOf(value);
-           }
-         }
-       });
+      window.noUiSlider.create(symmetrySlider, {
+        start: state.DEFAULT_FILTER_RANGES.symmetry,
+        connect: true,
+        step: 1,
+        range: {
+          min: 0,
+          max: 2,
+        },
+        format: {
+          to: function (value) {
+            return symmetryLabels[Math.round(value)];
+          },
+          from: function (value) {
+            return symmetryLabels.indexOf(value);
+          },
+        },
+      });
 
-       const debounceFetch = this.createDebouncedFetch();
-       symmetrySlider.noUiSlider.on('change', debounceFetch);
+      const debounceFetch = this.createDebouncedFetch();
+      symmetrySlider.noUiSlider.on('change', debounceFetch);
 
-       setTimeout(() => {
-         state.markSliderInitialized('symmetry');
-       }, 10);
+      setTimeout(() => {
+        state.markSliderInitialized('symmetry');
+      }, 10);
     },
 
     // Initialize table slider
     initializeTableSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for table slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for table slider'
+        );
         return;
       }
 
@@ -510,8 +575,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 1,
         range: {
-          'min': 0,
-          'max': 100
+          min: 0,
+          max: 100,
         },
         format: {
           to: function (value) {
@@ -519,8 +584,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return Number(value.replace('%', ''));
-          }
-        }
+          },
+        },
       });
 
       tableSlider.noUiSlider.on('update', function (values, handle) {
@@ -552,8 +617,13 @@ if (typeof window !== 'undefined') {
 
     // Initialize ratio slider
     initializeRatioSlider() {
-      if (!window.noUiSlider || typeof window.noUiSlider.create !== 'function') {
-        console.error('[DIAMOND FILTERS] noUiSlider not available for ratio slider');
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for ratio slider'
+        );
         return;
       }
 
@@ -571,8 +641,8 @@ if (typeof window !== 'undefined') {
         connect: true,
         step: 0.01,
         range: {
-          'min': 0.8,
-          'max': 3.0
+          min: 0.8,
+          max: 3.0,
         },
         format: {
           to: function (value) {
@@ -580,8 +650,8 @@ if (typeof window !== 'undefined') {
           },
           from: function (value) {
             return Number(value);
-          }
-        }
+          },
+        },
       });
 
       ratioSlider.noUiSlider.on('update', function (values, handle) {
@@ -619,7 +689,10 @@ if (typeof window !== 'undefined') {
         sliderChangeTimeout = setTimeout(() => {
           const state = window.DiamondSearchState;
           state.logCurrentFilters();
-          window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
+          window.DiamondAPI.fetchDiamondData(
+            1,
+            state.paginationInfo.limit || 24
+          );
         }, 500);
       };
     },
@@ -627,16 +700,21 @@ if (typeof window !== 'undefined') {
     // Update certificate filter visual states
     updateCertificateFilterVisualState() {
       const state = window.DiamondSearchState;
-      const certificateGroup = document.querySelector('[data-filter-group="ds-certificate"]');
+      const certificateGroup = document.querySelector(
+        '[data-filter-group="ds-certificate"]'
+      );
       if (!certificateGroup) return;
 
       const activeCertificates = state.getFilter('ds-certificate');
       const isInitialState = state.getFilter('ds-certificate-initial-state');
 
       const buttons = certificateGroup.querySelectorAll('button');
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         const value = button.dataset.value;
-        const isActive = !isInitialState && Array.isArray(activeCertificates) && activeCertificates.includes(value);
+        const isActive =
+          !isInitialState &&
+          Array.isArray(activeCertificates) &&
+          activeCertificates.includes(value);
         button.dataset.active = isActive ? 'true' : 'false';
         button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       });
@@ -647,7 +725,7 @@ if (typeof window !== 'undefined') {
       const state = window.DiamondSearchState;
       const filterGroups = document.querySelectorAll('[data-filter-group]');
 
-      filterGroups.forEach(group => {
+      filterGroups.forEach((group) => {
         const groupId = group.dataset.filterGroup;
         const isMultiSelect = group.dataset.multiselect === 'true';
         const buttons = group.querySelectorAll('button');
@@ -657,7 +735,7 @@ if (typeof window !== 'undefined') {
           if (!Array.isArray(state.getFilter(groupId))) {
             state.setFilter(groupId, []);
             if (!state.getFilter('ds-certificate-initial-state')) {
-              buttons.forEach(btn => {
+              buttons.forEach((btn) => {
                 if (btn.dataset.active === 'true') {
                   const currentFilters = state.getFilter(groupId) || [];
                   currentFilters.push(btn.dataset.value);
@@ -668,7 +746,7 @@ if (typeof window !== 'undefined') {
           }
         } else {
           if (!state.getFilter(groupId)) {
-            buttons.forEach(btn => {
+            buttons.forEach((btn) => {
               if (btn.dataset.active === 'true') {
                 state.setFilter(groupId, btn.dataset.value);
               }
@@ -677,7 +755,7 @@ if (typeof window !== 'undefined') {
         }
 
         // Add event listeners
-        buttons.forEach(button => {
+        buttons.forEach((button) => {
           if (button.hasAttribute('data-listener-attached')) return;
           button.setAttribute('data-listener-attached', 'true');
 
@@ -744,7 +822,9 @@ if (typeof window !== 'undefined') {
       const state = window.DiamondSearchState;
       const group = button.closest('[data-filter-group]');
 
-      const previousActiveButton = group.querySelector(`button[data-active="true"]`);
+      const previousActiveButton = group.querySelector(
+        `button[data-active="true"]`
+      );
       if (previousActiveButton) {
         previousActiveButton.dataset.active = 'false';
         previousActiveButton.setAttribute('aria-pressed', 'false');
@@ -758,6 +838,6 @@ if (typeof window !== 'undefined') {
         state.logCurrentFilters();
         window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
       }
-    }
+    },
   };
 }

@@ -1,8 +1,6 @@
 // Diamond Search API Module
 if (typeof window !== 'undefined') {
-
   window.DiamondAPI = {
-
     // Build query string from current filters
     buildFilterQueryString() {
       const params = new URLSearchParams();
@@ -30,10 +28,16 @@ if (typeof window !== 'undefined') {
       if (priceSliderEl && priceSliderEl.noUiSlider) {
         const priceValues = priceSliderEl.noUiSlider.get();
         if (priceValues && priceValues.length === 2) {
-          const minPrice = parseFloat(String(priceValues[0]).replace(/\s/g, ''));
-          const maxPrice = parseFloat(String(priceValues[1]).replace(/\s/g, ''));
-          if (!isNaN(minPrice)) params.append('minPriceSek', minPrice.toString());
-          if (!isNaN(maxPrice)) params.append('maxPriceSek', maxPrice.toString());
+          const minPrice = parseFloat(
+            String(priceValues[0]).replace(/\s/g, '')
+          );
+          const maxPrice = parseFloat(
+            String(priceValues[1]).replace(/\s/g, '')
+          );
+          if (!isNaN(minPrice))
+            params.append('minPriceSek', minPrice.toString());
+          if (!isNaN(maxPrice))
+            params.append('maxPriceSek', maxPrice.toString());
         }
       }
 
@@ -53,12 +57,44 @@ if (typeof window !== 'undefined') {
       const colourSliderEl = document.getElementById('ds-colour-slider-noui');
       if (colourSliderEl && colourSliderEl.noUiSlider) {
         const colourValues = colourSliderEl.noUiSlider.get();
+        console.log(
+          '[COLOUR FILTER DEBUG] Building query - raw slider values:',
+          colourValues
+        );
+
         if (colourValues && colourValues.length === 2) {
           const minColour = colourValues[0];
           const maxColour = colourValues[1];
-          if (minColour) params.append('minColour', minColour);
-          if (maxColour) params.append('maxColour', maxColour);
+          console.log(
+            '[COLOUR FILTER DEBUG] Building query - extracted values:'
+          );
+          console.log('  - minColour:', minColour);
+          console.log('  - maxColour:', maxColour);
+
+          if (minColour) {
+            params.append('minColour', minColour);
+            console.log(
+              '[COLOUR FILTER DEBUG] Added minColour to query:',
+              minColour
+            );
+          }
+          if (maxColour) {
+            params.append('maxColour', maxColour);
+            console.log(
+              '[COLOUR FILTER DEBUG] Added maxColour to query:',
+              maxColour
+            );
+          }
+        } else {
+          console.log(
+            '[COLOUR FILTER DEBUG] No valid colour values found - colourValues:',
+            colourValues
+          );
         }
+      } else {
+        console.log(
+          '[COLOUR FILTER DEBUG] Colour slider element not found or not initialized'
+        );
       }
 
       // Add clarity filters from sliders
@@ -88,14 +124,18 @@ if (typeof window !== 'undefined') {
       }
 
       // Add fluorescence filters from sliders
-      const fluorescenceSliderEl = document.getElementById('ds-fluorescence-slider-noui');
+      const fluorescenceSliderEl = document.getElementById(
+        'ds-fluorescence-slider-noui'
+      );
       if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
         const fluorescenceValues = fluorescenceSliderEl.noUiSlider.get();
         if (fluorescenceValues && fluorescenceValues.length === 2) {
           const minFluorescence = fluorescenceValues[0];
           const maxFluorescence = fluorescenceValues[1];
-          if (minFluorescence) params.append('minFluorescence', minFluorescence);
-          if (maxFluorescence) params.append('maxFluorescence', maxFluorescence);
+          if (minFluorescence)
+            params.append('minFluorescence', minFluorescence);
+          if (maxFluorescence)
+            params.append('maxFluorescence', maxFluorescence);
         }
       }
 
@@ -112,7 +152,9 @@ if (typeof window !== 'undefined') {
       }
 
       // Add symmetry filters from sliders
-      const symmetrySliderEl = document.getElementById('ds-symmetry-slider-noui');
+      const symmetrySliderEl = document.getElementById(
+        'ds-symmetry-slider-noui'
+      );
       if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
         const symmetryValues = symmetrySliderEl.noUiSlider.get();
         if (symmetryValues && symmetryValues.length === 2) {
@@ -147,6 +189,10 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      console.log(
+        '[COLOUR FILTER DEBUG] Final query params object:',
+        Object.fromEntries(params)
+      );
       return params.toString();
     },
 
@@ -166,18 +212,26 @@ if (typeof window !== 'undefined') {
 
       try {
         const filterParams = this.buildFilterQueryString();
+        console.log(
+          '[COLOUR FILTER DEBUG] Complete query string being sent to server:',
+          filterParams
+        );
+
         const baseUrl = `/apps/api/diamonds/all?page=${page}&limit=${limit}`;
         const url = filterParams ? `${baseUrl}&${filterParams}` : baseUrl;
+        console.log('[COLOUR FILTER DEBUG] Final API URL:', url);
 
         const response = await fetch(url);
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+          throw new Error(
+            `HTTP error! status: ${response.status}, message: ${errorText}`
+          );
         }
 
         const data = await response.json();
         const newDiamonds = data.diamonds || [];
-        console.log("[NEWLY FETCHED DIAMONDS]", newDiamonds);
+        console.log('[NEWLY FETCHED DIAMONDS]', newDiamonds);
 
         // Update state
         state.setDiamonds(newDiamonds, isLoadMore);
@@ -191,18 +245,20 @@ if (typeof window !== 'undefined') {
         });
 
         // Filter out bad data
-        state.allDiamonds = state.allDiamonds.filter(d => d.cut && d.cut.toLowerCase() !== 'cut');
+        state.allDiamonds = state.allDiamonds.filter(
+          (d) => d.cut && d.cut.toLowerCase() !== 'cut'
+        );
 
         // Render diamonds
         if (window.DiamondRenderer) {
           window.DiamondRenderer.renderDiamonds(state.allDiamonds);
         }
-
       } catch (error) {
         console.error('Failed to fetch diamond data:', error);
         if (gridArea && !isLoadMore) {
           gridArea.classList.remove('tw-opacity-60');
-          gridArea.innerHTML = '<p class="tw-text-center tw-py-10">Failed to load diamonds. Please try again later.</p>';
+          gridArea.innerHTML =
+            '<p class="tw-text-center tw-py-10">Failed to load diamonds. Please try again later.</p>';
         }
       } finally {
         if (isLoadMore) {
@@ -214,6 +270,6 @@ if (typeof window !== 'undefined') {
           }
         }
       }
-    }
+    },
   };
 }
