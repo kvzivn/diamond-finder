@@ -300,6 +300,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.colour,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
           max: 8,
@@ -346,6 +347,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.clarity,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
           max: 8,
@@ -393,6 +395,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.cutGrade,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
           max: 3,
