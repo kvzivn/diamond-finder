@@ -138,7 +138,7 @@ if (typeof window !== 'undefined') {
       // Title
       const title = document.createElement('h3');
       title.className = 'tw-text-lg tw-font-semibold tw-mb-1 tw-truncate';
-      title.textContent = `${carats}ct Diamant ${shape}`;
+      title.textContent = `Diamant ${shape}`;
 
       // Subtitle with diamond details
       const subtitle = document.createElement('div');
@@ -146,12 +146,23 @@ if (typeof window !== 'undefined') {
         'tw-text-sm tw-text-gray-600 tw-mb-2 tw-flex tw-flex-col tw-gap-1';
 
       const detailsData = [];
+      // Add carat as the first detail
+      detailsData.push({ label: 'Carat:', value: carats });
       if (diamond.color)
         detailsData.push({ label: 'Färg:', value: diamond.color });
       if (diamond.clarity)
         detailsData.push({ label: 'Klarhet:', value: diamond.clarity });
       if (diamond.cutGrade)
         detailsData.push({ label: 'Slipkvalitet:', value: diamond.cutGrade });
+      if (diamond.polish)
+        detailsData.push({ label: 'Polering:', value: diamond.polish });
+      if (diamond.symmetry)
+        detailsData.push({ label: 'Symmetri:', value: diamond.symmetry });
+      if (diamond.fluorescence)
+        detailsData.push({
+          label: 'Fluorescens:',
+          value: diamond.fluorescence,
+        });
 
       if (detailsData.length > 0) {
         detailsData.forEach((detail) => {
@@ -252,7 +263,7 @@ if (typeof window !== 'undefined') {
 
       if (!sortedDiamonds || sortedDiamonds.length === 0) {
         gridArea.innerHTML =
-          '<p class="tw-text-center tw-text-gray-500 tw-py-10">Inga diamanter hittades.</p>';
+          '<p class="tw-text-center tw-text-gray-500 tw-py-16">Hämtar diamanter...</p>';
       } else {
         const grid = document.createElement('div');
         grid.className =
