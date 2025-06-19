@@ -108,19 +108,49 @@ if (typeof window !== 'undefined') {
         'ds-fluorescence-slider-noui'
       );
       if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
-        values.fluorescence = fluorescenceSliderEl.noUiSlider.get();
+        const state = window.DiamondSearchState;
+        const fluorescenceLabels = state.FILTER_LABELS.fluorescence;
+        const handles = fluorescenceSliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.fluorescence = [fluorescenceLabels[startIndex]];
+        } else {
+          values.fluorescence = fluorescenceLabels.slice(startIndex, endIndex);
+        }
       }
 
       const polishSliderEl = document.getElementById('ds-polish-slider-noui');
       if (polishSliderEl && polishSliderEl.noUiSlider) {
-        values.polish = polishSliderEl.noUiSlider.get();
+        const state = window.DiamondSearchState;
+        const polishLabels = state.FILTER_LABELS.polish;
+        const handles = polishSliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.polish = [polishLabels[startIndex]];
+        } else {
+          values.polish = polishLabels.slice(startIndex, endIndex);
+        }
       }
 
       const symmetrySliderEl = document.getElementById(
         'ds-symmetry-slider-noui'
       );
       if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
-        values.symmetry = symmetrySliderEl.noUiSlider.get();
+        const state = window.DiamondSearchState;
+        const symmetryLabels = state.FILTER_LABELS.symmetry;
+        const handles = symmetrySliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.symmetry = [symmetryLabels[startIndex]];
+        } else {
+          values.symmetry = symmetryLabels.slice(startIndex, endIndex);
+        }
       }
 
       const tableSliderEl = document.getElementById('ds-table-slider');
@@ -482,15 +512,19 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.fluorescence,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
-          max: 4,
+          max: 5,
         },
         format: {
           to: function (value) {
             return fluorescenceLabels[Math.round(value)];
           },
           from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return fluorescenceLabels.length - 1;
+            }
             return fluorescenceLabels.indexOf(value);
           },
         },
@@ -527,15 +561,19 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.polish,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
-          max: 2,
+          max: 3,
         },
         format: {
           to: function (value) {
             return polishLabels[Math.round(value)];
           },
           from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return polishLabels.length - 1;
+            }
             return polishLabels.indexOf(value);
           },
         },
@@ -572,15 +610,19 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.symmetry,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
-          max: 2,
+          max: 3,
         },
         format: {
           to: function (value) {
             return symmetryLabels[Math.round(value)];
           },
           from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return symmetryLabels.length - 1;
+            }
             return symmetryLabels.indexOf(value);
           },
         },

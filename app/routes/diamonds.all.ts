@@ -23,6 +23,14 @@ function applyFilters(
     gradingLab?: string;
     minFluorescence?: string;
     maxFluorescence?: string;
+    minPolish?: string;
+    maxPolish?: string;
+    minSymmetry?: string;
+    maxSymmetry?: string;
+    minTable?: number;
+    maxTable?: number;
+    minRatio?: number;
+    maxRatio?: number;
   }
 ): Diamond[] {
   let filtered = [...diamonds];
@@ -226,6 +234,138 @@ function applyFilters(
     });
   }
 
+  // Polish filters
+  if (filters.minPolish || filters.maxPolish) {
+    const polishLabels = ['Good', 'Very Good', 'Excellent'];
+
+    filtered = filtered.filter((d) => {
+      const diamondPolish = d.polish ? d.polish.trim() : '';
+
+      // Find the index of the diamond's polish in our scale
+      const diamondPolishIndex = polishLabels.findIndex(
+        (label) => label.toLowerCase() === diamondPolish.toLowerCase()
+      );
+
+      // If the diamond's polish is not in our defined scale, exclude it
+      if (diamondPolishIndex === -1) {
+        return false;
+      }
+
+      let withinRange = true;
+
+      // Check minimum polish (lower quality/lower index)
+      if (filters.minPolish) {
+        const minIndex = polishLabels.findIndex(
+          (label) => label.toLowerCase() === filters.minPolish!.toLowerCase()
+        );
+        if (minIndex !== -1 && diamondPolishIndex < minIndex) {
+          withinRange = false;
+        }
+      }
+
+      // Check maximum polish (higher quality/higher index)
+      if (filters.maxPolish) {
+        const maxIndex = polishLabels.findIndex(
+          (label) => label.toLowerCase() === filters.maxPolish!.toLowerCase()
+        );
+        if (maxIndex !== -1 && diamondPolishIndex > maxIndex) {
+          withinRange = false;
+        }
+      }
+
+      return withinRange;
+    });
+  }
+
+  // Symmetry filters
+  if (filters.minSymmetry || filters.maxSymmetry) {
+    const symmetryLabels = ['Good', 'Very Good', 'Excellent'];
+
+    filtered = filtered.filter((d) => {
+      const diamondSymmetry = d.symmetry ? d.symmetry.trim() : '';
+
+      // Find the index of the diamond's symmetry in our scale
+      const diamondSymmetryIndex = symmetryLabels.findIndex(
+        (label) => label.toLowerCase() === diamondSymmetry.toLowerCase()
+      );
+
+      // If the diamond's symmetry is not in our defined scale, exclude it
+      if (diamondSymmetryIndex === -1) {
+        return false;
+      }
+
+      let withinRange = true;
+
+      // Check minimum symmetry (lower quality/lower index)
+      if (filters.minSymmetry) {
+        const minIndex = symmetryLabels.findIndex(
+          (label) => label.toLowerCase() === filters.minSymmetry!.toLowerCase()
+        );
+        if (minIndex !== -1 && diamondSymmetryIndex < minIndex) {
+          withinRange = false;
+        }
+      }
+
+      // Check maximum symmetry (higher quality/higher index)
+      if (filters.maxSymmetry) {
+        const maxIndex = symmetryLabels.findIndex(
+          (label) => label.toLowerCase() === filters.maxSymmetry!.toLowerCase()
+        );
+        if (maxIndex !== -1 && diamondSymmetryIndex > maxIndex) {
+          withinRange = false;
+        }
+      }
+
+      return withinRange;
+    });
+  }
+
+  // Table filters
+  if (filters.minTable !== undefined) {
+    filtered = filtered.filter(
+      (d) =>
+        d.tablePercent !== null &&
+        d.tablePercent !== undefined &&
+        d.tablePercent >= filters.minTable!
+    );
+  }
+  if (filters.maxTable !== undefined) {
+    filtered = filtered.filter(
+      (d) =>
+        d.tablePercent !== null &&
+        d.tablePercent !== undefined &&
+        d.tablePercent <= filters.maxTable!
+    );
+  }
+
+  // Ratio filters
+  if (filters.minRatio !== undefined) {
+    filtered = filtered.filter((d) => {
+      if (
+        d.measurementsLength &&
+        d.measurementsWidth &&
+        d.measurementsWidth > 0
+      ) {
+        const ratio = d.measurementsLength / d.measurementsWidth;
+        return ratio >= filters.minRatio!;
+      }
+      return false;
+    });
+  }
+  if (filters.maxRatio !== undefined) {
+    filtered = filtered.filter((d) => {
+      if (
+        d.measurementsLength &&
+        d.measurementsWidth &&
+        d.measurementsWidth > 0
+      ) {
+        const ratio = d.measurementsLength / d.measurementsWidth;
+        return ratio <= filters.maxRatio!;
+      }
+      return false;
+    });
+  }
+
   // Grading Lab filter
   if (filters.gradingLab) {
     if (filters.gradingLab === 'NONE') {
@@ -343,6 +483,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
     gradingLab: url.searchParams.get('gradingLab') || undefined,
     minFluorescence: url.searchParams.get('minFluorescence') || undefined,
     maxFluorescence: url.searchParams.get('maxFluorescence') || undefined,
+    minPolish: url.searchParams.get('minPolish') || undefined,
+    maxPolish: url.searchParams.get('maxPolish') || undefined,
+    minSymmetry: url.searchParams.get('minSymmetry') || undefined,
+    maxSymmetry: url.searchParams.get('maxSymmetry') || undefined,
+    minTable: url.searchParams.get('minTable')
+      ? parseFloat(url.searchParams.get('minTable')!)
+      : undefined,
+    maxTable: url.searchParams.get('maxTable')
+      ? parseFloat(url.searchParams.get('maxTable')!)
+      : undefined,
+    minRatio: url.searchParams.get('minRatio')
+      ? parseFloat(url.searchParams.get('minRatio')!)
+      : undefined,
+    maxRatio: url.searchParams.get('maxRatio')
+      ? parseFloat(url.searchParams.get('maxRatio')!)
+      : undefined,
   };
 
   console.log(

@@ -35,9 +35,9 @@ if (typeof window !== 'undefined') {
       colour: ['K', 'D_MAX'],
       clarity: ['SI2', 'FL_MAX'],
       cutGrade: ['Good', 'Excellent_MAX'],
-      fluorescence: ['Very Strong', 'None'],
-      polish: ['Good', 'Excellent'],
-      symmetry: ['Good', 'Excellent'],
+      fluorescence: ['Very Strong', 'None_MAX'],
+      polish: ['Good', 'Excellent_MAX'],
+      symmetry: ['Good', 'Excellent_MAX'],
       table: [0, 100], // Percentage range
       ratio: [0.8, 3.0], // Ratio range
     },
@@ -46,9 +46,16 @@ if (typeof window !== 'undefined') {
       colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'D'],
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL', 'FL'],
       cutGrade: ['Good', 'Very Good', 'Excellent', 'Excellent'],
-      fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
-      polish: ['Good', 'Very Good', 'Excellent'],
-      symmetry: ['Good', 'Very Good', 'Excellent'],
+      fluorescence: [
+        'Very Strong',
+        'Strong',
+        'Medium',
+        'Faint',
+        'None',
+        'None',
+      ],
+      polish: ['Good', 'Very Good', 'Excellent', 'Excellent'],
+      symmetry: ['Good', 'Very Good', 'Excellent', 'Excellent'],
     },
   };
 

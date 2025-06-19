@@ -140,10 +140,12 @@ if (typeof window !== 'undefined') {
         'ds-fluorescence-slider-noui'
       );
       if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
-        const fluorescenceValues = fluorescenceSliderEl.noUiSlider.get();
-        if (fluorescenceValues && fluorescenceValues.length === 2) {
+        const fluorescenceValues =
+          window.DiamondFilters.getSliderValues().fluorescence;
+        if (fluorescenceValues && fluorescenceValues.length > 0) {
           const minFluorescence = fluorescenceValues[0];
-          const maxFluorescence = fluorescenceValues[1];
+          const maxFluorescence =
+            fluorescenceValues[fluorescenceValues.length - 1];
           if (minFluorescence)
             params.append('minFluorescence', minFluorescence);
           if (maxFluorescence)
@@ -154,10 +156,10 @@ if (typeof window !== 'undefined') {
       // Add polish filters from sliders
       const polishSliderEl = document.getElementById('ds-polish-slider-noui');
       if (polishSliderEl && polishSliderEl.noUiSlider) {
-        const polishValues = polishSliderEl.noUiSlider.get();
-        if (polishValues && polishValues.length === 2) {
+        const polishValues = window.DiamondFilters.getSliderValues().polish;
+        if (polishValues && polishValues.length > 0) {
           const minPolish = polishValues[0];
-          const maxPolish = polishValues[1];
+          const maxPolish = polishValues[polishValues.length - 1];
           if (minPolish) params.append('minPolish', minPolish);
           if (maxPolish) params.append('maxPolish', maxPolish);
         }
@@ -168,10 +170,10 @@ if (typeof window !== 'undefined') {
         'ds-symmetry-slider-noui'
       );
       if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
-        const symmetryValues = symmetrySliderEl.noUiSlider.get();
-        if (symmetryValues && symmetryValues.length === 2) {
+        const symmetryValues = window.DiamondFilters.getSliderValues().symmetry;
+        if (symmetryValues && symmetryValues.length > 0) {
           const minSymmetry = symmetryValues[0];
-          const maxSymmetry = symmetryValues[1];
+          const maxSymmetry = symmetryValues[symmetryValues.length - 1];
           if (minSymmetry) params.append('minSymmetry', minSymmetry);
           if (maxSymmetry) params.append('maxSymmetry', maxSymmetry);
         }
