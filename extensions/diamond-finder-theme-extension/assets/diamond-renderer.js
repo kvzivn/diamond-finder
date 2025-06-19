@@ -263,7 +263,7 @@ if (typeof window !== 'undefined') {
 
       if (!sortedDiamonds || sortedDiamonds.length === 0) {
         gridArea.innerHTML =
-          '<p class="tw-text-center tw-text-gray-500 tw-py-16">Hämtar diamanter...</p>';
+          '<p class="tw-text-center tw-text-gray-500 tw-py-16">Inga diamanter hittades.</p>';
       } else {
         const grid = document.createElement('div');
         grid.className =

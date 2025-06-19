@@ -56,11 +56,21 @@ if (typeof window !== 'undefined') {
       // Add colour filters from sliders
       const colourSliderEl = document.getElementById('ds-colour-slider-noui');
       if (colourSliderEl && colourSliderEl.noUiSlider) {
-        const colourValues = colourSliderEl.noUiSlider.get();
-
-        if (colourValues && colourValues.length === 2) {
+        const colourValues = window.DiamondFilters.getSliderValues().colour;
+        if (colourValues && colourValues.length > 0) {
           const minColour = colourValues[0];
-          const maxColour = colourValues[1];
+          let maxColour = colourValues[colourValues.length - 1];
+
+          if (minColour === maxColour) {
+            const state = window.DiamondSearchState;
+            const uniqueColours = [...new Set(state.FILTER_LABELS.colour)];
+            const currentIndex = uniqueColours.indexOf(minColour);
+            if (currentIndex < uniqueColours.length - 1) {
+              maxColour = uniqueColours[currentIndex + 1];
+            } else {
+              maxColour = null;
+            }
+          }
 
           if (minColour) {
             params.append('minColour', minColour);
@@ -74,12 +84,26 @@ if (typeof window !== 'undefined') {
       // Add clarity filters from sliders
       const claritySliderEl = document.getElementById('ds-clarity-slider-noui');
       if (claritySliderEl && claritySliderEl.noUiSlider) {
-        const clarityValues = claritySliderEl.noUiSlider.get();
-        if (clarityValues && clarityValues.length === 2) {
+        const clarityValues = window.DiamondFilters.getSliderValues().clarity;
+        if (clarityValues && clarityValues.length > 0) {
           const minClarity = clarityValues[0];
-          const maxClarity = clarityValues[1];
+          let maxClarity = clarityValues[clarityValues.length - 1];
+
+          if (minClarity === maxClarity) {
+            const state = window.DiamondSearchState;
+            const uniqueClarities = [...new Set(state.FILTER_LABELS.clarity)];
+            const currentIndex = uniqueClarities.indexOf(minClarity);
+            if (currentIndex < uniqueClarities.length - 1) {
+              maxClarity = uniqueClarities[currentIndex + 1];
+            } else {
+              maxClarity = null;
+            }
+          }
+
           if (minClarity) params.append('minClarity', minClarity);
-          if (maxClarity) params.append('maxClarity', maxClarity);
+          if (maxClarity) {
+            params.append('maxClarity', maxClarity);
+          }
         }
       }
 
@@ -88,10 +112,10 @@ if (typeof window !== 'undefined') {
         'ds-cut-grade-slider-noui'
       );
       if (cutGradeSliderEl && cutGradeSliderEl.noUiSlider) {
-        const cutGradeValues = cutGradeSliderEl.noUiSlider.get();
-        if (cutGradeValues && cutGradeValues.length === 2) {
+        const cutGradeValues = window.DiamondFilters.getSliderValues().cutGrade;
+        if (cutGradeValues && cutGradeValues.length > 0) {
           const minCutGrade = cutGradeValues[0];
-          const maxCutGrade = cutGradeValues[1];
+          const maxCutGrade = cutGradeValues[cutGradeValues.length - 1];
           if (minCutGrade) params.append('minCutGrade', minCutGrade);
           if (maxCutGrade) params.append('maxCutGrade', maxCutGrade);
         }

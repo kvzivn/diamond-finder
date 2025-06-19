@@ -59,19 +59,49 @@ if (typeof window !== 'undefined') {
 
       const colourSliderEl = document.getElementById('ds-colour-slider-noui');
       if (colourSliderEl && colourSliderEl.noUiSlider) {
-        values.colour = colourSliderEl.noUiSlider.get();
+        const state = window.DiamondSearchState;
+        const colourLabels = state.FILTER_LABELS.colour;
+        const handles = colourSliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.colour = [colourLabels[startIndex]];
+        } else {
+          values.colour = colourLabels.slice(startIndex, endIndex);
+        }
       }
 
       const claritySliderEl = document.getElementById('ds-clarity-slider-noui');
       if (claritySliderEl && claritySliderEl.noUiSlider) {
-        values.clarity = claritySliderEl.noUiSlider.get();
+        const state = window.DiamondSearchState;
+        const clarityLabels = state.FILTER_LABELS.clarity;
+        const handles = claritySliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.clarity = [clarityLabels[startIndex]];
+        } else {
+          values.clarity = clarityLabels.slice(startIndex, endIndex);
+        }
       }
 
       const cutGradeSliderEl = document.getElementById(
         'ds-cut-grade-slider-noui'
       );
       if (cutGradeSliderEl && cutGradeSliderEl.noUiSlider) {
-        values.cutGrade = cutGradeSliderEl.noUiSlider.get();
+        const state = window.DiamondSearchState;
+        const cutGradeLabels = state.FILTER_LABELS.cutGrade;
+        const handles = cutGradeSliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.cutGrade = [cutGradeLabels[startIndex]];
+        } else {
+          values.cutGrade = cutGradeLabels.slice(startIndex, endIndex);
+        }
       }
 
       const fluorescenceSliderEl = document.getElementById(
@@ -310,6 +340,9 @@ if (typeof window !== 'undefined') {
             return colorLabels[Math.round(value)];
           },
           from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return colorLabels.length - 1;
+            }
             return colorLabels.indexOf(value);
           },
         },
@@ -357,6 +390,9 @@ if (typeof window !== 'undefined') {
             return clarityLabels[Math.round(value)];
           },
           from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return clarityLabels.length - 1;
+            }
             return clarityLabels.indexOf(value);
           },
         },
@@ -405,6 +441,9 @@ if (typeof window !== 'undefined') {
             return cutGradeLabels[Math.round(value)];
           },
           from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return cutGradeLabels.length - 1;
+            }
             return cutGradeLabels.indexOf(value);
           },
         },

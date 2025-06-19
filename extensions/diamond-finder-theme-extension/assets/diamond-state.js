@@ -32,9 +32,9 @@ if (typeof window !== 'undefined') {
     DEFAULT_FILTER_RANGES: {
       price: [2000, 10000000], // SEK range
       carat: [0.5, 20.0],
-      colour: ['K', 'D'],
-      clarity: ['I3', 'FL'],
-      cutGrade: ['Good', 'Excellent'],
+      colour: ['K', 'D_MAX'],
+      clarity: ['SI2', 'FL_MAX'],
+      cutGrade: ['Good', 'Excellent_MAX'],
       fluorescence: ['Very Strong', 'None'],
       polish: ['Good', 'Excellent'],
       symmetry: ['Good', 'Excellent'],
@@ -43,9 +43,9 @@ if (typeof window !== 'undefined') {
     },
 
     FILTER_LABELS: {
-      colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
-      clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
-      cutGrade: ['Good', 'Very Good', 'Excellent'],
+      colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'D'],
+      clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL', 'FL'],
+      cutGrade: ['Good', 'Very Good', 'Excellent', 'Excellent'],
       fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
       polish: ['Good', 'Very Good', 'Excellent'],
       symmetry: ['Good', 'Very Good', 'Excellent'],
