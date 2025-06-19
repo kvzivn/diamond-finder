@@ -410,6 +410,9 @@ if (typeof window !== 'undefined') {
         },
       });
 
+      const debounceFetch = this.createDebouncedFetch();
+      cutGradeSlider.noUiSlider.on('change', debounceFetch);
+
       setTimeout(() => {
         state.markSliderInitialized('cutGrade');
       }, 10);

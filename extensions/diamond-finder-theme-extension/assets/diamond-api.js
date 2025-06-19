@@ -83,6 +83,20 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Add cut grade filters from sliders
+      const cutGradeSliderEl = document.getElementById(
+        'ds-cut-grade-slider-noui'
+      );
+      if (cutGradeSliderEl && cutGradeSliderEl.noUiSlider) {
+        const cutGradeValues = cutGradeSliderEl.noUiSlider.get();
+        if (cutGradeValues && cutGradeValues.length === 2) {
+          const minCutGrade = cutGradeValues[0];
+          const maxCutGrade = cutGradeValues[1];
+          if (minCutGrade) params.append('minCutGrade', minCutGrade);
+          if (maxCutGrade) params.append('maxCutGrade', maxCutGrade);
+        }
+      }
+
       // Add certificate filters
       const certificates = state.getFilter('ds-certificate');
       if (certificates) {

@@ -17,6 +17,8 @@ function applyFilters(
     maxColour?: string;
     minClarity?: string;
     maxClarity?: string;
+    minCutGrade?: string;
+    maxCutGrade?: string;
     type?: string;
     gradingLab?: string;
     minFluorescence?: string;
@@ -181,6 +183,49 @@ function applyFilters(
     });
   }
 
+  // Cut Grade filters
+  if (filters.minCutGrade || filters.maxCutGrade) {
+    const cutGradeLabels = ['Good', 'Very Good', 'Excellent'];
+
+    filtered = filtered.filter((d) => {
+      const diamondCutGrade = d.cutGrade ? d.cutGrade.trim() : '';
+
+      // Find the index of the diamond's cut grade in our scale
+      const diamondCutGradeIndex = cutGradeLabels.findIndex(
+        (label) => label.toLowerCase() === diamondCutGrade.toLowerCase()
+      );
+
+      // If the diamond's cut grade is not in our defined scale, exclude it
+      if (diamondCutGradeIndex === -1) {
+        return false;
+      }
+
+      let withinRange = true;
+
+      // Check minimum cut grade (lower quality/lower index)
+      if (filters.minCutGrade) {
+        const minIndex = cutGradeLabels.findIndex(
+          (label) => label.toLowerCase() === filters.minCutGrade!.toLowerCase()
+        );
+        if (minIndex !== -1 && diamondCutGradeIndex < minIndex) {
+          withinRange = false;
+        }
+      }
+
+      // Check maximum cut grade (higher quality/higher index)
+      if (filters.maxCutGrade) {
+        const maxIndex = cutGradeLabels.findIndex(
+          (label) => label.toLowerCase() === filters.maxCutGrade!.toLowerCase()
+        );
+        if (maxIndex !== -1 && diamondCutGradeIndex > maxIndex) {
+          withinRange = false;
+        }
+      }
+
+      return withinRange;
+    });
+  }
+
   // Grading Lab filter
   if (filters.gradingLab) {
     if (filters.gradingLab === 'NONE') {
@@ -292,6 +337,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     maxColour: url.searchParams.get('maxColour') || undefined,
     minClarity: url.searchParams.get('minClarity') || undefined,
     maxClarity: url.searchParams.get('maxClarity') || undefined,
+    minCutGrade: url.searchParams.get('minCutGrade') || undefined,
+    maxCutGrade: url.searchParams.get('maxCutGrade') || undefined,
     type: url.searchParams.get('type') || undefined,
     gradingLab: url.searchParams.get('gradingLab') || undefined,
     minFluorescence: url.searchParams.get('minFluorescence') || undefined,
