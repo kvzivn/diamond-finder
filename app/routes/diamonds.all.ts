@@ -15,6 +15,8 @@ function applyFilters(
     maxCarat?: number;
     minColour?: string;
     maxColour?: string;
+    minClarity?: string;
+    maxClarity?: string;
     type?: string;
     gradingLab?: string;
     minFluorescence?: string;
@@ -119,6 +121,58 @@ function applyFilters(
           (label) => label.toLowerCase() === filters.maxColour!.toLowerCase()
         );
         if (maxIndex !== -1 && diamondColourIndex >= maxIndex) {
+          withinRange = false;
+        }
+      }
+
+      return withinRange;
+    });
+  }
+
+  // Clarity filters
+  if (filters.minClarity || filters.maxClarity) {
+    const clarityLabels = [
+      'SI2',
+      'SI1',
+      'VS2',
+      'VS1',
+      'VVS2',
+      'VVS1',
+      'IF',
+      'FL',
+    ];
+
+    filtered = filtered.filter((d) => {
+      const diamondClarity = d.clarity ? d.clarity.trim() : '';
+
+      // Find the index of the diamond's clarity in our scale
+      const diamondClarityIndex = clarityLabels.findIndex(
+        (label) => label.toLowerCase() === diamondClarity.toLowerCase()
+      );
+
+      // If the diamond's clarity is not in our defined scale, exclude it
+      if (diamondClarityIndex === -1) {
+        return false;
+      }
+
+      let withinRange = true;
+
+      // Check minimum clarity (lower quality/lower index)
+      if (filters.minClarity) {
+        const minIndex = clarityLabels.findIndex(
+          (label) => label.toLowerCase() === filters.minClarity!.toLowerCase()
+        );
+        if (minIndex !== -1 && diamondClarityIndex < minIndex) {
+          withinRange = false;
+        }
+      }
+
+      // Check maximum clarity (higher quality/higher index)
+      if (filters.maxClarity) {
+        const maxIndex = clarityLabels.findIndex(
+          (label) => label.toLowerCase() === filters.maxClarity!.toLowerCase()
+        );
+        if (maxIndex !== -1 && diamondClarityIndex > maxIndex) {
           withinRange = false;
         }
       }
@@ -236,6 +290,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       : undefined,
     minColour: url.searchParams.get('minColour') || undefined,
     maxColour: url.searchParams.get('maxColour') || undefined,
+    minClarity: url.searchParams.get('minClarity') || undefined,
+    maxClarity: url.searchParams.get('maxClarity') || undefined,
     type: url.searchParams.get('type') || undefined,
     gradingLab: url.searchParams.get('gradingLab') || undefined,
     minFluorescence: url.searchParams.get('minFluorescence') || undefined,
