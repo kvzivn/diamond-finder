@@ -98,7 +98,7 @@ if (typeof window !== 'undefined') {
           // Use actual diamond image
           const imageElement = document.createElement('img');
           imageElement.className =
-            'tw-w-full tw-h-auto tw-object-contain tw-border';
+            'tw-w-full tw-h-full tw-object-cover tw-border tw-bg-white';
           imageElement.src = diamond.imagePath;
           imageElement.alt = altText;
           imageElement.width = '100%';
@@ -112,13 +112,13 @@ if (typeof window !== 'undefined') {
               // Use SVG icon for diamond shape
               fallbackElement = window.DiamondShapeIcons.createSvgElement(
                 diamond.cut,
-                'tw-w-full tw-h-auto tw-border tw-p-8 tw-flex tw-items-center tw-justify-center tw-opacity-60'
+                'tw-w-full tw-h-full tw-border tw-p-8 tw-flex tw-items-center tw-justify-center tw-opacity-60'
               );
             } else {
               // Use placeholder image as final fallback
               fallbackElement = document.createElement('img');
               fallbackElement.className =
-                'tw-w-full tw-h-auto tw-object-contain tw-border';
+                'tw-w-full tw-h-auto tw-object-cover tw-border';
               fallbackElement.src =
                 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
               fallbackElement.alt = altText;
@@ -143,7 +143,7 @@ if (typeof window !== 'undefined') {
           // Use SVG icon for diamond shape when no image path
           const svgElement = window.DiamondShapeIcons.createSvgElement(
             diamond.cut,
-            'tw-w-full tw-h-auto tw-border tw-p-8 tw-flex tw-items-center tw-justify-center tw-opacity-60'
+            'tw-w-full tw-h-full tw-border tw-p-8 tw-flex tw-items-center tw-justify-center tw-opacity-60'
           );
 
           // Clear container and add SVG
@@ -153,7 +153,7 @@ if (typeof window !== 'undefined') {
           // Fallback to placeholder image if DiamondShapeIcons not available
           const placeholderImg = document.createElement('img');
           placeholderImg.className =
-            'tw-w-full tw-h-auto tw-object-contain tw-border';
+            'tw-w-full tw-h-auto tw-object-cover tw-border';
           placeholderImg.src =
             'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
           placeholderImg.alt = altText;

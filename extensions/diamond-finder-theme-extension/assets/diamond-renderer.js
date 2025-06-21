@@ -90,7 +90,7 @@ if (typeof window !== 'undefined') {
     createDiamondCard(diamond) {
       const diamondCard = document.createElement('div');
       diamondCard.className =
-        'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-p-4 tw-transition hover:tw-border-gray-300 hover:tw-shadow-md tw-overflow-hidden tw-cursor-pointer';
+        'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-py-4 tw-px-6 tw-transition hover:tw-border-gray-300 hover:tw-shadow-md tw-overflow-hidden tw-cursor-pointer';
 
       // Make card clickable to show diamond details
       diamondCard.addEventListener('click', () => {
@@ -162,13 +162,14 @@ if (typeof window !== 'undefined') {
 
       // Title
       const title = document.createElement('h3');
-      title.className = 'tw-text-lg tw-font-semibold tw-mb-1 tw-truncate';
+      title.className =
+        'tw-text-lg tw-font-semibold tw-mt-2 tw-truncate tw-text-center';
       title.textContent = `Diamant ${shape}`;
 
       // Subtitle with diamond details
       const subtitle = document.createElement('div');
       subtitle.className =
-        'tw-text-sm tw-text-gray-600 tw-mb-2 tw-flex tw-flex-col tw-gap-1';
+        'tw-flex tw-flex-col tw-space-y-1 tw-divide-y tw-divide-gray-100 tw-my-4 tw-text-sm tw-text-gray-600';
 
       const detailsData = [];
       // Add carat as the first detail
@@ -194,14 +195,14 @@ if (typeof window !== 'undefined') {
       if (detailsData.length > 0) {
         detailsData.forEach((detail) => {
           const detailRow = document.createElement('div');
-          detailRow.className = 'tw-flex';
+          detailRow.className = 'tw-flex tw-pt-1';
 
           const label = document.createElement('span');
           label.className = 'tw-w-1/2';
           label.textContent = detail.label;
 
           const value = document.createElement('span');
-          value.className = 'tw-w-1/2 tw-text-right';
+          value.className = 'tw-w-1/2 tw-text-right tw-text-gray-800';
           value.textContent = detail.value;
 
           detailRow.appendChild(label);
@@ -218,7 +219,7 @@ if (typeof window !== 'undefined') {
       // Price and certification wrapper
       const priceCertWrapper = document.createElement('div');
       priceCertWrapper.className =
-        'tw-flex tw-justify-between tw-items-center tw-mb-3';
+        'tw-flex tw-justify-between tw-items-center tw-mb-1';
 
       // Price
       const price = document.createElement('p');
@@ -245,7 +246,7 @@ if (typeof window !== 'undefined') {
 
       // Certification info
       const certInfo = document.createElement('p');
-      certInfo.className = 'tw-text-sm tw-text-gray-500';
+      certInfo.className = 'tw-text-sm tw-text-gray-800';
       certInfo.textContent = diamond.gradingLab
         ? `${diamond.gradingLab} Certifierad`
         : 'Certifiering ej tillgänglig';
@@ -254,18 +255,18 @@ if (typeof window !== 'undefined') {
       priceCertWrapper.appendChild(certInfo);
 
       // Add to cart button
-      const addButton = document.createElement('button');
-      addButton.className =
-        'tw-w-full tw-bg-white tw-text-gray-800 tw-py-2 tw-px-4 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-transition-colors tw-text-base tw-mt-auto';
-      addButton.textContent = 'Lägg i varukorg';
-      addButton.onclick = () => {}; // Placeholder for cart functionality
+      // const addButton = document.createElement('button');
+      // addButton.className =
+      //   'tw-w-full tw-bg-white tw-text-gray-800 tw-py-2 tw-px-4 tw-rounded tw-border tw-border-gray-300 hover:tw-bg-gray-100 tw-transition-colors tw-text-base tw-mt-auto';
+      // addButton.textContent = 'Lägg i varukorg';
+      // addButton.onclick = () => {};
 
       // Assemble card
       diamondCard.appendChild(imageElement);
       diamondCard.appendChild(title);
       diamondCard.appendChild(subtitle);
       diamondCard.appendChild(priceCertWrapper);
-      diamondCard.appendChild(addButton);
+      // diamondCard.appendChild(addButton);
 
       return diamondCard;
     },

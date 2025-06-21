@@ -195,30 +195,8 @@ if (typeof window !== 'undefined') {
       const activeColourTab = document.querySelector(
         '[data-tab][data-active="true"]'
       );
-      console.log(
-        '[FILTERS DEBUG] activeColourTab element found:',
-        activeColourTab
-      );
       if (activeColourTab) {
-        console.log(
-          '[FILTERS DEBUG] activeColourTab.dataset.tab:',
-          activeColourTab.dataset.tab
-        );
         values.colourType = activeColourTab.dataset.tab;
-      } else {
-        console.log(
-          '[FILTERS DEBUG] No active color tab found with selector [data-tab][data-active="true"]'
-        );
-        // Let's try to find all tabs and see their state
-        const allTabs = document.querySelectorAll('[data-tab]');
-        console.log(
-          '[FILTERS DEBUG] All tabs found:',
-          Array.from(allTabs).map((tab) => ({
-            id: tab.id,
-            dataTab: tab.dataset.tab,
-            dataActive: tab.dataset.active,
-          }))
-        );
       }
 
       return values;
