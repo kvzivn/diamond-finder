@@ -31,6 +31,9 @@ function applyFilters(
     maxTable?: number;
     minRatio?: number;
     maxRatio?: number;
+    fancyColours?: string;
+    minFancyIntensity?: string;
+    maxFancyIntensity?: string;
   }
 ): Diamond[] {
   let filtered = [...diamonds];
@@ -136,6 +139,140 @@ function applyFilters(
       }
 
       return withinRange;
+    });
+  }
+
+  // Fancy colour filters
+  if (
+    filters.fancyColours ||
+    filters.minFancyIntensity ||
+    filters.maxFancyIntensity
+  ) {
+    const fancyColourList = filters.fancyColours
+      ? filters.fancyColours.split(',').map((c) => c.toLowerCase())
+      : [];
+    const fancyIntensityLabels = [
+      'Fancy Deep',
+      'Fancy',
+      'Fancy Intense',
+      'Fancy Dark',
+      'Fancy Light',
+      'Light',
+      'Very Light',
+      'Faint',
+    ];
+
+    filtered = filtered.filter((d) => {
+      const diamondColour = d.color ? d.color.trim() : '';
+
+      // Check if it's a fancy colored diamond
+      const isFancyColored =
+        diamondColour.toLowerCase().includes('fancy') ||
+        diamondColour.toLowerCase().includes('light') ||
+        diamondColour.toLowerCase().includes('faint');
+
+      if (!isFancyColored) {
+        return false;
+      }
+
+      // Check fancy color match
+      if (fancyColourList.length > 0) {
+        let colorMatches = false;
+
+        for (const fancyColor of fancyColourList) {
+          if (fancyColor === 'other') {
+            // For "other", match any fancy color not in the main list
+            const mainColors = [
+              'yellow',
+              'pink',
+              'blue',
+              'red',
+              'green',
+              'purple',
+              'orange',
+              'violet',
+              'gray',
+              'black',
+              'brown',
+              'cognac',
+              'white',
+              's-and-p',
+            ];
+            const hasMainColor = mainColors.some((color) =>
+              diamondColour.toLowerCase().includes(color.replace('-', ' '))
+            );
+            if (!hasMainColor) {
+              colorMatches = true;
+              break;
+            }
+          } else if (fancyColor === 's-and-p') {
+            // Special case for S & P (Salt and Pepper)
+            if (
+              diamondColour.toLowerCase().includes('salt') ||
+              diamondColour.toLowerCase().includes('pepper')
+            ) {
+              colorMatches = true;
+              break;
+            }
+          } else {
+            // Check if the diamond color contains the selected fancy color
+            if (diamondColour.toLowerCase().includes(fancyColor)) {
+              colorMatches = true;
+              break;
+            }
+          }
+        }
+
+        if (!colorMatches) {
+          return false;
+        }
+      }
+
+      // Check intensity range
+      if (filters.minFancyIntensity || filters.maxFancyIntensity) {
+        // Extract intensity from diamond color
+        let diamondIntensity = '';
+        for (const intensity of fancyIntensityLabels) {
+          if (diamondColour.includes(intensity)) {
+            diamondIntensity = intensity;
+            break;
+          }
+        }
+
+        if (!diamondIntensity) {
+          return false;
+        }
+
+        const diamondIntensityIndex = fancyIntensityLabels.findIndex(
+          (label) => label === diamondIntensity
+        );
+
+        if (diamondIntensityIndex === -1) {
+          return false;
+        }
+
+        // Check minimum intensity
+        if (filters.minFancyIntensity) {
+          const minIndex = fancyIntensityLabels.findIndex(
+            (label) => label === filters.minFancyIntensity
+          );
+          if (minIndex !== -1 && diamondIntensityIndex < minIndex) {
+            return false;
+          }
+        }
+
+        // Check maximum intensity
+        if (filters.maxFancyIntensity) {
+          const maxIndex = fancyIntensityLabels.findIndex(
+            (label) => label === filters.maxFancyIntensity
+          );
+          if (maxIndex !== -1 && diamondIntensityIndex > maxIndex) {
+            return false;
+          }
+        }
+      }
+
+      return true;
     });
   }
 
@@ -499,6 +636,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     maxRatio: url.searchParams.get('maxRatio')
       ? parseFloat(url.searchParams.get('maxRatio')!)
       : undefined,
+    fancyColours: url.searchParams.get('fancyColours') || undefined,
+    minFancyIntensity: url.searchParams.get('minFancyIntensity') || undefined,
+    maxFancyIntensity: url.searchParams.get('maxFancyIntensity') || undefined,
   };
 
   console.log(

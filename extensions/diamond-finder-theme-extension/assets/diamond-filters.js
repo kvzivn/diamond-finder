@@ -163,6 +163,42 @@ if (typeof window !== 'undefined') {
         values.ratio = ratioSliderEl.noUiSlider.get();
       }
 
+      // Get fancy colour selections
+      const fancyColourButtons = document.querySelectorAll(
+        '[data-filter-group="ds-fancy-colour"] button[data-active="true"]'
+      );
+      if (fancyColourButtons.length > 0) {
+        values.fancyColours = Array.from(fancyColourButtons).map(
+          (btn) => btn.dataset.value
+        );
+      }
+
+      // Get fancy intensity values
+      const fancyIntensitySliderEl = document.getElementById(
+        'ds-fancy-intensity-slider'
+      );
+      if (fancyIntensitySliderEl && fancyIntensitySliderEl.noUiSlider) {
+        const state = window.DiamondSearchState;
+        const intensityLabels = state.FILTER_LABELS.fancyIntensity;
+        const handles = fancyIntensitySliderEl.noUiSlider.get(true);
+        const startIndex = Math.round(handles[0]);
+        const endIndex = Math.round(handles[1]);
+
+        if (startIndex === endIndex) {
+          values.fancyIntensity = [intensityLabels[startIndex]];
+        } else {
+          values.fancyIntensity = intensityLabels.slice(startIndex, endIndex);
+        }
+      }
+
+      // Get active colour tab
+      const activeColourTab = document.querySelector(
+        '[data-tab][data-active="true"]'
+      );
+      if (activeColourTab) {
+        values.colourType = activeColourTab.dataset.tab;
+      }
+
       return values;
     },
 
@@ -179,6 +215,8 @@ if (typeof window !== 'undefined') {
         this.initializeSymmetrySlider();
         this.initializeTableSlider();
         this.initializeRatioSlider();
+        this.initializeFancyIntensitySlider();
+        this.setupColourTabs();
       });
     },
 
@@ -925,6 +963,165 @@ if (typeof window !== 'undefined') {
         state.logCurrentFilters();
         window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
       }
+    },
+
+    // Initialize fancy intensity slider
+    initializeFancyIntensitySlider() {
+      if (
+        !window.noUiSlider ||
+        typeof window.noUiSlider.create !== 'function'
+      ) {
+        console.error(
+          '[DIAMOND FILTERS] noUiSlider not available for fancy intensity slider'
+        );
+        return;
+      }
+
+      const state = window.DiamondSearchState;
+      const fancyIntensitySlider = document.getElementById(
+        'ds-fancy-intensity-slider'
+      );
+
+      if (!fancyIntensitySlider) return;
+
+      const intensityLabels = state.FILTER_LABELS.fancyIntensity;
+
+      window.noUiSlider.create(fancyIntensitySlider, {
+        start: state.DEFAULT_FILTER_RANGES.fancyIntensity,
+        connect: true,
+        step: 1,
+        margin: 1,
+        range: {
+          min: 0,
+          max: 8,
+        },
+        format: {
+          to: function (value) {
+            return intensityLabels[Math.round(value)];
+          },
+          from: function (value) {
+            if (value.endsWith('_MAX')) {
+              return intensityLabels.length - 1;
+            }
+            return intensityLabels.indexOf(value);
+          },
+        },
+      });
+
+      const debounceFetch = this.createDebouncedFetch();
+      fancyIntensitySlider.noUiSlider.on('change', debounceFetch);
+
+      setTimeout(() => {
+        state.markSliderInitialized('fancyIntensity');
+      }, 10);
+    },
+
+    // Setup colour tab switching
+    setupColourTabs() {
+      const whiteTab = document.getElementById('ds-colour-tab-white');
+      const fancyTab = document.getElementById('ds-colour-tab-fancy');
+      const whitePanel = document.getElementById('ds-colour-panel-white');
+      const fancyPanel = document.getElementById('ds-colour-panel-fancy');
+
+      if (!whiteTab || !fancyTab || !whitePanel || !fancyPanel) return;
+
+      const switchTab = (activeTab) => {
+        if (activeTab === 'white') {
+          // Show white panel
+          whitePanel.classList.remove('tw-hidden');
+          fancyPanel.classList.add('tw-hidden');
+
+          // Update tab styling using data attributes
+          whiteTab.dataset.active = 'true';
+          whiteTab.setAttribute('aria-pressed', 'true');
+
+          fancyTab.dataset.active = 'false';
+          fancyTab.setAttribute('aria-pressed', 'false');
+
+          // Trigger fetch when switching back to white tab
+          const debounceFetch = this.createDebouncedFetch();
+          debounceFetch();
+        } else if (activeTab === 'fancy') {
+          // Show fancy panel
+          fancyPanel.classList.remove('tw-hidden');
+          whitePanel.classList.add('tw-hidden');
+
+          // Update tab styling using data attributes
+          fancyTab.dataset.active = 'true';
+          fancyTab.setAttribute('aria-pressed', 'true');
+
+          whiteTab.dataset.active = 'false';
+          whiteTab.setAttribute('aria-pressed', 'false');
+
+          // Don't trigger fetch when switching to fancy tab
+          // Fetch will only happen when fancy colors are selected
+        }
+      };
+
+      whiteTab.addEventListener('click', () => switchTab('white'));
+      fancyTab.addEventListener('click', () => switchTab('fancy'));
+
+      // Initialize fancy color filter buttons
+      this.setupFancyColorFilters();
+    },
+
+    // Setup fancy color multi-select filters
+    setupFancyColorFilters() {
+      const state = window.DiamondSearchState;
+      const fancyColorGroup = document.querySelector(
+        '[data-filter-group="ds-fancy-colour"]'
+      );
+
+      if (!fancyColorGroup) return;
+
+      // Initialize state for fancy colors
+      if (!Array.isArray(state.getFilter('ds-fancy-colour'))) {
+        state.setFilter('ds-fancy-colour', []);
+      }
+
+      const buttons = fancyColorGroup.querySelectorAll('button');
+
+      buttons.forEach((button) => {
+        if (button.hasAttribute('data-fancy-listener-attached')) return;
+        button.setAttribute('data-fancy-listener-attached', 'true');
+
+        button.addEventListener('click', () => {
+          this.handleFancyColorClick(button);
+        });
+      });
+    },
+
+    // Handle fancy color button clicks
+    handleFancyColorClick(button) {
+      const state = window.DiamondSearchState;
+      const value = button.dataset.value;
+
+      // Ensure we always have an array for fancy colours
+      let currentFilters = state.getFilter('ds-fancy-colour');
+      if (!Array.isArray(currentFilters)) {
+        currentFilters = [];
+      }
+
+      const currentIndex = currentFilters.indexOf(value);
+
+      if (currentIndex > -1) {
+        // Remove from selection
+        currentFilters.splice(currentIndex, 1);
+        button.dataset.active = 'false';
+        button.setAttribute('aria-pressed', 'false');
+      } else {
+        // Add to selection
+        currentFilters.push(value);
+        button.dataset.active = 'true';
+        button.setAttribute('aria-pressed', 'true');
+      }
+
+      state.setFilter('ds-fancy-colour', currentFilters);
+      console.log('[FANCY COLOR SELECTED]', currentFilters);
+      state.logCurrentFilters();
+
+      // Trigger diamond data fetch with current filters
+      window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
     },
   };
 }

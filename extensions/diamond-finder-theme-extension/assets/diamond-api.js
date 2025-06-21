@@ -54,29 +54,58 @@ if (typeof window !== 'undefined') {
       }
 
       // Add colour filters from sliders
-      const colourSliderEl = document.getElementById('ds-colour-slider-noui');
-      if (colourSliderEl && colourSliderEl.noUiSlider) {
-        const colourValues = window.DiamondFilters.getSliderValues().colour;
-        if (colourValues && colourValues.length > 0) {
-          const minColour = colourValues[0];
-          let maxColour = colourValues[colourValues.length - 1];
+      const filterValues = window.DiamondFilters.getSliderValues();
 
-          if (minColour === maxColour) {
-            const state = window.DiamondSearchState;
-            const uniqueColours = [...new Set(state.FILTER_LABELS.colour)];
-            const currentIndex = uniqueColours.indexOf(minColour);
-            if (currentIndex < uniqueColours.length - 1) {
-              maxColour = uniqueColours[currentIndex + 1];
-            } else {
-              maxColour = null;
+      if (filterValues.colourType === 'white' || !filterValues.colourType) {
+        // Apply white color filters when white tab is active or no tab is specified
+        const colourSliderEl = document.getElementById('ds-colour-slider-noui');
+        if (colourSliderEl && colourSliderEl.noUiSlider) {
+          const colourValues = window.DiamondFilters.getSliderValues().colour;
+          if (colourValues && colourValues.length > 0) {
+            const minColour = colourValues[0];
+            let maxColour = colourValues[colourValues.length - 1];
+
+            if (minColour === maxColour) {
+              const state = window.DiamondSearchState;
+              const uniqueColours = [...new Set(state.FILTER_LABELS.colour)];
+              const currentIndex = uniqueColours.indexOf(minColour);
+              if (currentIndex < uniqueColours.length - 1) {
+                maxColour = uniqueColours[currentIndex + 1];
+              } else {
+                maxColour = null;
+              }
+            }
+
+            if (minColour) {
+              params.append('minColour', minColour);
+            }
+            if (maxColour) {
+              params.append('maxColour', maxColour);
             }
           }
+        }
+      } else if (
+        filterValues.colourType === 'fancy' &&
+        filterValues.fancyColours &&
+        filterValues.fancyColours.length > 0
+      ) {
+        // Only apply fancy filters if fancy colors are actually selected
+        params.append('fancyColours', filterValues.fancyColours.join(','));
 
-          if (minColour) {
-            params.append('minColour', minColour);
+        // Add fancy intensity range
+        if (
+          filterValues.fancyIntensity &&
+          filterValues.fancyIntensity.length > 0
+        ) {
+          const minIntensity = filterValues.fancyIntensity[0];
+          const maxIntensity =
+            filterValues.fancyIntensity[filterValues.fancyIntensity.length - 1];
+
+          if (minIntensity) {
+            params.append('minFancyIntensity', minIntensity);
           }
-          if (maxColour) {
-            params.append('maxColour', maxColour);
+          if (maxIntensity && maxIntensity !== minIntensity) {
+            params.append('maxFancyIntensity', maxIntensity);
           }
         }
       }

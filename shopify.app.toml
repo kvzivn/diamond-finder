@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://vincent-assist-thomas-yukon.trycloudflare.com"
+application_url = "https://morrison-fr-andy-letting.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,13 +27,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://vincent-assist-thomas-yukon.trycloudflare.com/auth/callback",
-  "https://vincent-assist-thomas-yukon.trycloudflare.com/auth/shopify/callback",
-  "https://vincent-assist-thomas-yukon.trycloudflare.com/api/auth/callback"
+  "https://morrison-fr-andy-letting.trycloudflare.com/auth/callback",
+  "https://morrison-fr-andy-letting.trycloudflare.com/auth/shopify/callback",
+  "https://morrison-fr-andy-letting.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://vincent-assist-thomas-yukon.trycloudflare.com"
+url = "https://morrison-fr-andy-letting.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

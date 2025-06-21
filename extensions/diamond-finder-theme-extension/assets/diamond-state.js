@@ -26,6 +26,7 @@ if (typeof window !== 'undefined') {
       symmetry: false,
       table: false,
       ratio: false,
+      fancyIntensity: false,
     },
 
     // Configuration constants
@@ -40,6 +41,7 @@ if (typeof window !== 'undefined') {
       symmetry: ['Good', 'Excellent_MAX'],
       table: [0, 100], // Percentage range
       ratio: [0.8, 3.0], // Ratio range
+      fancyIntensity: ['Fancy Deep', 'Faint_MAX'],
     },
 
     FILTER_LABELS: {
@@ -56,6 +58,17 @@ if (typeof window !== 'undefined') {
       ],
       polish: ['Good', 'Very Good', 'Excellent', 'Excellent'],
       symmetry: ['Good', 'Very Good', 'Excellent', 'Excellent'],
+      fancyIntensity: [
+        'Fancy Deep',
+        'Fancy',
+        'Fancy Intense',
+        'Fancy Dark',
+        'Fancy Light',
+        'Light',
+        'Very Light',
+        'Faint',
+        'Faint',
+      ],
     },
   };
 
