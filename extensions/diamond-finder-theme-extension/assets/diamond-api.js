@@ -56,6 +56,15 @@ if (typeof window !== 'undefined') {
       // Add colour filters from sliders
       const filterValues = window.DiamondFilters.getSliderValues();
 
+      console.log(
+        '[DIAMOND API DEBUG] filterValues.colourType:',
+        filterValues.colourType
+      );
+      console.log(
+        '[DIAMOND API DEBUG] filterValues.fancyColours:',
+        filterValues.fancyColours
+      );
+
       if (filterValues.colourType === 'white' || !filterValues.colourType) {
         // Apply white color filters when white tab is active or no tab is specified
         const colourSliderEl = document.getElementById('ds-colour-slider-noui');
@@ -89,6 +98,12 @@ if (typeof window !== 'undefined') {
         filterValues.fancyColours &&
         filterValues.fancyColours.length > 0
       ) {
+        console.log('[DIAMOND API DEBUG] Applying fancy color filters');
+        console.log(
+          '[DIAMOND API DEBUG] fancyColours to be sent:',
+          filterValues.fancyColours
+        );
+
         // Only apply fancy filters if fancy colors are actually selected
         params.append('fancyColours', filterValues.fancyColours.join(','));
 
@@ -108,6 +123,16 @@ if (typeof window !== 'undefined') {
             params.append('maxFancyIntensity', maxIntensity);
           }
         }
+      } else {
+        console.log('[DIAMOND API DEBUG] No fancy color filters applied');
+        console.log(
+          '[DIAMOND API DEBUG] Reason - colourType:',
+          filterValues.colourType,
+          'fancyColours length:',
+          filterValues.fancyColours
+            ? filterValues.fancyColours.length
+            : 'undefined'
+        );
       }
 
       // Add clarity filters from sliders

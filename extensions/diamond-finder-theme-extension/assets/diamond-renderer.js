@@ -1,6 +1,31 @@
 // Diamond Renderer Module
 if (typeof window !== 'undefined') {
   window.DiamondRenderer = {
+    // Helper function to format fancy colors
+    formatDiamondColor(diamond) {
+      // Check if diamond has fancy color
+      if (
+        diamond.naturalFancyColor &&
+        diamond.naturalFancyColor.trim() !== ''
+      ) {
+        const fancyColor = diamond.naturalFancyColor.trim();
+        const intensity = diamond.naturalFancyColorIntensity
+          ? diamond.naturalFancyColorIntensity.trim()
+          : '';
+
+        // If there's an intensity, combine it with the color
+        if (intensity) {
+          return `${intensity} ${fancyColor}`;
+        } else {
+          // Just return the fancy color if no intensity
+          return fancyColor;
+        }
+      }
+
+      // Fall back to regular color if no fancy color
+      return diamond.color || 'Ej tillgänglig';
+    },
+
     // Sort diamonds based on selected criteria
     sortDiamonds(diamonds, sortType) {
       const diamondsCopy = [...diamonds];
@@ -148,8 +173,10 @@ if (typeof window !== 'undefined') {
       const detailsData = [];
       // Add carat as the first detail
       detailsData.push({ label: 'Carat:', value: carats });
-      if (diamond.color)
-        detailsData.push({ label: 'Färg:', value: diamond.color });
+      detailsData.push({
+        label: 'Färg:',
+        value: this.formatDiamondColor(diamond),
+      });
       if (diamond.clarity)
         detailsData.push({ label: 'Klarhet:', value: diamond.clarity });
       if (diamond.cutGrade)

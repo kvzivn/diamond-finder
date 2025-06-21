@@ -151,6 +151,7 @@ function applyFilters(
     const fancyColourList = filters.fancyColours
       ? filters.fancyColours.split(',').map((c) => c.toLowerCase())
       : [];
+
     const fancyIntensityLabels = [
       'Fancy Deep',
       'Fancy',
@@ -163,17 +164,18 @@ function applyFilters(
     ];
 
     filtered = filtered.filter((d) => {
-      const diamondColour = d.color ? d.color.trim() : '';
+      // Check if it's a fancy colored diamond using the correct fields
+      const hasFancyColor =
+        d.naturalFancyColor && d.naturalFancyColor.trim() !== '';
 
-      // Check if it's a fancy colored diamond
-      const isFancyColored =
-        diamondColour.toLowerCase().includes('fancy') ||
-        diamondColour.toLowerCase().includes('light') ||
-        diamondColour.toLowerCase().includes('faint');
-
-      if (!isFancyColored) {
+      if (!hasFancyColor) {
         return false;
       }
+
+      const diamondFancyColor = d.naturalFancyColor!.toLowerCase().trim();
+      const diamondIntensity = d.naturalFancyColorIntensity
+        ? d.naturalFancyColorIntensity.trim()
+        : '';
 
       // Check fancy color match
       if (fancyColourList.length > 0) {
@@ -198,9 +200,18 @@ function applyFilters(
               'white',
               's-and-p',
             ];
-            const hasMainColor = mainColors.some((color) =>
-              diamondColour.toLowerCase().includes(color.replace('-', ' '))
-            );
+            // Check if the diamond color contains any of the main colors
+            const hasMainColor = mainColors.some((color) => {
+              if (color === 's-and-p') {
+                return (
+                  diamondFancyColor.includes('salt') ||
+                  diamondFancyColor.includes('pepper')
+                );
+              }
+              return diamondFancyColor.includes(color);
+            });
+
+            // "Other" matches if it doesn't contain any main color
             if (!hasMainColor) {
               colorMatches = true;
               break;
@@ -208,15 +219,15 @@ function applyFilters(
           } else if (fancyColor === 's-and-p') {
             // Special case for S & P (Salt and Pepper)
             if (
-              diamondColour.toLowerCase().includes('salt') ||
-              diamondColour.toLowerCase().includes('pepper')
+              diamondFancyColor.includes('salt') ||
+              diamondFancyColor.includes('pepper')
             ) {
               colorMatches = true;
               break;
             }
           } else {
-            // Check if the diamond color contains the selected fancy color
-            if (diamondColour.toLowerCase().includes(fancyColor)) {
+            // Check if the diamond fancy color contains the selected fancy color
+            if (diamondFancyColor.includes(fancyColor)) {
               colorMatches = true;
               break;
             }
@@ -230,41 +241,54 @@ function applyFilters(
 
       // Check intensity range
       if (filters.minFancyIntensity || filters.maxFancyIntensity) {
-        // Extract intensity from diamond color
-        let diamondIntensity = '';
-        for (const intensity of fancyIntensityLabels) {
-          if (diamondColour.includes(intensity)) {
-            diamondIntensity = intensity;
-            break;
-          }
-        }
-
         if (!diamondIntensity) {
           return false;
         }
 
         const diamondIntensityIndex = fancyIntensityLabels.findIndex(
-          (label) => label === diamondIntensity
+          (label) => label.toLowerCase() === diamondIntensity.toLowerCase()
         );
 
         if (diamondIntensityIndex === -1) {
           return false;
         }
 
-        // Check minimum intensity
-        if (filters.minFancyIntensity) {
+        // Check if diamond intensity is within selected range
+        // Note: In our array, lower index = higher quality intensity
+        if (filters.minFancyIntensity && filters.maxFancyIntensity) {
           const minIndex = fancyIntensityLabels.findIndex(
-            (label) => label === filters.minFancyIntensity
+            (label) =>
+              label.toLowerCase() === filters.minFancyIntensity!.toLowerCase()
+          );
+          const maxIndex = fancyIntensityLabels.findIndex(
+            (label) =>
+              label.toLowerCase() === filters.maxFancyIntensity!.toLowerCase()
+          );
+
+          // Include diamonds within the range (inclusive)
+          if (minIndex !== -1 && maxIndex !== -1) {
+            // minIndex should be <= diamondIntensityIndex <= maxIndex
+            if (
+              diamondIntensityIndex < minIndex ||
+              diamondIntensityIndex > maxIndex
+            ) {
+              return false;
+            }
+          }
+        } else if (filters.minFancyIntensity) {
+          // Only min intensity specified
+          const minIndex = fancyIntensityLabels.findIndex(
+            (label) =>
+              label.toLowerCase() === filters.minFancyIntensity!.toLowerCase()
           );
           if (minIndex !== -1 && diamondIntensityIndex < minIndex) {
             return false;
           }
-        }
-
-        // Check maximum intensity
-        if (filters.maxFancyIntensity) {
+        } else if (filters.maxFancyIntensity) {
+          // Only max intensity specified
           const maxIndex = fancyIntensityLabels.findIndex(
-            (label) => label === filters.maxFancyIntensity
+            (label) =>
+              label.toLowerCase() === filters.maxFancyIntensity!.toLowerCase()
           );
           if (maxIndex !== -1 && diamondIntensityIndex > maxIndex) {
             return false;

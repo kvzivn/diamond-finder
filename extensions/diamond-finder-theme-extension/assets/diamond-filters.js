@@ -195,8 +195,30 @@ if (typeof window !== 'undefined') {
       const activeColourTab = document.querySelector(
         '[data-tab][data-active="true"]'
       );
+      console.log(
+        '[FILTERS DEBUG] activeColourTab element found:',
+        activeColourTab
+      );
       if (activeColourTab) {
+        console.log(
+          '[FILTERS DEBUG] activeColourTab.dataset.tab:',
+          activeColourTab.dataset.tab
+        );
         values.colourType = activeColourTab.dataset.tab;
+      } else {
+        console.log(
+          '[FILTERS DEBUG] No active color tab found with selector [data-tab][data-active="true"]'
+        );
+        // Let's try to find all tabs and see their state
+        const allTabs = document.querySelectorAll('[data-tab]');
+        console.log(
+          '[FILTERS DEBUG] All tabs found:',
+          Array.from(allTabs).map((tab) => ({
+            id: tab.id,
+            dataTab: tab.dataset.tab,
+            dataActive: tab.dataset.active,
+          }))
+        );
       }
 
       return values;
@@ -1026,6 +1048,8 @@ if (typeof window !== 'undefined') {
       if (!whiteTab || !fancyTab || !whitePanel || !fancyPanel) return;
 
       const switchTab = (activeTab) => {
+        console.log('[TABS DEBUG] Switching to tab:', activeTab);
+
         if (activeTab === 'white') {
           // Show white panel
           whitePanel.classList.remove('tw-hidden');
@@ -1037,6 +1061,15 @@ if (typeof window !== 'undefined') {
 
           fancyTab.dataset.active = 'false';
           fancyTab.setAttribute('aria-pressed', 'false');
+
+          console.log(
+            '[TABS DEBUG] White tab data-active:',
+            whiteTab.dataset.active
+          );
+          console.log(
+            '[TABS DEBUG] Fancy tab data-active:',
+            fancyTab.dataset.active
+          );
 
           // Trigger fetch when switching back to white tab
           const debounceFetch = this.createDebouncedFetch();
@@ -1052,6 +1085,15 @@ if (typeof window !== 'undefined') {
 
           whiteTab.dataset.active = 'false';
           whiteTab.setAttribute('aria-pressed', 'false');
+
+          console.log(
+            '[TABS DEBUG] Fancy tab data-active:',
+            fancyTab.dataset.active
+          );
+          console.log(
+            '[TABS DEBUG] White tab data-active:',
+            whiteTab.dataset.active
+          );
 
           // Don't trigger fetch when switching to fancy tab
           // Fetch will only happen when fancy colors are selected

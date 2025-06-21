@@ -1,6 +1,31 @@
 // Diamond Details Module
 if (typeof window !== 'undefined') {
   window.DiamondDetails = {
+    // Helper function to format fancy colors
+    formatDiamondColor(diamond) {
+      // Check if diamond has fancy color
+      if (
+        diamond.naturalFancyColor &&
+        diamond.naturalFancyColor.trim() !== ''
+      ) {
+        const fancyColor = diamond.naturalFancyColor.trim();
+        const intensity = diamond.naturalFancyColorIntensity
+          ? diamond.naturalFancyColorIntensity.trim()
+          : '';
+
+        // If there's an intensity, combine it with the color
+        if (intensity) {
+          return `${intensity} ${fancyColor}`;
+        } else {
+          // Just return the fancy color if no intensity
+          return fancyColor;
+        }
+      }
+
+      // Fall back to regular color if no fancy color
+      return diamond.color || 'Ej tillgänglig';
+    },
+
     // Helper function to translate diamond shape names to Swedish
     translateShapeToSwedish(englishShape) {
       const shapeTranslations = {
@@ -179,7 +204,7 @@ if (typeof window !== 'undefined') {
               this.translateShapeToSwedish(diamond.cut) || 'Ej tillgänglig',
           },
           { label: 'KARAT:', value: diamond.carat || 'Ej tillgänglig' },
-          { label: 'FÄRG:', value: diamond.color || 'Ej tillgänglig' },
+          { label: 'FÄRG:', value: this.formatDiamondColor(diamond) },
           { label: 'KLARHET:', value: diamond.clarity || 'Ej tillgänglig' },
           { label: 'SLIPKVALITET:', value: diamond.cutGrade || 'Ingen' },
           { label: 'SYMMETRI:', value: diamond.symmetry || 'Ej tillgänglig' },
