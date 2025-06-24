@@ -24,8 +24,11 @@ npm run dev              # Start Shopify app development with tunneling
 npm run build           # Build the Remix application
 npm run setup           # Generate Prisma client and run migrations
 
-# Linting and Formatting
+# Linting and Formatting  
 npm run lint            # Run ESLint
+
+# Testing and Type Safety
+npm run typecheck       # Run TypeScript type checking (if available)
 
 # Database
 npm run prisma          # Access Prisma CLI

@@ -1,7 +1,7 @@
 import { json, LoaderFunctionArgs } from '@remix-run/node';
 import type { DiamondType } from '../models/diamond.server';
-import { getCachedDiamonds } from '../services/diamond-cache.server';
-import { refreshDiamondCacheByType } from '../services/diamond-updater.server';
+import { getDiamondsByType } from '../services/diamond-db.server';
+import { refreshDiamondsByType } from '../services/diamond-updater.server';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
@@ -15,7 +15,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   const url = new URL(request.url);
   const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-  let limit = parseInt(url.searchParams.get('limit') || String(DEFAULT_LIMIT), 10);
+  let limit = parseInt(
+    url.searchParams.get('limit') || String(DEFAULT_LIMIT),
+    10
+  );
 
   if (isNaN(offset) || offset < 0) {
     return json({ error: 'Invalid offset parameter.' }, { status: 400 });
@@ -27,25 +30,35 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     limit = MAX_LIMIT;
   }
 
-  let diamonds = getCachedDiamonds(type);
+  try {
+    const { data, totalCount } = await getDiamondsByType(type, offset, limit);
 
-  if (!diamonds) {
-    console.log(`API Route: Cache miss for ${type}. Triggering background refresh.`);
-    // Trigger refresh but don't await it for this request to keep it responsive
-    refreshDiamondCacheByType(type).catch((err: Error) => {
-      console.error(`API Route: Background refresh for ${type} failed:`, err.message);
+    // If no diamonds found, trigger a background refresh
+    if (totalCount === 0) {
+      console.log(
+        `API Route: No ${type} diamonds in database. Triggering background refresh.`
+      );
+      // Trigger refresh but don't await it for this request to keep it responsive
+      refreshDiamondsByType(type).catch((err: Error) => {
+        console.error(
+          `API Route: Background refresh for ${type} failed:`,
+          err.message
+        );
+      });
+    }
+
+    return json({
+      data,
+      totalCount,
+      offset,
+      limit,
+      type,
     });
-    diamonds = []; // Return empty array while cache is populated in background
+  } catch (error) {
+    console.error(`Error fetching ${type} diamonds:`, error);
+    return json(
+      { error: 'Failed to fetch diamonds. Please try again later.' },
+      { status: 500 }
+    );
   }
-
-  const paginatedDiamonds = diamonds.slice(offset, offset + limit);
-  const totalCount = diamonds.length;
-
-  return json({
-    data: paginatedDiamonds,
-    totalCount,
-    offset,
-    limit,
-    type,
-  });
 }

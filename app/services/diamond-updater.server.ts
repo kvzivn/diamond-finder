@@ -1,6 +1,13 @@
 import type { DiamondType } from '../models/diamond.server';
-import { fetchDiamondsFromApi } from './idex.service.server';
-import { setCachedDiamonds, isCacheValid, clearCache } from './diamond-cache.server';
+import { fetchDiamondsStream } from './idex.service.server';
+import {
+  createImportJob,
+  updateImportJobStatus,
+  clearDiamondsByType,
+  importDiamondsBatch,
+  getDiamondsByType,
+} from './diamond-db.server';
+import { ImportStatus } from '@prisma/client';
 
 interface UpdateStatus {
   type: DiamondType;
@@ -14,27 +21,21 @@ let isUpdateInProgressNatural = false;
 let isUpdateInProgressLab = false;
 
 /**
- * Refreshes the cache for a specific type of diamond if it's not already valid
- * or if a force refresh is requested.
+ * Refreshes the diamonds in the database for a specific type.
  * Prevents concurrent updates for the same diamond type.
  * @param type - The type of diamonds to refresh ('natural' or 'lab').
- * @param force - Whether to force a refresh even if the cache is valid.
+ * @param force - Whether to force a refresh (always true for database imports).
  * @returns Promise<UpdateStatus>
  */
-export async function refreshDiamondCacheByType(type: DiamondType, force: boolean = false): Promise<UpdateStatus> {
+export async function refreshDiamondsByType(
+  type: DiamondType,
+  force: boolean = true
+): Promise<UpdateStatus> {
   console.log(`Refresh requested for ${type} diamonds. Force: ${force}`);
 
-  if (!force && isCacheValid(type)) {
-    console.log(`Cache for ${type} diamonds is still valid. No update needed.`);
-    return {
-      type,
-      success: true,
-      message: 'Cache already valid and not forced.',
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  let isUpdateInProgressFlag = type === 'natural' ? isUpdateInProgressNatural : isUpdateInProgressLab;
+  // Check if update is already in progress
+  let isUpdateInProgressFlag =
+    type === 'natural' ? isUpdateInProgressNatural : isUpdateInProgressLab;
   if (isUpdateInProgressFlag) {
     console.log(`Update for ${type} diamonds is already in progress.`);
     return {
@@ -52,28 +53,72 @@ export async function refreshDiamondCacheByType(type: DiamondType, force: boolea
     isUpdateInProgressLab = true;
   }
 
-  console.log(`Starting cache refresh for ${type} diamonds...`);
+  const importJobId = await createImportJob(type);
+  console.log(
+    `Starting database import for ${type} diamonds. Job ID: ${importJobId}`
+  );
+
   try {
-    if (force) {
-        console.log(`Forced refresh: Clearing existing cache for ${type} diamonds first.`);
-        clearCache(type);
+    // Update job status to in progress
+    await updateImportJobStatus(importJobId, ImportStatus.IN_PROGRESS, {
+      startedAt: new Date(),
+    });
+
+    // Clear existing diamonds of this type
+    const deletedCount = await clearDiamondsByType(type);
+    console.log(
+      `Cleared ${deletedCount} existing ${type} diamonds from database.`
+    );
+
+    // Fetch and import diamonds in chunks
+    let totalImported = 0;
+    const diamondStream = fetchDiamondsStream(type);
+
+    for await (const diamondChunk of diamondStream) {
+      const importedCount = await importDiamondsBatch(
+        diamondChunk,
+        type,
+        importJobId
+      );
+      totalImported += importedCount;
+      console.log(
+        `Progress: Imported ${totalImported} ${type} diamonds so far...`
+      );
     }
-    const diamonds = await fetchDiamondsFromApi(type);
-    setCachedDiamonds(type, diamonds);
-    console.log(`Successfully refreshed cache for ${type} diamonds. Count: ${diamonds.length}`);
+
+    // Update job status to completed
+    await updateImportJobStatus(importJobId, ImportStatus.COMPLETED, {
+      totalRecords: totalImported,
+      processedRecords: totalImported,
+      completedAt: new Date(),
+    });
+
+    console.log(
+      `Successfully imported ${totalImported} ${type} diamonds to database.`
+    );
+
     return {
       type,
       success: true,
-      message: `Successfully updated ${type} diamonds. Fetched ${diamonds.length} items.`,
-      updatedCount: diamonds.length,
+      message: `Successfully updated ${type} diamonds. Imported ${totalImported} items.`,
+      updatedCount: totalImported,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    console.error(`Error refreshing ${type} diamond cache:`, error);
+    console.error(`Error refreshing ${type} diamonds:`, error);
+
+    // Update job status to failed
+    await updateImportJobStatus(importJobId, ImportStatus.FAILED, {
+      error:
+        error instanceof Error ? error.message : 'Unknown error during import.',
+      completedAt: new Date(),
+    });
+
     return {
       type,
       success: false,
-      message: error instanceof Error ? error.message : 'Unknown error during update.',
+      message:
+        error instanceof Error ? error.message : 'Unknown error during update.',
       timestamp: new Date().toISOString(),
     };
   } finally {
@@ -88,13 +133,29 @@ export async function refreshDiamondCacheByType(type: DiamondType, force: boolea
 }
 
 /**
- * Refreshes the cache for all diamond types (natural and lab).
- * @param force - Whether to force a refresh even if the cache is valid.
+ * Refreshes diamonds for all types (natural and lab) in the database.
+ * @param force - Whether to force a refresh (always true for database imports).
  * @returns Promise<UpdateStatus[]>
  */
-export async function refreshAllDiamondCaches(force: boolean = false): Promise<UpdateStatus[]> {
-  console.log(`Full cache refresh requested. Force: ${force}`);
-  const naturalStatus = await refreshDiamondCacheByType('natural', force);
-  const labStatus = await refreshDiamondCacheByType('lab', force);
+export async function refreshAllDiamonds(
+  force: boolean = true
+): Promise<UpdateStatus[]> {
+  console.log(`Full database refresh requested. Force: ${force}`);
+  const naturalStatus = await refreshDiamondsByType('natural', force);
+  const labStatus = await refreshDiamondsByType('lab', force);
   return [naturalStatus, labStatus];
 }
+
+/**
+ * Get the current count of diamonds in the database by type.
+ * @param type - The type of diamonds to count.
+ * @returns Promise<number>
+ */
+export async function getDiamondCount(type: DiamondType): Promise<number> {
+  const { totalCount } = await getDiamondsByType(type, 0, 1);
+  return totalCount;
+}
+
+// For backward compatibility - redirect old function names
+export const refreshDiamondCacheByType = refreshDiamondsByType;
+export const refreshAllDiamondCaches = refreshAllDiamonds;

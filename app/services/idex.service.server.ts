@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import type { Diamond, DiamondType } from '../models/diamond.server';
+import { saveExchangeRate } from './diamond-db.server';
 
 const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 
@@ -295,6 +296,10 @@ async function getUsdToSekExchangeRate(): Promise<number> {
     }
 
     console.log(`[ExchangeRateService] Current USD to SEK rate: ${sekRate}`);
+
+    // Save the exchange rate to database
+    await saveExchangeRate('USD', 'SEK', sekRate);
+
     return sekRate;
   } catch (error) {
     console.error('[ExchangeRateService] Error fetching exchange rate:', error);
@@ -452,4 +457,182 @@ export async function fetchDiamondsFromApi(
 
   console.log(`Successfully parsed ${diamonds.length} ${type} diamonds.`);
   return diamonds;
+}
+
+// New function that returns a stream of parsed diamonds for database import
+export async function* fetchDiamondsStream(
+  type: DiamondType
+): AsyncGenerator<Diamond[], void, unknown> {
+  const apiKey = process.env.IDEX_API_KEY;
+  const apiSecret = process.env.IDEX_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    throw new Error(
+      'IDEX API key or secret is not configured in environment variables.'
+    );
+  }
+
+  let endpoint = '';
+  let dataFormat = '';
+  let headers: string[] = [];
+
+  if (type === 'natural') {
+    endpoint = `${IDEX_API_BASE_URL}/fullfeed`;
+    dataFormat = 'format_20220525_basis';
+    headers = NATURAL_DIAMOND_HEADERS;
+  } else if (type === 'lab') {
+    endpoint = `${IDEX_API_BASE_URL}/labgrownfullfile`;
+    dataFormat = 'format_lg_20221130';
+    headers = LAB_GROWN_DIAMOND_HEADERS;
+  } else {
+    throw new Error(`Unsupported diamond type: ${type}`);
+  }
+
+  console.log(
+    `Fetching ${type} diamonds from IDEX API for streaming... Format: ${dataFormat}`
+  );
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      authentication_details: {
+        api_key: apiKey,
+        api_secret: apiSecret,
+      },
+      parameters: {
+        file_format: 'csv',
+        data_format: dataFormat,
+        create_zip_file: true,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error('IDEX API Error:', response.status, errorBody);
+    throw new Error(
+      `Failed to fetch diamonds from IDEX API: ${response.status} - ${errorBody}`
+    );
+  }
+
+  const zipArrayBuffer = await response.arrayBuffer();
+  const jszip = new JSZip();
+  const zip = await jszip.loadAsync(zipArrayBuffer);
+
+  const csvFile = Object.values(zip.files).find((file) =>
+    file.name.toLowerCase().endsWith('.csv')
+  );
+
+  if (!csvFile) {
+    throw new Error('CSV file not found in the downloaded ZIP archive.');
+  }
+
+  console.log(`Found CSV file in ZIP: ${csvFile.name}`);
+  const csvString = await csvFile.async('string');
+
+  // Get exchange rate first
+  let exchangeRate: number | null = null;
+  try {
+    exchangeRate = await getUsdToSekExchangeRate();
+    console.log(`[IDEX SERVICE] Using exchange rate: ${exchangeRate}`);
+  } catch (error) {
+    console.error(
+      '[IDEX SERVICE] Failed to fetch exchange rate. Proceeding without SEK conversion.',
+      error
+    );
+  }
+
+  // Parse and yield diamonds in chunks for memory efficiency
+  const lines = csvString.trim().split('\n');
+  const diamondKeys = headers.map(headerToCamelCase);
+  const CHUNK_SIZE = 1000;
+
+  let chunk: Diamond[] = [];
+
+  for (const line of lines) {
+    const values = line.split(',');
+    const diamond: Partial<Diamond> = {};
+
+    headers.forEach((header, index) => {
+      const key = diamondKeys[index];
+      if (
+        key === '_EMPTY_FIELD_' &&
+        header !== 'Measurements (LengthxWidthxHeight)' &&
+        header !== 'Girdle (From / To)'
+      )
+        return;
+
+      const rawValue = values[index];
+      if (rawValue !== undefined && rawValue.trim() !== '') {
+        const value = rawValue.trim();
+
+        if (header === 'Measurements (LengthxWidthxHeight)') {
+          const parts = value.split('x');
+          if (parts.length === 3) {
+            diamond.measurementsLength = parseFloat(parts[0]);
+            diamond.measurementsWidth = parseFloat(parts[1]);
+            diamond.measurementsHeight = parseFloat(parts[2]);
+          }
+        } else if (header === 'Girdle (From / To)') {
+          const parts = value.split('/');
+          if (parts.length === 2) {
+            diamond.girdleFrom = parts[0].trim();
+            diamond.girdleTo = parts[1].trim();
+          }
+        } else if (key !== '_EMPTY_FIELD_') {
+          // Basic type conversion - extend as needed
+          if (
+            key === 'carat' ||
+            key === 'pricePerCarat' ||
+            key === 'totalPrice' ||
+            key === 'percentOffIdexList' ||
+            key === 'measurementsLength' ||
+            key === 'measurementsWidth' ||
+            key === 'measurementsHeight' ||
+            key === 'depthPercent' ||
+            key === 'tablePercent' ||
+            key === 'crownHeight' ||
+            key === 'crownAngle' ||
+            key === 'pavilionDepth' ||
+            key === 'pavilionAngle' ||
+            key === 'askingPriceForPair' ||
+            key === 'askingPricePerCaratForPair'
+          ) {
+            (diamond as any)[key] = parseFloat(value);
+          } else if (key === 'pairSeparable') {
+            (diamond as any)[key] =
+              value.toLowerCase() === 'yes'
+                ? true
+                : value.toLowerCase() === 'no'
+                  ? false
+                  : value;
+          } else {
+            (diamond as any)[key] = value;
+          }
+        }
+      }
+    });
+
+    // Apply exchange rate if available
+    if (exchangeRate && typeof diamond.totalPrice === 'number') {
+      diamond.totalPriceSek = parseFloat(
+        (diamond.totalPrice * exchangeRate).toFixed(2)
+      );
+    }
+
+    if (diamond.itemId) {
+      chunk.push(diamond as Diamond);
+
+      if (chunk.length >= CHUNK_SIZE) {
+        yield chunk;
+        chunk = [];
+      }
+    }
+  }
+
+  // Yield any remaining diamonds
+  if (chunk.length > 0) {
+    yield chunk;
+  }
 }

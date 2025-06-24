@@ -1,26 +1,43 @@
 import { ActionFunctionArgs, json } from '@remix-run/node';
-import { refreshAllDiamondCaches } from '../services/diamond-updater.server';
+import { refreshAllDiamonds } from '../services/diamond-updater.server';
 
 /**
- * Action to manually trigger a refresh of all diamond caches.
+ * Action to manually trigger a refresh of all diamonds in the database.
  * Call this via a POST request (e.g., from a form or curl) during development/admin tasks.
  * For production, a secure cron job endpoint is recommended.
  */
 export async function action({ request }: ActionFunctionArgs) {
   if (request.method !== 'POST') {
-    return json({ message: 'Method not allowed. Please use POST.' }, { status: 405 });
+    return json(
+      { message: 'Method not allowed. Please use POST.' },
+      { status: 405 }
+    );
   }
 
-  console.log('Admin: Manual cache refresh triggered.');
+  console.log('Admin: Manual database refresh triggered.');
   try {
     // Using force = true to ensure it always refreshes when manually triggered
-    const results = await refreshAllDiamondCaches(true);
-    console.log('Admin: Manual cache refresh completed.', results);
-    return json({ success: true, message: 'Diamond caches refresh triggered successfully.', results });
+    const results = await refreshAllDiamonds(true);
+    console.log('Admin: Manual database refresh completed.', results);
+    return json({
+      success: true,
+      message: 'Diamond database refresh triggered successfully.',
+      results,
+    });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error during cache refresh.';
-    console.error('Admin: Manual cache refresh failed:', errorMessage);
-    return json({ success: false, message: 'Failed to trigger diamond cache refresh.', error: errorMessage }, { status: 500 });
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : 'Unknown error during database refresh.';
+    console.error('Admin: Manual database refresh failed:', errorMessage);
+    return json(
+      {
+        success: false,
+        message: 'Failed to trigger diamond database refresh.',
+        error: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -28,7 +45,7 @@ export async function action({ request }: ActionFunctionArgs) {
 // import type { LoaderFunctionArgs } from '@remix-run/node';
 // export async function loader({}: LoaderFunctionArgs) {
 //   return new Response(
-//     '<form method="post"><button type="submit">Refresh All Diamond Caches</button></form>',
+//     '<form method="post"><button type="submit">Refresh All Diamonds in Database</button></form>',
 //     { headers: { "Content-Type": "text/html" } }
 //   );
 // }

@@ -9,8 +9,8 @@ generator client {
 // enough when changing adapters.
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
@@ -29,4 +29,134 @@ model Session {
   locale        String?
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
+}
+
+model Diamond {
+  id                          String    @id @default(cuid())
+  itemId                      String    @unique
+  supplierStockRef            String?
+  cut                         String?
+  carat                       Float?
+  color                       String?
+  naturalFancyColor           String?
+  naturalFancyColorIntensity  String?
+  naturalFancyColorOvertone   String?
+  treatedColor                String?
+  clarity                     String?
+  cutGrade                    String?
+  gradingLab                  String?
+  certificateNumber           String?
+  certificatePath             String?
+  certificateUrl              String?
+  imagePath                   String?
+  imageUrl                    String?
+  onlineReport                String?
+  onlineReportUrl             String?
+  videoUrl                    String?
+  threeDViewerUrl             String?
+  pricePerCarat               Float?
+  totalPrice                  Float?
+  totalPriceSek               Float?
+  percentOffIdexList          Float?
+  polish                      String?
+  symmetry                    String?
+  measurementsLength          Float?
+  measurementsWidth           Float?
+  measurementsHeight          Float?
+  depthPercent                Float?
+  tablePercent                Float?
+  crownHeight                 Float?
+  crownAngle                  Float?
+  pavilionDepth               Float?
+  pavilionAngle               Float?
+  girdleFrom                  String?
+  girdleTo                    String?
+  culetSize                   String?
+  culetCondition              String?
+  graining                    String?
+  fluorescenceIntensity       String?
+  fluorescenceColor           String?
+  enhancement                 String?
+  country                     String?
+  countryCode                 String?
+  countryName                 String?
+  stateRegion                 String?
+  stateCode                   String?
+  stateName                   String?
+  pairStockRef                String?
+  pairSeparable               String?
+  askingPriceForPair          Float?
+  askingPricePerCaratForPair  Float?
+  shade                       String?
+  milky                       String?
+  blackInclusion              String?
+  eyeClean                    String?
+  provenanceReport            String?
+  provenanceNumber            String?
+  brand                       String?
+  guaranteedAvailability      String?
+  availability                String?
+  type                        DiamondType
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+  importJobId                 String?
+  importJob                   ImportJob? @relation(fields: [importJobId], references: [id])
+
+  @@index([type])
+  @@index([cut])
+  @@index([totalPrice])
+  @@index([totalPriceSek])
+  @@index([carat])
+  @@index([color])
+  @@index([clarity])
+  @@index([cutGrade])
+  @@index([naturalFancyColor])
+  @@index([type, cut, totalPrice])
+  @@index([type, totalPrice, carat])
+  @@index([type, cut, carat, color, clarity])
+}
+
+model ImportJob {
+  id              String      @id @default(cuid())
+  type            DiamondType
+  status          ImportStatus @default(PENDING)
+  totalRecords    Int?
+  processedRecords Int?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  error           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  diamonds        Diamond[]
+
+  @@index([type, status])
+  @@index([createdAt])
+}
+
+model ExchangeRate {
+  id          String   @id @default(cuid())
+  fromCurrency String
+  toCurrency   String
+  rate        Float
+  source      String   @default("openexchangerates")
+  validFrom   DateTime @default(now())
+  validUntil  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([fromCurrency, toCurrency, validFrom])
+  @@index([fromCurrency, toCurrency])
+  @@index([validFrom, validUntil])
+}
+
+enum DiamondType {
+  natural
+  lab
+}
+
+enum ImportStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
