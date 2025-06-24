@@ -232,8 +232,10 @@ if (typeof window !== 'undefined') {
         diamond.totalPriceSek !== null &&
         typeof diamond.totalPriceSek === 'number'
       ) {
-        const roundedPrice = Math.round(diamond.totalPriceSek / 100) * 100;
-        displayPrice = roundedPrice.toLocaleString('sv-SE').replace(/,/g, ' ');
+        // Price is already rounded to nearest 100 SEK in the backend
+        displayPrice = diamond.totalPriceSek
+          .toLocaleString('sv-SE')
+          .replace(/,/g, ' ');
       } else if (
         diamond.totalPrice !== null &&
         typeof diamond.totalPrice === 'number'
@@ -283,9 +285,23 @@ if (typeof window !== 'undefined') {
       gridArea.classList.remove('tw-opacity-60');
       gridArea.innerHTML = '';
 
+      // Filter out diamonds with null prices as a final safeguard
+      const validPriceDiamonds = diamondsToRender.filter((diamond) => {
+        const hasValidPrice =
+          (diamond.totalPriceSek && diamond.totalPriceSek > 0) ||
+          (diamond.totalPrice && diamond.totalPrice > 0);
+        if (!hasValidPrice) {
+          console.warn(
+            '[DIAMOND RENDERER] Filtered out diamond with null/invalid price:',
+            diamond.itemId
+          );
+        }
+        return hasValidPrice;
+      });
+
       // Sort diamonds
       const sortedDiamonds = this.sortDiamonds(
-        diamondsToRender,
+        validPriceDiamonds,
         state.currentSort
       );
 

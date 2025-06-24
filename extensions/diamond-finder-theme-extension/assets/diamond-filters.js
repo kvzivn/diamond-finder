@@ -251,7 +251,7 @@ if (typeof window !== 'undefined') {
         },
         format: {
           to: function (value) {
-            return Math.round(value).toLocaleString('sv-SE').replace(/,/g, ' ');
+            return Math.round(value).toString();
           },
           from: function (value) {
             return Number(value.replace(/\s/g, ''));
@@ -271,10 +271,20 @@ if (typeof window !== 'undefined') {
       priceSlider.noUiSlider.on('change', debounceFetch);
 
       minPriceInput.addEventListener('change', function () {
-        priceSlider.noUiSlider.set([this.value, null]);
+        // Remove any spaces and parse as number to ensure clean value
+        const cleanValue = this.value.replace(/\s/g, '');
+        const numericValue = parseFloat(cleanValue);
+        if (!isNaN(numericValue)) {
+          priceSlider.noUiSlider.set([numericValue, null]);
+        }
       });
       maxPriceInput.addEventListener('change', function () {
-        priceSlider.noUiSlider.set([null, this.value]);
+        // Remove any spaces and parse as number to ensure clean value
+        const cleanValue = this.value.replace(/\s/g, '');
+        const numericValue = parseFloat(cleanValue);
+        if (!isNaN(numericValue)) {
+          priceSlider.noUiSlider.set([null, numericValue]);
+        }
       });
 
       state.markSliderInitialized('price');

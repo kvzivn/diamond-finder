@@ -181,8 +181,8 @@ if (typeof window !== 'undefined') {
           diamond.totalPriceSek !== null &&
           typeof diamond.totalPriceSek === 'number'
         ) {
-          const roundedPrice = Math.round(diamond.totalPriceSek / 100) * 100;
-          displayPrice = `${roundedPrice.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
+          // Price is already rounded to nearest 100 SEK in the backend
+          displayPrice = `${diamond.totalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
         } else if (
           diamond.totalPrice !== null &&
           typeof diamond.totalPrice === 'number'

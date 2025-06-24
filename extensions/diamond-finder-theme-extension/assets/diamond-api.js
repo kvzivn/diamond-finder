@@ -39,6 +39,9 @@ if (typeof window !== 'undefined') {
           if (!isNaN(maxPrice))
             params.append('maxPriceSek', maxPrice.toString());
         }
+      } else {
+        // Fallback: Always apply default minimum price filter of 2500 SEK when slider isn't available
+        params.append('minPriceSek', '2500');
       }
 
       // Add carat filters from sliders

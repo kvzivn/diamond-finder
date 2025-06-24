@@ -77,9 +77,11 @@ export async function getFilteredDiamonds(
     where.cut = { equals: filters.shape, mode: 'insensitive' };
   }
 
-  // Price filters (prioritize SEK over USD)
+  // Price filters (prioritize SEK over USD) - always exclude diamonds with null prices
   if (filters.minPriceSek !== undefined || filters.maxPriceSek !== undefined) {
-    where.totalPriceSek = {};
+    where.totalPriceSek = {
+      not: null, // Exclude diamonds with null prices
+    };
     if (filters.minPriceSek !== undefined) {
       where.totalPriceSek.gte = filters.minPriceSek;
     }
@@ -87,13 +89,24 @@ export async function getFilteredDiamonds(
       where.totalPriceSek.lte = filters.maxPriceSek;
     }
   } else if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-    where.totalPrice = {};
+    where.totalPrice = {
+      not: null, // Exclude diamonds with null prices
+    };
     if (filters.minPrice !== undefined) {
       where.totalPrice.gte = filters.minPrice;
     }
     if (filters.maxPrice !== undefined) {
       where.totalPrice.lte = filters.maxPrice;
     }
+  } else {
+    // Even when no explicit price filters are applied, exclude diamonds with null prices
+    // Prioritize SEK prices, fallback to USD prices, but exclude completely null diamonds
+    where.OR = [
+      { totalPriceSek: { not: null } },
+      {
+        AND: [{ totalPriceSek: null }, { totalPrice: { not: null } }],
+      },
+    ];
   }
 
   // Carat filters

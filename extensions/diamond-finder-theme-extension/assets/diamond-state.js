@@ -31,7 +31,7 @@ if (typeof window !== 'undefined') {
 
     // Configuration constants
     DEFAULT_FILTER_RANGES: {
-      price: [2000, 10000000], // SEK range
+      price: [2500, 10000000], // SEK range
       carat: [0.5, 20.0],
       colour: ['K', 'D_MAX'],
       clarity: ['SI2', 'FL_MAX'],

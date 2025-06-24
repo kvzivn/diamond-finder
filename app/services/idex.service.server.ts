@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import type { Diamond, DiamondType } from '../models/diamond.server';
 import { saveExchangeRate } from './diamond-db.server';
+import { calculateFinalPriceSek } from './diamond-pricing.server';
 
 const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 
@@ -387,23 +388,40 @@ export async function fetchDiamondsFromApi(
   try {
     const exchangeRate = await getUsdToSekExchangeRate();
 
-    // Convert USD prices to SEK
-    diamonds = diamonds.map((diamond) => {
+    // Convert USD prices to SEK and apply markup
+    console.log(
+      `[IDEX SERVICE] Applying pricing for ${diamonds.length} ${type} diamonds...`
+    );
+
+    diamonds = diamonds.map((diamond, index) => {
       const diamondWithSek = { ...diamond };
-      if (typeof diamond.totalPrice === 'number') {
-        diamondWithSek.totalPriceSek = parseFloat(
-          (diamond.totalPrice * exchangeRate).toFixed(2)
+      if (typeof diamond.totalPrice === 'number' && diamond.carat) {
+        // First convert USD to SEK
+        const basePriceSek = diamond.totalPrice * exchangeRate;
+        // Then apply markup based on carat and type, with rounding to nearest 100 SEK
+        diamondWithSek.totalPriceSek = calculateFinalPriceSek(
+          basePriceSek,
+          diamond.carat,
+          type
         );
       }
+
+      // Progress indicator every 5000 diamonds
+      if ((index + 1) % 5000 === 0 || index === diamonds.length - 1) {
+        console.log(
+          `[IDEX SERVICE] Price calculation progress: ${index + 1}/${diamonds.length} ${type} diamonds processed`
+        );
+      }
+
       return diamondWithSek;
     });
 
     console.log(
-      `[IDEX SERVICE] Applied USD to SEK conversion for ${diamonds.length} diamonds using rate: ${exchangeRate}`
+      `[IDEX SERVICE] Applied USD to SEK conversion with carat-based markup for ${diamonds.length} diamonds using exchange rate: ${exchangeRate}`
     );
   } catch (error) {
     console.error(
-      '[IDEX SERVICE] Failed to fetch exchange rate or apply currency conversion. Proceeding with USD prices only.',
+      '[IDEX SERVICE] Failed to fetch exchange rate or apply currency conversion with markup. Proceeding with USD prices only.',
       error
     );
     // Continue without SEK conversion - diamonds will only have USD prices
@@ -538,7 +556,7 @@ export async function* fetchDiamondsStream(
     console.log(`[IDEX SERVICE] Using exchange rate: ${exchangeRate}`);
   } catch (error) {
     console.error(
-      '[IDEX SERVICE] Failed to fetch exchange rate. Proceeding without SEK conversion.',
+      '[IDEX SERVICE] Failed to fetch exchange rate. Proceeding without SEK conversion and markup.',
       error
     );
   }
@@ -547,10 +565,17 @@ export async function* fetchDiamondsStream(
   const lines = csvString.trim().split('\n');
   const diamondKeys = headers.map(headerToCamelCase);
   const CHUNK_SIZE = 1000;
+  const totalLines = lines.length;
+
+  console.log(
+    `[IDEX SERVICE] Processing ${totalLines} ${type} diamond records in batches...`
+  );
 
   let chunk: Diamond[] = [];
+  let processedCount = 0;
 
   for (const line of lines) {
+    processedCount++;
     const values = line.split(',');
     const diamond: Partial<Diamond> = {};
 
@@ -614,10 +639,19 @@ export async function* fetchDiamondsStream(
       }
     });
 
-    // Apply exchange rate if available
-    if (exchangeRate && typeof diamond.totalPrice === 'number') {
-      diamond.totalPriceSek = parseFloat(
-        (diamond.totalPrice * exchangeRate).toFixed(2)
+    // Apply exchange rate and markup if available
+    if (
+      exchangeRate &&
+      typeof diamond.totalPrice === 'number' &&
+      diamond.carat
+    ) {
+      // First convert USD to SEK
+      const basePriceSek = diamond.totalPrice * exchangeRate;
+      // Then apply markup based on carat and type, with rounding to nearest 100 SEK
+      diamond.totalPriceSek = calculateFinalPriceSek(
+        basePriceSek,
+        diamond.carat,
+        type
       );
     }
 
@@ -625,6 +659,9 @@ export async function* fetchDiamondsStream(
       chunk.push(diamond as Diamond);
 
       if (chunk.length >= CHUNK_SIZE) {
+        console.log(
+          `[IDEX SERVICE] Processed ${processedCount}/${totalLines} lines, yielding batch of ${chunk.length} ${type} diamonds`
+        );
         yield chunk;
         chunk = [];
       }
