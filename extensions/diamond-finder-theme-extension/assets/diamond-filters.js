@@ -68,7 +68,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.colour = [colourLabels[startIndex]];
         } else {
-          values.colour = colourLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.colour = [
+            colourLabels[startIndex],
+            colourLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -83,7 +87,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.clarity = [clarityLabels[startIndex]];
         } else {
-          values.clarity = clarityLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.clarity = [
+            clarityLabels[startIndex],
+            clarityLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -100,7 +108,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.cutGrade = [cutGradeLabels[startIndex]];
         } else {
-          values.cutGrade = cutGradeLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.cutGrade = [
+            cutGradeLabels[startIndex],
+            cutGradeLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -117,7 +129,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.fluorescence = [fluorescenceLabels[startIndex]];
         } else {
-          values.fluorescence = fluorescenceLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.fluorescence = [
+            fluorescenceLabels[startIndex],
+            fluorescenceLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -132,7 +148,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.polish = [polishLabels[startIndex]];
         } else {
-          values.polish = polishLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.polish = [
+            polishLabels[startIndex],
+            polishLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -149,7 +169,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.symmetry = [symmetryLabels[startIndex]];
         } else {
-          values.symmetry = symmetryLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.symmetry = [
+            symmetryLabels[startIndex],
+            symmetryLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -187,7 +211,11 @@ if (typeof window !== 'undefined') {
         if (startIndex === endIndex) {
           values.fancyIntensity = [intensityLabels[startIndex]];
         } else {
-          values.fancyIntensity = intensityLabels.slice(startIndex, endIndex);
+          // Only return min and max values, not all values in between
+          values.fancyIntensity = [
+            intensityLabels[startIndex],
+            intensityLabels[endIndex - 1],
+          ];
         }
       }
 
@@ -411,7 +439,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 8,
+          max: 7,
         },
         format: {
           to: function (value) {
@@ -461,7 +489,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 8,
+          max: 7,
         },
         format: {
           to: function (value) {
@@ -512,7 +540,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 3,
+          max: 2,
         },
         format: {
           to: function (value) {
@@ -563,7 +591,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 5,
+          max: 4,
         },
         format: {
           to: function (value) {
@@ -612,7 +640,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 3,
+          max: 2,
         },
         format: {
           to: function (value) {
@@ -661,7 +689,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 3,
+          max: 2,
         },
         format: {
           to: function (value) {
@@ -1003,7 +1031,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 8,
+          max: 7,
         },
         format: {
           to: function (value) {

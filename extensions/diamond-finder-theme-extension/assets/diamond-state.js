@@ -45,19 +45,12 @@ if (typeof window !== 'undefined') {
     },
 
     FILTER_LABELS: {
-      colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'D'],
-      clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL', 'FL'],
-      cutGrade: ['Good', 'Very Good', 'Excellent', 'Excellent'],
-      fluorescence: [
-        'Very Strong',
-        'Strong',
-        'Medium',
-        'Faint',
-        'None',
-        'None',
-      ],
-      polish: ['Good', 'Very Good', 'Excellent', 'Excellent'],
-      symmetry: ['Good', 'Very Good', 'Excellent', 'Excellent'],
+      colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
+      clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
+      cutGrade: ['Good', 'Very Good', 'Excellent'],
+      fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
+      polish: ['Good', 'Very Good', 'Excellent'],
+      symmetry: ['Good', 'Very Good', 'Excellent'],
       fancyIntensity: [
         'Fancy Deep',
         'Fancy',
@@ -66,7 +59,6 @@ if (typeof window !== 'undefined') {
         'Fancy Light',
         'Light',
         'Very Light',
-        'Faint',
         'Faint',
       ],
     },

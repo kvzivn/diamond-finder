@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://sense-temple-suite-study.trycloudflare.com"
+application_url = "https://cv-gently-know-bo.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,10 +26,10 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://sense-temple-suite-study.trycloudflare.com/auth/callback", "https://sense-temple-suite-study.trycloudflare.com/auth/shopify/callback", "https://sense-temple-suite-study.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://cv-gently-know-bo.trycloudflare.com/auth/callback", "https://cv-gently-know-bo.trycloudflare.com/auth/shopify/callback", "https://cv-gently-know-bo.trycloudflare.com/api/auth/callback"]
 
 [app_proxy]
-url = "https://sense-temple-suite-study.trycloudflare.com"
+url = "https://cv-gently-know-bo.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

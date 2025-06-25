@@ -1,25 +1,25 @@
 <!-- Diamond Search Filters Section -->
-<div class="diamond-filters-ui tw-mb-8">
+<div class='diamond-filters-ui tw-mb-8'>
   <!-- Top Row: Natural/Lab Grown Tabs -->
-  <div class="tw-flex tw-justify-center tw-mt-6 tw-mb-12">
-    <div class="tw-flex tw-bg-gray-300 tw-rounded-full tw-w-80" data-filter-group="ds-type" data-multiselect="false">
+  <div class='tw-flex tw-justify-center tw-mt-6 tw-mb-12'>
+    <div class='tw-flex tw-bg-gray-300 tw-rounded-full tw-w-80' data-filter-group='ds-type' data-multiselect='false'>
       <button
-        type="button"
+        type='button'
         class="tw-flex-1 tw-px-6 tw-py-3 tw-rounded-full tw-text-sm tw-font-medium tw-transition-all tw-duration-200 focus:tw-outline-none data-[active='true']:tw-bg-gray-800 data-[active='true']:tw-text-white data-[active='false']:tw-text-slate-700 data-[active='false']:hover:tw-text-slate-900"
-        data-value="Natural"
-        aria-pressed="true"
-        data-active="true"
-        id="ds-type-natural"
+        data-value='Natural'
+        aria-pressed='true'
+        data-active='true'
+        id='ds-type-natural'
       >
         Naturliga
       </button>
       <button
-        type="button"
+        type='button'
         class="tw-flex-1 tw-px-6 tw-py-3 tw-rounded-full tw-text-sm tw-font-medium tw-transition-all tw-duration-200 focus:tw-outline-none data-[active='true']:tw-bg-gray-800 data-[active='true']:tw-text-white data-[active='false']:tw-text-slate-700 data-[active='false']:hover:tw-text-slate-900"
-        data-value="Lab Grown"
-        aria-pressed="false"
-        data-active="false"
-        id="ds-type-lab-grown"
+        data-value='Lab Grown'
+        aria-pressed='false'
+        data-active='false'
+        id='ds-type-lab-grown'
       >
         Labbodlade
       </button>
@@ -27,7 +27,7 @@
   </div>
 
   <!-- Main Filter Grid -->
-  <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8 tw-pb-8">
+  <div class='tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8 tw-pb-8'>
     <!-- Shape Filter -->
     {% render 'diamond-search-shape-filter' %}
 
@@ -48,16 +48,33 @@
   </div>
 
   <!-- Advanced Filters Toggle -->
-  <div class="tw-mt-6 tw-text-center">
-    <button type="button" id="ds-advanced-filters-toggle" class="tw-inline-flex tw-items-center tw-justify-center tw-mx-auto tw-text-base tw-text-gray-600 hover:tw-text-gray-800">
-      Avancerade filter <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" class="tw-ml-1"><path stroke="none" d="M0 0h24v24H0z"></path><path d="m6 9 6 6 6-6"></path></svg>
+  <div class='tw-mt-6 tw-text-center'>
+    <button
+      type='button'
+      id='ds-advanced-filters-toggle'
+      class='tw-inline-flex tw-items-center tw-justify-center tw-mx-auto tw-text-base tw-text-gray-600 hover:tw-text-gray-800'
+    >
+      Avancerade filter
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
+        width='20'
+        height='20'
+        fill='none'
+        stroke='#2c3e50'
+        stroke-linecap='round'
+        stroke-linejoin='round'
+        stroke-width='1.5'
+        viewBox='0 0 24 24'
+        class='tw-ml-1'
+      >
+        <path stroke="none" d="M0 0h24v24H0z"></path><path d="m6 9 6 6 6-6"></path>
+      </svg>
     </button>
   </div>
 
   <!-- Advanced Filters Content -->
-  <div id="ds-advanced-filters-content" class="tw-hidden tw-mt-4 tw-pt-4">
-    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8">
-
+  <div id='ds-advanced-filters-content' class='tw-hidden tw-mt-4 tw-mb-24 tw-pt-4'>
+    <div class='tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-x-10 tw-gap-y-8'>
       <!-- Polish Filter -->
       {% render 'diamond-search-polish-filter' %}
 
@@ -69,8 +86,8 @@
       {% render 'diamond-search-fluorescence-filter' %}
       <!-- Certificate Filter -->
       <div>
-        <label class="tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2">Certifikat</label>
-        {% render 'certificate-filter-group', group_id: 'ds-certificate', options_str: "GIA|IGI|HRD" %}
+        <label class='tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2'>Certifikat</label>
+        {% render 'certificate-filter-group', group_id: 'ds-certificate', options_str: 'GIA|IGI|HRD' %}
       </div>
 
       <!-- Table Filter -->

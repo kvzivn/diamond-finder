@@ -564,11 +564,11 @@ export async function* fetchDiamondsStream(
   // Parse and yield diamonds in chunks for memory efficiency
   const lines = csvString.trim().split('\n');
   const diamondKeys = headers.map(headerToCamelCase);
-  const CHUNK_SIZE = 1000;
+  const CHUNK_SIZE = 800; // Optimized for 1GB App / 2GB instance
   const totalLines = lines.length;
 
   console.log(
-    `[IDEX SERVICE] Processing ${totalLines} ${type} diamond records in batches...`
+    `[IDEX SERVICE] Processing ${totalLines} ${type} diamond records in optimized batches...`
   );
 
   let chunk: Diamond[] = [];
@@ -660,16 +660,22 @@ export async function* fetchDiamondsStream(
 
       if (chunk.length >= CHUNK_SIZE) {
         console.log(
-          `[IDEX SERVICE] Processed ${processedCount}/${totalLines} lines, yielding batch of ${chunk.length} ${type} diamonds`
+          `[IDEX SERVICE] Processed ${processedCount}/${totalLines} lines, yielding optimized batch of ${chunk.length} ${type} diamonds`
         );
         yield chunk;
         chunk = [];
+
+        // Add small memory cleanup hint
+        if (global.gc && processedCount % (CHUNK_SIZE * 5) === 0) {
+          global.gc();
+        }
       }
     }
   }
 
   // Yield any remaining diamonds
   if (chunk.length > 0) {
+    console.log(`[IDEX SERVICE] Final batch: ${chunk.length} ${type} diamonds`);
     yield chunk;
   }
 }

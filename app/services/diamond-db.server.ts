@@ -42,7 +42,7 @@ interface DiamondFilters {
   limit?: number;
 }
 
-const BATCH_SIZE = 1000; // PostgreSQL can handle larger batches
+const BATCH_SIZE = 800; // Optimized for 1GB App / 2GB PostgreSQL instance
 
 export async function getDiamondsByType(
   type: DiamondType,
@@ -120,39 +120,30 @@ export async function getFilteredDiamonds(
     }
   }
 
-  // Colour filters (complex logic requires raw query or multiple conditions)
+  // Colour filters
   if (filters.minColour || filters.maxColour) {
     const colourLabels = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'];
-    const colorConditions: string[] = [];
+
+    let minIdx = 0; // Default to K (worst)
+    let maxIdx = colourLabels.length - 1; // Default to D (best)
 
     if (filters.minColour) {
-      const minIndex = colourLabels.indexOf(filters.minColour.toUpperCase());
-      if (minIndex !== -1) {
-        const validColors = colourLabels.slice(0, minIndex + 1);
-        colorConditions.push(
-          `color IN (${validColors.map((c) => `'${c}'`).join(',')})`
-        );
-      }
+      const idx = colourLabels.indexOf(filters.minColour.toUpperCase());
+      if (idx !== -1) minIdx = idx;
     }
 
     if (filters.maxColour) {
-      const maxIndex = colourLabels.indexOf(filters.maxColour.toUpperCase());
-      if (maxIndex !== -1) {
-        const validColors = colourLabels.slice(maxIndex);
-        if (colorConditions.length > 0) {
-          // Need intersection of both conditions
-          where.color = {
-            in: colourLabels.slice(
-              maxIndex,
-              filters.minColour
-                ? colourLabels.indexOf(filters.minColour.toUpperCase()) + 1
-                : undefined
-            ),
-          };
-        } else {
-          where.color = { in: validColors };
-        }
-      }
+      // Handle _MAX suffix (means include the best/last value)
+      const maxColourValue = filters.maxColour
+        .toUpperCase()
+        .replace('_MAX', '');
+      const idx = colourLabels.indexOf(maxColourValue);
+      if (idx !== -1) maxIdx = idx;
+    }
+
+    // Get the range of valid colors (from minColour to maxColour inclusive)
+    if (minIdx <= maxIdx) {
+      where.color = { in: colourLabels.slice(minIdx, maxIdx + 1) };
     }
   }
 
@@ -351,7 +342,11 @@ export async function getFilteredDiamonds(
         where.clarity = { in: clarityLabels.slice(minIdx) };
       }
     } else if (filters.maxClarity) {
-      const maxIdx = clarityLabels.indexOf(filters.maxClarity.toUpperCase());
+      // Handle _MAX suffix (means include the best/last value)
+      const maxClarityValue = filters.maxClarity
+        .toUpperCase()
+        .replace('_MAX', '');
+      const maxIdx = clarityLabels.indexOf(maxClarityValue);
       if (maxIdx !== -1) {
         where.clarity = { in: clarityLabels.slice(0, maxIdx + 1) };
       }
@@ -380,8 +375,10 @@ export async function getFilteredDiamonds(
         where.cutGrade = { in: cutGradeLabels.slice(minIdx) };
       }
     } else if (filters.maxCutGrade) {
+      // Handle _MAX suffix (means include the best/last value)
+      const maxCutGradeValue = filters.maxCutGrade.replace(/_MAX$/i, '');
       const maxIdx = cutGradeLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxCutGrade!.toLowerCase()
+        (g) => g.toLowerCase() === maxCutGradeValue.toLowerCase()
       );
       if (maxIdx !== -1) {
         where.cutGrade = { in: cutGradeLabels.slice(0, maxIdx + 1) };
@@ -411,8 +408,10 @@ export async function getFilteredDiamonds(
         where.polish = { in: polishLabels.slice(minIdx) };
       }
     } else if (filters.maxPolish) {
+      // Handle _MAX suffix (means include the best/last value)
+      const maxPolishValue = filters.maxPolish.replace(/_MAX$/i, '');
       const maxIdx = polishLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxPolish!.toLowerCase()
+        (g) => g.toLowerCase() === maxPolishValue.toLowerCase()
       );
       if (maxIdx !== -1) {
         where.polish = { in: polishLabels.slice(0, maxIdx + 1) };
@@ -442,8 +441,10 @@ export async function getFilteredDiamonds(
         where.symmetry = { in: symmetryLabels.slice(minIdx) };
       }
     } else if (filters.maxSymmetry) {
+      // Handle _MAX suffix (means include the best/last value)
+      const maxSymmetryValue = filters.maxSymmetry.replace(/_MAX$/i, '');
       const maxIdx = symmetryLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxSymmetry!.toLowerCase()
+        (g) => g.toLowerCase() === maxSymmetryValue.toLowerCase()
       );
       if (maxIdx !== -1) {
         where.symmetry = { in: symmetryLabels.slice(0, maxIdx + 1) };
@@ -466,44 +467,43 @@ export async function getFilteredDiamonds(
   // This requires a calculated field or raw query
   // For now, we'll skip this complex filter
 
-  // Fluorescence filters
+  // Fluorescence filters (ordered from best to worst for diamonds)
   if (filters.minFluorescence || filters.maxFluorescence) {
     const fluorescenceLabels = [
-      'None',
-      'Faint',
-      'Medium',
-      'Strong',
       'Very Strong',
+      'Strong',
+      'Medium',
+      'Faint',
+      'None',
     ];
 
-    if (filters.minFluorescence && filters.maxFluorescence) {
-      const minIdx = fluorescenceLabels.findIndex(
+    let minIdx = 0; // Default to Very Strong (worst)
+    let maxIdx = fluorescenceLabels.length - 1; // Default to None (best)
+
+    if (filters.minFluorescence) {
+      const idx = fluorescenceLabels.findIndex(
         (g) => g.toLowerCase() === filters.minFluorescence!.toLowerCase()
       );
-      const maxIdx = fluorescenceLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxFluorescence!.toLowerCase()
+      if (idx !== -1) minIdx = idx;
+    }
+
+    if (filters.maxFluorescence) {
+      // Handle _MAX suffix (means include the best/last value)
+      const maxFluorescenceValue = filters.maxFluorescence.replace(
+        /_MAX$/i,
+        ''
       );
-      if (minIdx !== -1 && maxIdx !== -1) {
-        where.fluorescenceIntensity = {
-          in: fluorescenceLabels.slice(minIdx, maxIdx + 1),
-        };
-      }
-    } else if (filters.minFluorescence) {
-      const minIdx = fluorescenceLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minFluorescence!.toLowerCase()
+      const idx = fluorescenceLabels.findIndex(
+        (g) => g.toLowerCase() === maxFluorescenceValue.toLowerCase()
       );
-      if (minIdx !== -1) {
-        where.fluorescenceIntensity = { in: fluorescenceLabels.slice(minIdx) };
-      }
-    } else if (filters.maxFluorescence) {
-      const maxIdx = fluorescenceLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxFluorescence!.toLowerCase()
-      );
-      if (maxIdx !== -1) {
-        where.fluorescenceIntensity = {
-          in: fluorescenceLabels.slice(0, maxIdx + 1),
-        };
-      }
+      if (idx !== -1) maxIdx = idx;
+    }
+
+    // Get the range of valid fluorescence values
+    if (minIdx <= maxIdx) {
+      where.fluorescenceIntensity = {
+        in: fluorescenceLabels.slice(minIdx, maxIdx + 1),
+      };
     }
   }
 
@@ -573,9 +573,14 @@ export async function importDiamondsBatch(
 ): Promise<number> {
   let totalImported = 0;
 
-  // Process in batches to avoid overwhelming the database
+  // Process in optimized batches with delays to avoid overwhelming the database
   for (let i = 0; i < diamonds.length; i += BATCH_SIZE) {
     const batch = diamonds.slice(i, i + BATCH_SIZE);
+
+    // Add memory cleanup hint before processing batch
+    if (global.gc) {
+      global.gc();
+    }
 
     // Prepare data for batch insert
     const data = batch.map((diamond) => ({
@@ -662,6 +667,11 @@ export async function importDiamondsBatch(
     console.log(
       `Imported batch ${Math.floor(i / BATCH_SIZE) + 1}, total imported: ${totalImported}`
     );
+
+    // Add small delay between batches to reduce memory pressure (50ms = good balance)
+    if (i + BATCH_SIZE < diamonds.length) {
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Increased delay
+    }
   }
 
   return totalImported;

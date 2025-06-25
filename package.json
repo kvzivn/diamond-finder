@@ -18,7 +18,11 @@
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
     "tailwind:build": "tailwindcss -i ./extensions/diamond-finder-theme-extension/assets/tailwind-input.css -o ./extensions/diamond-finder-theme-extension/assets/tailwind-output.css",
-    "tailwind:watch": "tailwindcss -i ./extensions/diamond-finder-theme-extension/assets/tailwind-input.css -o ./extensions/diamond-finder-theme-extension/assets/tailwind-output.css --watch"
+    "tailwind:watch": "tailwindcss -i ./extensions/diamond-finder-theme-extension/assets/tailwind-input.css -o ./extensions/diamond-finder-theme-extension/assets/tailwind-output.css --watch",
+    "import:all": "tsx scripts/import-diamonds-direct.ts",
+    "import:natural": "tsx scripts/import-diamonds-direct.ts natural",
+    "import:lab": "tsx scripts/import-diamonds-direct.ts lab",
+    "import:status": "tsx scripts/check-import-status.ts"
   },
   "type": "module",
   "engines": {
@@ -37,6 +41,7 @@
     "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
     "isbot": "^5.1.0",
     "jszip": "^3.10.1",
+    "pg": "^8.12.0",
     "prisma": "^6.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -50,6 +55,7 @@
     "@types/eslint": "^9.6.1",
     "@types/jszip": "^3.4.0",
     "@types/node": "^22.2.0",
+    "@types/pg": "^8.11.10",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "autoprefixer": "^10.4.21",
@@ -58,6 +64,7 @@
     "postcss": "^8.5.3",
     "prettier": "^3.2.4",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
     "typescript": "^5.2.2",
     "vite": "^6.2.2"
   },

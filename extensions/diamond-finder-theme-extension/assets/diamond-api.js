@@ -75,24 +75,16 @@ if (typeof window !== 'undefined') {
           const colourValues = window.DiamondFilters.getSliderValues().colour;
           if (colourValues && colourValues.length > 0) {
             const minColour = colourValues[0];
-            let maxColour = colourValues[colourValues.length - 1];
+            const maxColour = colourValues[colourValues.length - 1];
 
             if (minColour === maxColour) {
-              const state = window.DiamondSearchState;
-              const uniqueColours = [...new Set(state.FILTER_LABELS.colour)];
-              const currentIndex = uniqueColours.indexOf(minColour);
-              if (currentIndex < uniqueColours.length - 1) {
-                maxColour = uniqueColours[currentIndex + 1];
-              } else {
-                maxColour = null;
-              }
-            }
-
-            if (minColour) {
+              // Single value selected - only send one parameter
               params.append('minColour', minColour);
-            }
-            if (maxColour) {
-              params.append('maxColour', maxColour);
+              params.append('maxColour', minColour);
+            } else {
+              // Range selected
+              if (minColour) params.append('minColour', minColour);
+              if (maxColour) params.append('maxColour', maxColour);
             }
           }
         }
@@ -144,22 +136,16 @@ if (typeof window !== 'undefined') {
         const clarityValues = window.DiamondFilters.getSliderValues().clarity;
         if (clarityValues && clarityValues.length > 0) {
           const minClarity = clarityValues[0];
-          let maxClarity = clarityValues[clarityValues.length - 1];
+          const maxClarity = clarityValues[clarityValues.length - 1];
 
           if (minClarity === maxClarity) {
-            const state = window.DiamondSearchState;
-            const uniqueClarities = [...new Set(state.FILTER_LABELS.clarity)];
-            const currentIndex = uniqueClarities.indexOf(minClarity);
-            if (currentIndex < uniqueClarities.length - 1) {
-              maxClarity = uniqueClarities[currentIndex + 1];
-            } else {
-              maxClarity = null;
-            }
-          }
-
-          if (minClarity) params.append('minClarity', minClarity);
-          if (maxClarity) {
-            params.append('maxClarity', maxClarity);
+            // Single value selected - only send one parameter
+            params.append('minClarity', minClarity);
+            params.append('maxClarity', minClarity);
+          } else {
+            // Range selected
+            if (minClarity) params.append('minClarity', minClarity);
+            if (maxClarity) params.append('maxClarity', maxClarity);
           }
         }
       }
@@ -173,8 +159,16 @@ if (typeof window !== 'undefined') {
         if (cutGradeValues && cutGradeValues.length > 0) {
           const minCutGrade = cutGradeValues[0];
           const maxCutGrade = cutGradeValues[cutGradeValues.length - 1];
-          if (minCutGrade) params.append('minCutGrade', minCutGrade);
-          if (maxCutGrade) params.append('maxCutGrade', maxCutGrade);
+
+          if (minCutGrade === maxCutGrade) {
+            // Single value selected
+            params.append('minCutGrade', minCutGrade);
+            params.append('maxCutGrade', minCutGrade);
+          } else {
+            // Range selected
+            if (minCutGrade) params.append('minCutGrade', minCutGrade);
+            if (maxCutGrade) params.append('maxCutGrade', maxCutGrade);
+          }
         }
       }
 
@@ -203,10 +197,18 @@ if (typeof window !== 'undefined') {
           const minFluorescence = fluorescenceValues[0];
           const maxFluorescence =
             fluorescenceValues[fluorescenceValues.length - 1];
-          if (minFluorescence)
+
+          if (minFluorescence === maxFluorescence) {
+            // Single value selected
             params.append('minFluorescence', minFluorescence);
-          if (maxFluorescence)
-            params.append('maxFluorescence', maxFluorescence);
+            params.append('maxFluorescence', minFluorescence);
+          } else {
+            // Range selected
+            if (minFluorescence)
+              params.append('minFluorescence', minFluorescence);
+            if (maxFluorescence)
+              params.append('maxFluorescence', maxFluorescence);
+          }
         }
       }
 
@@ -217,8 +219,16 @@ if (typeof window !== 'undefined') {
         if (polishValues && polishValues.length > 0) {
           const minPolish = polishValues[0];
           const maxPolish = polishValues[polishValues.length - 1];
-          if (minPolish) params.append('minPolish', minPolish);
-          if (maxPolish) params.append('maxPolish', maxPolish);
+
+          if (minPolish === maxPolish) {
+            // Single value selected
+            params.append('minPolish', minPolish);
+            params.append('maxPolish', minPolish);
+          } else {
+            // Range selected
+            if (minPolish) params.append('minPolish', minPolish);
+            if (maxPolish) params.append('maxPolish', maxPolish);
+          }
         }
       }
 
@@ -231,8 +241,16 @@ if (typeof window !== 'undefined') {
         if (symmetryValues && symmetryValues.length > 0) {
           const minSymmetry = symmetryValues[0];
           const maxSymmetry = symmetryValues[symmetryValues.length - 1];
-          if (minSymmetry) params.append('minSymmetry', minSymmetry);
-          if (maxSymmetry) params.append('maxSymmetry', maxSymmetry);
+
+          if (minSymmetry === maxSymmetry) {
+            // Single value selected
+            params.append('minSymmetry', minSymmetry);
+            params.append('maxSymmetry', minSymmetry);
+          } else {
+            // Range selected
+            if (minSymmetry) params.append('minSymmetry', minSymmetry);
+            if (maxSymmetry) params.append('maxSymmetry', maxSymmetry);
+          }
         }
       }
 
@@ -267,10 +285,25 @@ if (typeof window !== 'undefined') {
     async fetchDiamondData(page = 1, limit = 24, isLoadMore = false) {
       const state = window.DiamondSearchState;
       const gridArea = document.getElementById('diamond-grid-area');
+      const initialLoadingSpinner = document.getElementById(
+        'diamond-initial-loading'
+      );
+
+      // Track if this is the initial load (before initialLoadComplete is set)
+      const isInitialLoad = !state.initialLoadComplete && !isLoadMore;
 
       if (!isLoadMore) {
-        if (gridArea) {
-          gridArea.classList.add('tw-opacity-60');
+        // Show initial loading spinner only for the very first load
+        if (isInitialLoad && initialLoadingSpinner) {
+          initialLoadingSpinner.classList.remove('tw-hidden');
+          if (gridArea) {
+            gridArea.classList.add('tw-hidden');
+          }
+        } else {
+          // For filter loads, use opacity effect
+          if (gridArea) {
+            gridArea.classList.add('tw-opacity-60');
+          }
         }
       } else {
         state.isLoadingMore = true;
@@ -317,18 +350,38 @@ if (typeof window !== 'undefined') {
         }
       } catch (error) {
         console.error('Failed to fetch diamond data:', error);
+
         if (gridArea && !isLoadMore) {
-          gridArea.classList.remove('tw-opacity-60');
-          gridArea.innerHTML =
-            '<p class="tw-text-center tw-py-10">Failed to load diamonds. Please try again later.</p>';
+          // Handle error for initial load vs filter load
+          if (isInitialLoad && initialLoadingSpinner) {
+            // Hide spinner and show error in grid area for initial load
+            initialLoadingSpinner.classList.add('tw-hidden');
+            gridArea.classList.remove('tw-hidden');
+            gridArea.innerHTML =
+              '<p class="tw-text-center tw-py-10">Kunde inte hämta diamanter. Försök igen senare.</p>';
+          } else {
+            // Handle error for filter load
+            gridArea.classList.remove('tw-opacity-60');
+            gridArea.innerHTML =
+              '<p class="tw-text-center tw-py-10">Kunde inte hämta diamanter. Försök igen senare.</p>';
+          }
         }
       } finally {
         if (isLoadMore) {
           state.isLoadingMore = false;
           window.DiamondUI?.showLoadMoreIndicator(false);
         } else {
-          if (gridArea) {
-            gridArea.classList.remove('tw-opacity-60');
+          // Hide initial loading spinner and show grid area
+          if (isInitialLoad && initialLoadingSpinner) {
+            initialLoadingSpinner.classList.add('tw-hidden');
+            if (gridArea) {
+              gridArea.classList.remove('tw-hidden');
+            }
+          } else {
+            // For filter loads, remove opacity
+            if (gridArea) {
+              gridArea.classList.remove('tw-opacity-60');
+            }
           }
         }
       }
