@@ -207,6 +207,62 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Special handling for clarity filter
+      if (filterType === 'clarity') {
+        // For clarity, we need special logic to handle FL_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at FL_MAX position - return only FL
+            return ['FL', 'FL'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at FL_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at FL, right at FL_MAX - only FL
+            return ['FL', 'FL'];
+          } else {
+            // Include all grades from start to FL (inclusive)
+            return [labels[startIndex], 'FL'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
+      // Special handling for colour filter
+      if (filterType === 'colour') {
+        // For colour, we need special logic to handle D_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at D_MAX position - return only D
+            return ['D', 'D'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at D_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at D, right at D_MAX - only D
+            return ['D', 'D'];
+          } else {
+            // Include all grades from start to D (inclusive)
+            return [labels[startIndex], 'D'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
       // Original logic for other filter types
       if (startIndex === endIndex) {
         return [labels[startIndex]];

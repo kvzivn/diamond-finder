@@ -195,11 +195,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 7,
+          max: 8, // Updated to 8 since we have 9 colour levels (0-8)
         },
         format: {
           to: function (value) {
-            return colorLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = colorLabels[index];
+            // Display "D" for both position 7 and 8 (D_MAX)
+            return label === 'D_MAX' ? 'D' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {
@@ -244,11 +247,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 7,
+          max: 8, // Updated to 8 since we have 9 clarity levels (0-8)
         },
         format: {
           to: function (value) {
-            return clarityLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = clarityLabels[index];
+            // Display "FL" for both position 7 and 8 (FL_MAX)
+            return label === 'FL_MAX' ? 'FL' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {

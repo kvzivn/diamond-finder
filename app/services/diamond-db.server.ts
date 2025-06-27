@@ -122,48 +122,100 @@ export async function getFilteredDiamonds(
 
   // Colour filters
   if (filters.minColour || filters.maxColour) {
-    const colourLabels = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'];
+    // These are the actual colour values that exist in the database
+    const actualColourLabels = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'];
 
-    let minIdx = 0; // Default to K (worst)
-    let maxIdx = colourLabels.length - 1; // Default to D (best)
+    // Map filter values to actual database values
+    const getActualColour = (value: string) => {
+      const cleanValue = value.toUpperCase().replace(/_MAX$/i, '');
+      // Handle D_MAX as D
+      return cleanValue === 'D_MAX' ? 'D' : cleanValue;
+    };
 
-    if (filters.minColour) {
-      const idx = colourLabels.indexOf(filters.minColour.toUpperCase());
-      if (idx !== -1) minIdx = idx;
-    }
+    if (filters.minColour && filters.maxColour) {
+      const minColour = getActualColour(filters.minColour);
+      const maxColour = getActualColour(filters.maxColour);
 
-    if (filters.maxColour) {
-      // Handle _MAX suffix (means include the best/last value)
-      const maxColourValue = filters.maxColour
-        .toUpperCase()
-        .replace('_MAX', '');
-      const idx = colourLabels.indexOf(maxColourValue);
-      if (idx !== -1) maxIdx = idx;
-    }
+      const minIdx = actualColourLabels.indexOf(minColour);
+      const maxIdx = actualColourLabels.indexOf(maxColour);
 
-    // Get the range of valid colors (from minColour to maxColour inclusive)
-    if (minIdx <= maxIdx) {
-      const colorRange = colourLabels.slice(minIdx, maxIdx + 1);
+      if (minIdx !== -1 && maxIdx !== -1) {
+        // Get the range of colour values to include
+        const colourValuesToInclude = actualColourLabels.slice(
+          minIdx,
+          maxIdx + 1
+        );
 
-      if (!where.AND) {
-        where.AND = [];
-      } else if (!Array.isArray(where.AND)) {
-        where.AND = [where.AND];
+        if (!where.AND) {
+          where.AND = [];
+        } else if (!Array.isArray(where.AND)) {
+          where.AND = [where.AND];
+        }
+
+        // Apply white color filters AND exclude fancy colored diamonds
+        (where.AND as Prisma.DiamondWhereInput[]).push({
+          AND: [
+            { color: { in: colourValuesToInclude } },
+            {
+              OR: [
+                { naturalFancyColor: null },
+                { naturalFancyColor: '' },
+                { naturalFancyColor: { in: ['', ' ', '  '] } },
+              ],
+            },
+          ],
+        });
       }
+    } else if (filters.minColour) {
+      const minColour = getActualColour(filters.minColour);
+      const minIdx = actualColourLabels.indexOf(minColour);
+      if (minIdx !== -1) {
+        const colourValuesToInclude = actualColourLabels.slice(minIdx);
 
-      // Apply white color filters AND exclude fancy colored diamonds
-      (where.AND as Prisma.DiamondWhereInput[]).push({
-        AND: [
-          { color: { in: colorRange } },
-          {
-            OR: [
-              { naturalFancyColor: null },
-              { naturalFancyColor: '' },
-              { naturalFancyColor: { in: ['', ' ', '  '] } },
-            ],
-          },
-        ],
-      });
+        if (!where.AND) {
+          where.AND = [];
+        } else if (!Array.isArray(where.AND)) {
+          where.AND = [where.AND];
+        }
+
+        (where.AND as Prisma.DiamondWhereInput[]).push({
+          AND: [
+            { color: { in: colourValuesToInclude } },
+            {
+              OR: [
+                { naturalFancyColor: null },
+                { naturalFancyColor: '' },
+                { naturalFancyColor: { in: ['', ' ', '  '] } },
+              ],
+            },
+          ],
+        });
+      }
+    } else if (filters.maxColour) {
+      const maxColour = getActualColour(filters.maxColour);
+      const maxIdx = actualColourLabels.indexOf(maxColour);
+      if (maxIdx !== -1) {
+        const colourValuesToInclude = actualColourLabels.slice(0, maxIdx + 1);
+
+        if (!where.AND) {
+          where.AND = [];
+        } else if (!Array.isArray(where.AND)) {
+          where.AND = [where.AND];
+        }
+
+        (where.AND as Prisma.DiamondWhereInput[]).push({
+          AND: [
+            { color: { in: colourValuesToInclude } },
+            {
+              OR: [
+                { naturalFancyColor: null },
+                { naturalFancyColor: '' },
+                { naturalFancyColor: { in: ['', ' ', '  '] } },
+              ],
+            },
+          ],
+        });
+      }
     }
   }
 
@@ -404,7 +456,8 @@ export async function getFilteredDiamonds(
 
   // Clarity filters
   if (filters.minClarity || filters.maxClarity) {
-    const clarityLabels = [
+    // These are the actual clarity values that exist in the database
+    const actualClarityLabels = [
       'SI2',
       'SI1',
       'VS2',
@@ -415,30 +468,39 @@ export async function getFilteredDiamonds(
       'FL',
     ];
 
-    if (filters.minClarity && filters.maxClarity) {
-      // Handle _MAX suffix for maxClarity
-      const maxClarityValue = filters.maxClarity
-        .toUpperCase()
-        .replace('_MAX', '');
+    // Map filter values to actual database values
+    const getActualClarity = (value: string) => {
+      const cleanValue = value.toUpperCase().replace(/_MAX$/i, '');
+      // Handle FL_MAX as FL
+      return cleanValue === 'FL_MAX' ? 'FL' : cleanValue;
+    };
 
-      const minIdx = clarityLabels.indexOf(filters.minClarity.toUpperCase());
-      const maxIdx = clarityLabels.indexOf(maxClarityValue);
+    if (filters.minClarity && filters.maxClarity) {
+      const minClarity = getActualClarity(filters.minClarity);
+      const maxClarity = getActualClarity(filters.maxClarity);
+
+      const minIdx = actualClarityLabels.indexOf(minClarity);
+      const maxIdx = actualClarityLabels.indexOf(maxClarity);
+
       if (minIdx !== -1 && maxIdx !== -1) {
-        where.clarity = { in: clarityLabels.slice(minIdx, maxIdx + 1) };
+        // Get the range of clarity values to include
+        const clarityValuesToInclude = actualClarityLabels.slice(
+          minIdx,
+          maxIdx + 1
+        );
+        where.clarity = { in: clarityValuesToInclude };
       }
     } else if (filters.minClarity) {
-      const minIdx = clarityLabels.indexOf(filters.minClarity.toUpperCase());
+      const minClarity = getActualClarity(filters.minClarity);
+      const minIdx = actualClarityLabels.indexOf(minClarity);
       if (minIdx !== -1) {
-        where.clarity = { in: clarityLabels.slice(minIdx) };
+        where.clarity = { in: actualClarityLabels.slice(minIdx) };
       }
     } else if (filters.maxClarity) {
-      // Handle _MAX suffix (means include the best/last value)
-      const maxClarityValue = filters.maxClarity
-        .toUpperCase()
-        .replace('_MAX', '');
-      const maxIdx = clarityLabels.indexOf(maxClarityValue);
+      const maxClarity = getActualClarity(filters.maxClarity);
+      const maxIdx = actualClarityLabels.indexOf(maxClarity);
       if (maxIdx !== -1) {
-        where.clarity = { in: clarityLabels.slice(0, maxIdx + 1) };
+        where.clarity = { in: actualClarityLabels.slice(0, maxIdx + 1) };
       }
     }
   }

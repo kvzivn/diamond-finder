@@ -60,8 +60,18 @@ if (typeof window !== 'undefined') {
     },
 
     FILTER_LABELS: {
-      colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
-      clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
+      colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'D_MAX'],
+      clarity: [
+        'SI2',
+        'SI1',
+        'VS2',
+        'VS1',
+        'VVS2',
+        'VVS1',
+        'IF',
+        'FL',
+        'FL_MAX',
+      ],
       cutGrade: ['Good', 'Very Good', 'Excellent', 'Excellent_MAX'],
       fluorescence: ['None', 'Faint', 'Medium', 'Strong', 'Very Strong'],
       polish: ['Good', 'Very Good', 'Excellent'],
