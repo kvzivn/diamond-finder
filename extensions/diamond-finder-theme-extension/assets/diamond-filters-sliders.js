@@ -355,11 +355,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 4,
+          max: 5, // Updated to 5 since we have 6 fluorescence levels (0-5)
         },
         format: {
           to: function (value) {
-            return fluorescenceLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = fluorescenceLabels[index];
+            // Display "Very Strong" for both position 4 and 5 (Very Strong_MAX)
+            return label === 'Very Strong_MAX' ? 'Very Strong' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {
@@ -409,11 +412,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 2,
+          max: 3, // Updated to 3 since we have 4 polish levels (0-3)
         },
         format: {
           to: function (value) {
-            return polishLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = polishLabels[index];
+            // Display "Excellent" for both position 2 and 3 (Excellent_MAX)
+            return label === 'Excellent_MAX' ? 'Excellent' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {
@@ -463,11 +469,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 2,
+          max: 3, // Updated to 3 since we have 4 symmetry levels (0-3)
         },
         format: {
           to: function (value) {
-            return symmetryLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = symmetryLabels[index];
+            // Display "Excellent" for both position 2 and 3 (Excellent_MAX)
+            return label === 'Excellent_MAX' ? 'Excellent' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {

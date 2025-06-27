@@ -291,6 +291,90 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Special handling for polish filter
+      if (filterType === 'polish') {
+        // For polish, we need special logic to handle Excellent_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at Excellent_MAX position - return only Excellent
+            return ['Excellent', 'Excellent'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at Excellent_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at Excellent, right at Excellent_MAX - only Excellent
+            return ['Excellent', 'Excellent'];
+          } else {
+            // Include all grades from start to Excellent (inclusive)
+            return [labels[startIndex], 'Excellent'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
+      // Special handling for symmetry filter
+      if (filterType === 'symmetry') {
+        // For symmetry, we need special logic to handle Excellent_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at Excellent_MAX position - return only Excellent
+            return ['Excellent', 'Excellent'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at Excellent_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at Excellent, right at Excellent_MAX - only Excellent
+            return ['Excellent', 'Excellent'];
+          } else {
+            // Include all grades from start to Excellent (inclusive)
+            return [labels[startIndex], 'Excellent'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
+      // Special handling for fluorescence filter
+      if (filterType === 'fluorescence') {
+        // For fluorescence, we need special logic to handle Very Strong_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at Very Strong_MAX position - return only Very Strong
+            return ['Very Strong', 'Very Strong'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at Very Strong_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at Very Strong, right at Very Strong_MAX - only Very Strong
+            return ['Very Strong', 'Very Strong'];
+          } else {
+            // Include all grades from start to Very Strong (inclusive)
+            return [labels[startIndex], 'Very Strong'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
       // Original logic for other filter types
       if (startIndex === endIndex) {
         return [labels[startIndex]];

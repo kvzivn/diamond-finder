@@ -620,72 +620,100 @@ export async function getFilteredDiamonds(
 
   // Polish filters
   if (filters.minPolish || filters.maxPolish) {
-    const polishLabels = ['Good', 'Very Good', 'Excellent'];
+    // These are the actual polish values that exist in the database
+    const actualPolishLabels = ['Good', 'Very Good', 'Excellent'];
+
+    // Map filter values to actual database values
+    const getActualPolish = (value: string) => {
+      const cleanValue = value.replace(/_MAX$/i, '');
+      // Handle Excellent_MAX as Excellent
+      return cleanValue === 'Excellent_MAX' ? 'Excellent' : cleanValue;
+    };
 
     if (filters.minPolish && filters.maxPolish) {
-      // Handle _MAX suffix for maxPolish
-      const maxPolishValue = filters.maxPolish.replace(/_MAX$/i, '');
+      const minPolish = getActualPolish(filters.minPolish);
+      const maxPolish = getActualPolish(filters.maxPolish);
 
-      const minIdx = polishLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minPolish!.toLowerCase()
+      const minIdx = actualPolishLabels.findIndex(
+        (g) => g.toLowerCase() === minPolish.toLowerCase()
       );
-      const maxIdx = polishLabels.findIndex(
-        (g) => g.toLowerCase() === maxPolishValue.toLowerCase()
+      const maxIdx = actualPolishLabels.findIndex(
+        (g) => g.toLowerCase() === maxPolish.toLowerCase()
       );
+
       if (minIdx !== -1 && maxIdx !== -1) {
-        where.polish = { in: polishLabels.slice(minIdx, maxIdx + 1) };
+        // Get the range of polish values to include
+        const polishValuesToInclude = actualPolishLabels.slice(
+          minIdx,
+          maxIdx + 1
+        );
+        where.polish = { in: polishValuesToInclude };
       }
     } else if (filters.minPolish) {
-      const minIdx = polishLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minPolish!.toLowerCase()
+      const minPolish = getActualPolish(filters.minPolish);
+      const minIdx = actualPolishLabels.findIndex(
+        (g) => g.toLowerCase() === minPolish.toLowerCase()
       );
       if (minIdx !== -1) {
-        where.polish = { in: polishLabels.slice(minIdx) };
+        where.polish = { in: actualPolishLabels.slice(minIdx) };
       }
     } else if (filters.maxPolish) {
-      // Handle _MAX suffix (means include the best/last value)
-      const maxPolishValue = filters.maxPolish.replace(/_MAX$/i, '');
-      const maxIdx = polishLabels.findIndex(
-        (g) => g.toLowerCase() === maxPolishValue.toLowerCase()
+      const maxPolish = getActualPolish(filters.maxPolish);
+      const maxIdx = actualPolishLabels.findIndex(
+        (g) => g.toLowerCase() === maxPolish.toLowerCase()
       );
       if (maxIdx !== -1) {
-        where.polish = { in: polishLabels.slice(0, maxIdx + 1) };
+        where.polish = { in: actualPolishLabels.slice(0, maxIdx + 1) };
       }
     }
   }
 
   // Symmetry filters
   if (filters.minSymmetry || filters.maxSymmetry) {
-    const symmetryLabels = ['Good', 'Very Good', 'Excellent'];
+    // These are the actual symmetry values that exist in the database
+    const actualSymmetryLabels = ['Good', 'Very Good', 'Excellent'];
+
+    // Map filter values to actual database values
+    const getActualSymmetry = (value: string) => {
+      const cleanValue = value.replace(/_MAX$/i, '');
+      // Handle Excellent_MAX as Excellent
+      return cleanValue === 'Excellent_MAX' ? 'Excellent' : cleanValue;
+    };
 
     if (filters.minSymmetry && filters.maxSymmetry) {
-      // Handle _MAX suffix for maxSymmetry
-      const maxSymmetryValue = filters.maxSymmetry.replace(/_MAX$/i, '');
+      const minSymmetry = getActualSymmetry(filters.minSymmetry);
+      const maxSymmetry = getActualSymmetry(filters.maxSymmetry);
 
-      const minIdx = symmetryLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minSymmetry!.toLowerCase()
+      const minIdx = actualSymmetryLabels.findIndex(
+        (g) => g.toLowerCase() === minSymmetry.toLowerCase()
       );
-      const maxIdx = symmetryLabels.findIndex(
-        (g) => g.toLowerCase() === maxSymmetryValue.toLowerCase()
+      const maxIdx = actualSymmetryLabels.findIndex(
+        (g) => g.toLowerCase() === maxSymmetry.toLowerCase()
       );
+
       if (minIdx !== -1 && maxIdx !== -1) {
-        where.symmetry = { in: symmetryLabels.slice(minIdx, maxIdx + 1) };
+        // Get the range of symmetry values to include
+        const symmetryValuesToInclude = actualSymmetryLabels.slice(
+          minIdx,
+          maxIdx + 1
+        );
+        where.symmetry = { in: symmetryValuesToInclude };
       }
     } else if (filters.minSymmetry) {
-      const minIdx = symmetryLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minSymmetry!.toLowerCase()
+      const minSymmetry = getActualSymmetry(filters.minSymmetry);
+      const minIdx = actualSymmetryLabels.findIndex(
+        (g) => g.toLowerCase() === minSymmetry.toLowerCase()
       );
       if (minIdx !== -1) {
-        where.symmetry = { in: symmetryLabels.slice(minIdx) };
+        where.symmetry = { in: actualSymmetryLabels.slice(minIdx) };
       }
     } else if (filters.maxSymmetry) {
-      // Handle _MAX suffix (means include the best/last value)
-      const maxSymmetryValue = filters.maxSymmetry.replace(/_MAX$/i, '');
-      const maxIdx = symmetryLabels.findIndex(
-        (g) => g.toLowerCase() === maxSymmetryValue.toLowerCase()
+      const maxSymmetry = getActualSymmetry(filters.maxSymmetry);
+      const maxIdx = actualSymmetryLabels.findIndex(
+        (g) => g.toLowerCase() === maxSymmetry.toLowerCase()
       );
       if (maxIdx !== -1) {
-        where.symmetry = { in: symmetryLabels.slice(0, maxIdx + 1) };
+        where.symmetry = { in: actualSymmetryLabels.slice(0, maxIdx + 1) };
       }
     }
   }
@@ -705,43 +733,65 @@ export async function getFilteredDiamonds(
   // This requires a calculated field or raw query
   // For now, we'll skip this complex filter
 
-  // Fluorescence filters (ordered from best to worst for diamonds)
+  // Fluorescence filters (ordered from best to worst for UI display)
   if (filters.minFluorescence || filters.maxFluorescence) {
-    const fluorescenceLabels = [
-      'Very Strong',
-      'Strong',
-      'Medium',
-      'Faint',
+    // These are the actual fluorescence values that exist in the database
+    // Note: UI displays from None (best) to Very Strong (worst)
+    // But in the database, we need to handle the actual values
+    const actualFluorescenceLabels = [
       'None',
+      'Faint',
+      'Medium',
+      'Strong',
+      'Very Strong',
     ];
 
-    let minIdx = 0; // Default to Very Strong (worst)
-    let maxIdx = fluorescenceLabels.length - 1; // Default to None (best)
+    // Map filter values to actual database values
+    const getActualFluorescence = (value: string) => {
+      const cleanValue = value.replace(/_MAX$/i, '');
+      // Handle Very Strong_MAX as Very Strong
+      return cleanValue;
+    };
 
-    if (filters.minFluorescence) {
-      const idx = fluorescenceLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minFluorescence!.toLowerCase()
-      );
-      if (idx !== -1) minIdx = idx;
-    }
+    if (filters.minFluorescence && filters.maxFluorescence) {
+      const minFluorescence = getActualFluorescence(filters.minFluorescence);
+      const maxFluorescence = getActualFluorescence(filters.maxFluorescence);
 
-    if (filters.maxFluorescence) {
-      // Handle _MAX suffix (means include the best/last value)
-      const maxFluorescenceValue = filters.maxFluorescence.replace(
-        /_MAX$/i,
-        ''
+      const minIdx = actualFluorescenceLabels.findIndex(
+        (g) => g.toLowerCase() === minFluorescence.toLowerCase()
       );
-      const idx = fluorescenceLabels.findIndex(
-        (g) => g.toLowerCase() === maxFluorescenceValue.toLowerCase()
+      const maxIdx = actualFluorescenceLabels.findIndex(
+        (g) => g.toLowerCase() === maxFluorescence.toLowerCase()
       );
-      if (idx !== -1) maxIdx = idx;
-    }
 
-    // Get the range of valid fluorescence values
-    if (minIdx <= maxIdx) {
-      where.fluorescenceIntensity = {
-        in: fluorescenceLabels.slice(minIdx, maxIdx + 1),
-      };
+      if (minIdx !== -1 && maxIdx !== -1) {
+        // Get the range of fluorescence values to include
+        const fluorescenceValuesToInclude = actualFluorescenceLabels.slice(
+          minIdx,
+          maxIdx + 1
+        );
+        where.fluorescenceIntensity = { in: fluorescenceValuesToInclude };
+      }
+    } else if (filters.minFluorescence) {
+      const minFluorescence = getActualFluorescence(filters.minFluorescence);
+      const minIdx = actualFluorescenceLabels.findIndex(
+        (g) => g.toLowerCase() === minFluorescence.toLowerCase()
+      );
+      if (minIdx !== -1) {
+        where.fluorescenceIntensity = {
+          in: actualFluorescenceLabels.slice(minIdx),
+        };
+      }
+    } else if (filters.maxFluorescence) {
+      const maxFluorescence = getActualFluorescence(filters.maxFluorescence);
+      const maxIdx = actualFluorescenceLabels.findIndex(
+        (g) => g.toLowerCase() === maxFluorescence.toLowerCase()
+      );
+      if (maxIdx !== -1) {
+        where.fluorescenceIntensity = {
+          in: actualFluorescenceLabels.slice(0, maxIdx + 1),
+        };
+      }
     }
   }
 
