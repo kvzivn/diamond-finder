@@ -58,6 +58,10 @@ if (typeof window !== 'undefined') {
     window.DiamondAPI &&
     window.DiamondRenderer &&
     window.DiamondFilters &&
+    window.DiamondFiltersUtils &&
+    window.DiamondFiltersSliders &&
+    window.DiamondFiltersButtons &&
+    window.DiamondFiltersTabs &&
     window.DiamondUI &&
     window.DiamondDetails
   ) {
@@ -70,12 +74,34 @@ if (typeof window !== 'undefined') {
         window.DiamondAPI &&
         window.DiamondRenderer &&
         window.DiamondFilters &&
+        window.DiamondFiltersUtils &&
+        window.DiamondFiltersSliders &&
+        window.DiamondFiltersButtons &&
+        window.DiamondFiltersTabs &&
         window.DiamondUI &&
         window.DiamondDetails
       ) {
         window.DiamondSearchApp.initialize();
       } else {
         console.warn('[DIAMOND SEARCH] Some modules failed to load');
+        // Log which modules are missing
+        const modules = {
+          DiamondSearchState: window.DiamondSearchState,
+          DiamondAPI: window.DiamondAPI,
+          DiamondRenderer: window.DiamondRenderer,
+          DiamondFilters: window.DiamondFilters,
+          DiamondFiltersUtils: window.DiamondFiltersUtils,
+          DiamondFiltersSliders: window.DiamondFiltersSliders,
+          DiamondFiltersButtons: window.DiamondFiltersButtons,
+          DiamondFiltersTabs: window.DiamondFiltersTabs,
+          DiamondUI: window.DiamondUI,
+          DiamondDetails: window.DiamondDetails,
+        };
+        Object.entries(modules).forEach(([name, module]) => {
+          if (!module) {
+            console.warn(`[DIAMOND SEARCH] Missing module: ${name}`);
+          }
+        });
       }
     }, 100);
   }

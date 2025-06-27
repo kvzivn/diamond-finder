@@ -24,7 +24,7 @@ npm run dev              # Start Shopify app development with tunneling
 npm run build           # Build the Remix application
 npm run setup           # Generate Prisma client and run migrations
 
-# Linting and Formatting  
+# Linting and Formatting
 npm run lint            # Run ESLint
 
 # Testing and Type Safety
@@ -47,17 +47,20 @@ npm run generate        # Generate new Shopify app components
 ## Key Services and Models
 
 ### Diamond Service (`app/services/idex.service.server.ts`)
+
 - Fetches diamond data from IDEX API (natural and lab-grown)
-- Handles ZIP file extraction and CSV parsing  
+- Handles ZIP file extraction and CSV parsing
 - Converts USD prices to SEK using exchange rates
 - Maps CSV headers to Diamond interface properties
 
 ### Diamond Model (`app/models/diamond.server.ts`)
+
 - Defines Diamond interface with 60+ properties
 - Supports both natural and lab-grown diamond types
 - Includes price fields in both USD and SEK
 
 ### Diamond Cache Service (`app/services/diamond-cache.server.ts`)
+
 - Caches diamond data to reduce API calls
 - Manages data freshness and invalidation
 
@@ -66,9 +69,14 @@ npm run generate        # Generate new Shopify app components
 The theme extension follows a modular architecture documented in `extensions/diamond-finder-theme-extension/README-DIAMOND-SEARCH-ARCHITECTURE.md`:
 
 - **diamond-state.js**: Global state management
-- **diamond-api.js**: API communication and query building  
+- **diamond-api.js**: API communication and query building
 - **diamond-renderer.js**: Diamond display and sorting
-- **diamond-filters.js**: Filter component logic
+- **Diamond Filter Modules**:
+  - **diamond-filters-utils.js**: Shared utilities and helpers
+  - **diamond-filters-sliders.js**: All slider components
+  - **diamond-filters-buttons.js**: Button filter groups
+  - **diamond-filters-tabs.js**: Color tab switching
+  - **diamond-filters-core.js**: Main coordination module
 - **diamond-ui.js**: UI interactions and events
 - **diamond-finder-init.js**: Application initialization
 
@@ -87,7 +95,7 @@ Uses Prisma with SQLite for development. Main model is `Session` for Shopify app
 ## API Routes
 
 - `/diamonds/all` - Returns all cached diamond data
-- `/diamonds/natural` - Returns natural diamonds only  
+- `/diamonds/natural` - Returns natural diamonds only
 - `/diamonds/lab` - Returns lab-grown diamonds only
 - `/admin/trigger-refresh` - Forces refresh of diamond cache
 

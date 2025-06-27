@@ -36,7 +36,7 @@ if (typeof window !== 'undefined') {
       colour: ['K', 'D_MAX'], // Revert back to K as requested
       clarity: ['SI2', 'FL_MAX'],
       cutGrade: ['Fair', 'Ideal_MAX'],
-      fluorescence: ['Very Strong', 'None_MAX'],
+      fluorescence: ['None', 'Very Strong_MAX'],
       polish: ['Good', 'Excellent_MAX'],
       symmetry: ['Good', 'Excellent_MAX'],
       table: [0, 100], // Percentage range
@@ -48,7 +48,7 @@ if (typeof window !== 'undefined') {
       colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
       cutGrade: ['Fair', 'Good', 'Very Good', 'Excellent', 'Ideal'],
-      fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
+      fluorescence: ['None', 'Faint', 'Medium', 'Strong', 'Very Strong'],
       polish: ['Good', 'Very Good', 'Excellent'],
       symmetry: ['Good', 'Very Good', 'Excellent'],
       fancyIntensity: [
