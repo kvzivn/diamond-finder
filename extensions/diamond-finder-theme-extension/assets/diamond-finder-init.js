@@ -1,8 +1,6 @@
 // Diamond Search Main Application Controller
 if (typeof window !== 'undefined') {
-
   window.DiamondSearchApp = {
-
     // Initialize the entire application
     initialize() {
       // Wait for DOM to be ready
@@ -15,8 +13,6 @@ if (typeof window !== 'undefined') {
 
     // Start the application
     start() {
-      console.log("[DIAMOND SEARCH] Initializing application...");
-
       // Initialize sliders first (they trigger the initial data fetch when all are ready)
       window.DiamondFilters.initializeSliders();
 
@@ -28,8 +24,6 @@ if (typeof window !== 'undefined') {
 
       // Setup additional event handlers
       this.setupAdditionalEventHandlers();
-
-      console.log("[DIAMOND SEARCH] Application initialized successfully");
     },
 
     // Setup any additional event handlers not covered by other modules
@@ -40,7 +34,10 @@ if (typeof window !== 'undefined') {
         applyFiltersButton.addEventListener('click', () => {
           const state = window.DiamondSearchState;
           state.logCurrentFilters();
-          window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
+          window.DiamondAPI.fetchDiamondData(
+            1,
+            state.paginationInfo.limit || 24
+          );
         });
       }
     },
@@ -52,28 +49,41 @@ if (typeof window !== 'undefined') {
       if (state.areAllSlidersInitialized() && !state.initialLoadComplete) {
         window.DiamondUI.applyInitialFilters();
       }
-    }
+    },
   };
 
   // Auto-initialize when all modules are loaded
-  if (window.DiamondSearchState && window.DiamondAPI && window.DiamondRenderer &&
-      window.DiamondFilters && window.DiamondUI && window.DiamondDetails) {
+  if (
+    window.DiamondSearchState &&
+    window.DiamondAPI &&
+    window.DiamondRenderer &&
+    window.DiamondFilters &&
+    window.DiamondUI &&
+    window.DiamondDetails
+  ) {
     window.DiamondSearchApp.initialize();
   } else {
     // Fallback: wait a bit for all modules to load
     setTimeout(() => {
-      if (window.DiamondSearchState && window.DiamondAPI && window.DiamondRenderer &&
-          window.DiamondFilters && window.DiamondUI && window.DiamondDetails) {
+      if (
+        window.DiamondSearchState &&
+        window.DiamondAPI &&
+        window.DiamondRenderer &&
+        window.DiamondFilters &&
+        window.DiamondUI &&
+        window.DiamondDetails
+      ) {
         window.DiamondSearchApp.initialize();
       } else {
-        console.warn("[DIAMOND SEARCH] Some modules failed to load");
+        console.warn('[DIAMOND SEARCH] Some modules failed to load');
       }
     }, 100);
   }
 
   // Override the slider initialization callback
-  const originalMarkSliderInitialized = window.DiamondSearchState.markSliderInitialized;
-  window.DiamondSearchState.markSliderInitialized = function(sliderType) {
+  const originalMarkSliderInitialized =
+    window.DiamondSearchState.markSliderInitialized;
+  window.DiamondSearchState.markSliderInitialized = function (sliderType) {
     originalMarkSliderInitialized.call(this, sliderType);
 
     // Check if all sliders are now initialized and trigger initial load

@@ -143,7 +143,27 @@ export async function getFilteredDiamonds(
 
     // Get the range of valid colors (from minColour to maxColour inclusive)
     if (minIdx <= maxIdx) {
-      where.color = { in: colourLabels.slice(minIdx, maxIdx + 1) };
+      const colorRange = colourLabels.slice(minIdx, maxIdx + 1);
+
+      if (!where.AND) {
+        where.AND = [];
+      } else if (!Array.isArray(where.AND)) {
+        where.AND = [where.AND];
+      }
+
+      // Apply white color filters AND exclude fancy colored diamonds
+      (where.AND as Prisma.DiamondWhereInput[]).push({
+        AND: [
+          { color: { in: colorRange } },
+          {
+            OR: [
+              { naturalFancyColor: null },
+              { naturalFancyColor: '' },
+              { naturalFancyColor: { in: ['', ' ', '  '] } },
+            ],
+          },
+        ],
+      });
     }
   }
 

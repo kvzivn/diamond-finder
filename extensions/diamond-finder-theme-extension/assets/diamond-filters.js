@@ -221,10 +221,12 @@ if (typeof window !== 'undefined') {
 
       // Get active colour tab
       const activeColourTab = document.querySelector(
-        '[data-tab][data-active="true"]'
+        '#ds-colour-tab-white[data-active="true"], #ds-colour-tab-fancy[data-active="true"]'
       );
       if (activeColourTab) {
         values.colourType = activeColourTab.dataset.tab;
+      } else {
+        values.colourType = 'white'; // Default to white if no tab is found active
       }
 
       return values;

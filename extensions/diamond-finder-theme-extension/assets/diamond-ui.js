@@ -61,6 +61,30 @@ if (typeof window !== 'undefined') {
         button.setAttribute('aria-pressed', 'false');
       });
 
+      // Ensure white color tab is active initially (to exclude fancy colored diamonds)
+      const whiteTab = document.getElementById('ds-colour-tab-white');
+      const fancyTab = document.getElementById('ds-colour-tab-fancy');
+      const whitePanel = document.getElementById('ds-colour-panel-white');
+      const fancyPanel = document.getElementById('ds-colour-panel-fancy');
+
+      if (whiteTab && fancyTab && whitePanel && fancyPanel) {
+        // Set white tab as active
+        whiteTab.dataset.active = 'true';
+        whiteTab.setAttribute('aria-pressed', 'true');
+
+        // Set fancy tab as inactive
+        fancyTab.dataset.active = 'false';
+        fancyTab.setAttribute('aria-pressed', 'false');
+
+        // Show white panel, hide fancy panel
+        whitePanel.classList.remove('tw-hidden');
+        fancyPanel.classList.add('tw-hidden');
+
+        console.log(
+          '[INITIAL LOAD] White color tab set as active to exclude fancy diamonds'
+        );
+      }
+
       // Setup filter button groups
       window.DiamondFilters.setupFilterButtonGroups();
 
@@ -71,7 +95,8 @@ if (typeof window !== 'undefined') {
         sliders: initialSliderValues,
       });
 
-      // Fetch initial data
+      // Fetch initial data - color filters will be applied via the API logic
+      // The API logic handles the case where sliders aren't ready by applying default white color filters
       window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
       state.initialLoadComplete = true;
     },
@@ -297,15 +322,6 @@ if (typeof window !== 'undefined') {
           hideImages();
         }
       });
-    },
-
-    // Check if all sliders are initialized and trigger initial load
-    checkSlidersAndInitialize() {
-      const state = window.DiamondSearchState;
-
-      if (state.areAllSlidersInitialized() && !state.initialLoadComplete) {
-        this.applyInitialFilters();
-      }
     },
   };
 }
