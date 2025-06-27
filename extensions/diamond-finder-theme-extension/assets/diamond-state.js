@@ -29,6 +29,21 @@ if (typeof window !== 'undefined') {
       fancyIntensity: false,
     },
 
+    // Track which sliders have been changed by the user
+    sliderChangedState: {
+      price: false,
+      carat: false,
+      colour: false,
+      clarity: false,
+      cutGrade: false,
+      fluorescence: false,
+      polish: false,
+      symmetry: false,
+      table: false,
+      ratio: false,
+      fancyIntensity: false,
+    },
+
     // Configuration constants
     DEFAULT_FILTER_RANGES: {
       price: [2500, 10000000], // SEK range
@@ -80,10 +95,24 @@ if (typeof window !== 'undefined') {
 
   window.DiamondSearchState.clearFilters = function () {
     this.activeFilters = {};
+    // Reset slider changed states for advanced filters
+    this.sliderChangedState.fluorescence = false;
+    this.sliderChangedState.polish = false;
+    this.sliderChangedState.symmetry = false;
+    this.sliderChangedState.table = false;
+    this.sliderChangedState.ratio = false;
   };
 
   window.DiamondSearchState.markSliderInitialized = function (sliderType) {
     this.sliderInitializationState[sliderType] = true;
+  };
+
+  window.DiamondSearchState.markSliderChanged = function (sliderType) {
+    this.sliderChangedState[sliderType] = true;
+  };
+
+  window.DiamondSearchState.hasSliderChanged = function (sliderType) {
+    return this.sliderChangedState[sliderType] === true;
   };
 
   window.DiamondSearchState.areAllSlidersInitialized = function () {
@@ -107,15 +136,63 @@ if (typeof window !== 'undefined') {
     this.paginationInfo = info;
   };
 
+  window.DiamondSearchState.resetSliderChangedState = function (sliderType) {
+    if (sliderType) {
+      this.sliderChangedState[sliderType] = false;
+    } else {
+      // Reset all slider changed states
+      Object.keys(this.sliderChangedState).forEach((key) => {
+        this.sliderChangedState[key] = false;
+      });
+    }
+  };
+
   // Utility functions
   window.DiamondSearchState.logCurrentFilters = function (
-    prefix = '[FILTERS APPLIED]'
+    prefix = '[INITIAL FILTERS]'
   ) {
     const sliderValues = window.DiamondFilters
       ? window.DiamondFilters.getSliderValues()
       : {};
-    const allFilters = { ...this.activeFilters, sliders: sliderValues };
+
+    // Only include advanced filters if they've been changed by the user
+    const appliedSliderValues = {
+      price: sliderValues.price,
+      carat: sliderValues.carat,
+      colour: sliderValues.colour,
+      clarity: sliderValues.clarity,
+      cutGrade: sliderValues.cutGrade,
+    };
+
+    // Add advanced filters only if they've been changed
+    if (this.hasSliderChanged('fluorescence') && sliderValues.fluorescence) {
+      appliedSliderValues.fluorescence = sliderValues.fluorescence;
+    }
+    if (this.hasSliderChanged('polish') && sliderValues.polish) {
+      appliedSliderValues.polish = sliderValues.polish;
+    }
+    if (this.hasSliderChanged('symmetry') && sliderValues.symmetry) {
+      appliedSliderValues.symmetry = sliderValues.symmetry;
+    }
+    if (this.hasSliderChanged('table') && sliderValues.table) {
+      appliedSliderValues.table = sliderValues.table;
+    }
+    if (this.hasSliderChanged('ratio') && sliderValues.ratio) {
+      appliedSliderValues.ratio = sliderValues.ratio;
+    }
+
+    // Include fancy color related values if applicable
+    if (sliderValues.fancyColours) {
+      appliedSliderValues.fancyColours = sliderValues.fancyColours;
+    }
+    if (sliderValues.fancyIntensity) {
+      appliedSliderValues.fancyIntensity = sliderValues.fancyIntensity;
+    }
+    if (sliderValues.colourType) {
+      appliedSliderValues.colourType = sliderValues.colourType;
+    }
+
+    const allFilters = { ...this.activeFilters, sliders: appliedSliderValues };
     console.log(prefix, allFilters);
-    console.log(sliderValues);
   };
 }

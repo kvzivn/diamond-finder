@@ -84,15 +84,26 @@ if (typeof window !== 'undefined') {
       // Setup filter button groups
       window.DiamondFilters.setupFilterButtonGroups();
 
-      // Log initial filters
+      // Log initial filters - only show what's actually being applied
       const initialSliderValues = window.DiamondFilters.getSliderValues(true);
-      console.log('[INITIAL FILTERS]', {
+      const appliedFilters = {
+        price: initialSliderValues.price,
+        carat: initialSliderValues.carat,
+        colour: initialSliderValues.colour,
+        clarity: initialSliderValues.clarity,
+        cutGrade: initialSliderValues.cutGrade,
+        // Advanced filters are NOT included as they're not applied initially
+      };
+
+      console.log('[INITIAL USER SELECTIONS]', {
         ...state.activeFilters,
-        sliders: initialSliderValues,
+        sliders: appliedFilters,
       });
 
-      // Fetch initial data - color filters will be applied via the API logic
-      // The API logic handles the case where sliders aren't ready by applying default white color filters
+      // Fetch initial data
+      // Basic filters (shape, type, price, carat, color, clarity, cut grade) will be applied
+      // Advanced filters (fluorescence, polish, symmetry, table, ratio) will NOT be applied unless the user changes them
+      // Certificates will include all by default (GIA, IGI, HRD)
       window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
       state.initialLoadComplete = true;
     },

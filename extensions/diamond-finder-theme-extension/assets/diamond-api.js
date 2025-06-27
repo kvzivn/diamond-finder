@@ -228,7 +228,11 @@ if (typeof window !== 'undefined') {
       const fluorescenceSliderEl = document.getElementById(
         'ds-fluorescence-slider-noui'
       );
-      if (fluorescenceSliderEl && fluorescenceSliderEl.noUiSlider) {
+      if (
+        fluorescenceSliderEl &&
+        fluorescenceSliderEl.noUiSlider &&
+        state.hasSliderChanged('fluorescence')
+      ) {
         const fluorescenceValues =
           window.DiamondFilters.getSliderValues().fluorescence;
         if (fluorescenceValues && fluorescenceValues.length > 0) {
@@ -252,7 +256,11 @@ if (typeof window !== 'undefined') {
 
       // Add polish filters from sliders
       const polishSliderEl = document.getElementById('ds-polish-slider-noui');
-      if (polishSliderEl && polishSliderEl.noUiSlider) {
+      if (
+        polishSliderEl &&
+        polishSliderEl.noUiSlider &&
+        state.hasSliderChanged('polish')
+      ) {
         const polishValues = window.DiamondFilters.getSliderValues().polish;
         if (polishValues && polishValues.length > 0) {
           const minPolish = polishValues[0];
@@ -274,7 +282,11 @@ if (typeof window !== 'undefined') {
       const symmetrySliderEl = document.getElementById(
         'ds-symmetry-slider-noui'
       );
-      if (symmetrySliderEl && symmetrySliderEl.noUiSlider) {
+      if (
+        symmetrySliderEl &&
+        symmetrySliderEl.noUiSlider &&
+        state.hasSliderChanged('symmetry')
+      ) {
         const symmetryValues = window.DiamondFilters.getSliderValues().symmetry;
         if (symmetryValues && symmetryValues.length > 0) {
           const minSymmetry = symmetryValues[0];
@@ -294,7 +306,11 @@ if (typeof window !== 'undefined') {
 
       // Add table filters from sliders
       const tableSliderEl = document.getElementById('ds-table-slider');
-      if (tableSliderEl && tableSliderEl.noUiSlider) {
+      if (
+        tableSliderEl &&
+        tableSliderEl.noUiSlider &&
+        state.hasSliderChanged('table')
+      ) {
         const tableValues = tableSliderEl.noUiSlider.get();
         if (tableValues && tableValues.length === 2) {
           const minTable = parseFloat(tableValues[0]);
@@ -306,7 +322,11 @@ if (typeof window !== 'undefined') {
 
       // Add ratio filters from sliders
       const ratioSliderEl = document.getElementById('ds-ratio-slider');
-      if (ratioSliderEl && ratioSliderEl.noUiSlider) {
+      if (
+        ratioSliderEl &&
+        ratioSliderEl.noUiSlider &&
+        state.hasSliderChanged('ratio')
+      ) {
         const ratioValues = ratioSliderEl.noUiSlider.get();
         if (ratioValues && ratioValues.length === 2) {
           const minRatio = parseFloat(ratioValues[0]);
@@ -316,7 +336,72 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Log all filters being applied
+      this.logAppliedFilters(params);
+
       return params.toString();
+    },
+
+    // Log all filters being applied to the API
+    logAppliedFilters(params) {
+      const appliedFilters = {};
+      const basicFilters = {};
+      const advancedFilters = {};
+      const otherFilters = {};
+
+      // Convert URLSearchParams to a plain object and categorize
+      for (const [key, value] of params.entries()) {
+        appliedFilters[key] = value;
+
+        // Categorize filters
+        if (
+          [
+            'shape',
+            'type',
+            'minPriceSek',
+            'maxPriceSek',
+            'minCarat',
+            'maxCarat',
+            'minColour',
+            'maxColour',
+            'minClarity',
+            'maxClarity',
+            'minCutGrade',
+            'maxCutGrade',
+            'gradingLab',
+          ].includes(key)
+        ) {
+          basicFilters[key] = value;
+        } else if (
+          [
+            'minFluorescence',
+            'maxFluorescence',
+            'minPolish',
+            'maxPolish',
+            'minSymmetry',
+            'maxSymmetry',
+            'minTable',
+            'maxTable',
+            'minRatio',
+            'maxRatio',
+          ].includes(key)
+        ) {
+          advancedFilters[key] = value;
+        } else {
+          otherFilters[key] = value;
+        }
+      }
+
+      console.log('[FILTERS APPLIED]', {
+        totalFilters: params
+          .toString()
+          .split('&')
+          .filter((p) => p).length,
+        basicFilters: basicFilters,
+        advancedFilters: advancedFilters,
+        otherFilters: otherFilters,
+        fullQueryString: params.toString(),
+      });
     },
 
     // Fetch diamond data from API

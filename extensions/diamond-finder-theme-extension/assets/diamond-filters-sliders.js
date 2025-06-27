@@ -377,6 +377,11 @@ if (typeof window !== 'undefined') {
       const debounceFetch = window.DiamondFiltersUtils.createDebouncedFetch();
       fluorescenceSlider.noUiSlider.on('change', debounceFetch);
 
+      // Track when user changes the slider
+      fluorescenceSlider.noUiSlider.on('change', function () {
+        state.markSliderChanged('fluorescence');
+      });
+
       setTimeout(() => {
         state.markSliderInitialized('fluorescence');
       }, 10);
@@ -426,6 +431,11 @@ if (typeof window !== 'undefined') {
       const debounceFetch = window.DiamondFiltersUtils.createDebouncedFetch();
       polishSlider.noUiSlider.on('change', debounceFetch);
 
+      // Track when user changes the slider
+      polishSlider.noUiSlider.on('change', function () {
+        state.markSliderChanged('polish');
+      });
+
       setTimeout(() => {
         state.markSliderInitialized('polish');
       }, 10);
@@ -474,6 +484,11 @@ if (typeof window !== 'undefined') {
 
       const debounceFetch = window.DiamondFiltersUtils.createDebouncedFetch();
       symmetrySlider.noUiSlider.on('change', debounceFetch);
+
+      // Track when user changes the slider
+      symmetrySlider.noUiSlider.on('change', function () {
+        state.markSliderChanged('symmetry');
+      });
 
       setTimeout(() => {
         state.markSliderInitialized('symmetry');
@@ -530,10 +545,16 @@ if (typeof window !== 'undefined') {
 
       tableSlider.noUiSlider.on('change', debounceFetch);
 
+      // Track when user changes the slider
+      tableSlider.noUiSlider.on('change', function () {
+        state.markSliderChanged('table');
+      });
+
       minTableInput.addEventListener('change', function () {
         const value = parseFloat(this.value.replace('%', ''));
         if (!isNaN(value)) {
           tableSlider.noUiSlider.set([value, null]);
+          state.markSliderChanged('table');
         }
       });
 
@@ -541,6 +562,7 @@ if (typeof window !== 'undefined') {
         const value = parseFloat(this.value.replace('%', ''));
         if (!isNaN(value)) {
           tableSlider.noUiSlider.set([null, value]);
+          state.markSliderChanged('table');
         }
       });
 
@@ -597,10 +619,16 @@ if (typeof window !== 'undefined') {
 
       ratioSlider.noUiSlider.on('change', debounceFetch);
 
+      // Track when user changes the slider
+      ratioSlider.noUiSlider.on('change', function () {
+        state.markSliderChanged('ratio');
+      });
+
       minRatioInput.addEventListener('change', function () {
         const value = parseFloat(this.value);
         if (!isNaN(value)) {
           ratioSlider.noUiSlider.set([value, null]);
+          state.markSliderChanged('ratio');
         }
       });
 
@@ -608,6 +636,7 @@ if (typeof window !== 'undefined') {
         const value = parseFloat(this.value);
         if (!isNaN(value)) {
           ratioSlider.noUiSlider.set([null, value]);
+          state.markSliderChanged('ratio');
         }
       });
 
