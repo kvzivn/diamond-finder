@@ -64,15 +64,39 @@ if (typeof window !== 'undefined') {
         const handles = colourSliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = colourLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.colour = [colourLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.colour = [
-            colourLabels[startIndex],
-            colourLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.colour = [
+              colourLabels[maxIndex],
+              colourLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minColour = colourLabels[startIndex];
+            const maxColour = colourLabels[endIndex] + '_MAX';
+            values.colour = [minColour, maxColour];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minColour = colourLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.colour = [minColour];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.colour = [minColour];
+            } else {
+              // Normal range with exclusive end
+              values.colour = [minColour, colourLabels[adjustedEndIndex]];
+            }
+          }
         }
       }
 
@@ -83,15 +107,39 @@ if (typeof window !== 'undefined') {
         const handles = claritySliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = clarityLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.clarity = [clarityLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.clarity = [
-            clarityLabels[startIndex],
-            clarityLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.clarity = [
+              clarityLabels[maxIndex],
+              clarityLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minClarity = clarityLabels[startIndex];
+            const maxClarity = clarityLabels[endIndex] + '_MAX';
+            values.clarity = [minClarity, maxClarity];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minClarity = clarityLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.clarity = [minClarity];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.clarity = [minClarity];
+            } else {
+              // Normal range with exclusive end
+              values.clarity = [minClarity, clarityLabels[adjustedEndIndex]];
+            }
+          }
         }
       }
 
@@ -104,15 +152,39 @@ if (typeof window !== 'undefined') {
         const handles = cutGradeSliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = cutGradeLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.cutGrade = [cutGradeLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.cutGrade = [
-            cutGradeLabels[startIndex],
-            cutGradeLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.cutGrade = [
+              cutGradeLabels[maxIndex],
+              cutGradeLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minCutGrade = cutGradeLabels[startIndex];
+            const maxCutGrade = cutGradeLabels[endIndex] + '_MAX';
+            values.cutGrade = [minCutGrade, maxCutGrade];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minCutGrade = cutGradeLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.cutGrade = [minCutGrade];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.cutGrade = [minCutGrade];
+            } else {
+              // Normal range with exclusive end
+              values.cutGrade = [minCutGrade, cutGradeLabels[adjustedEndIndex]];
+            }
+          }
         }
       }
 
@@ -125,15 +197,42 @@ if (typeof window !== 'undefined') {
         const handles = fluorescenceSliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = fluorescenceLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.fluorescence = [fluorescenceLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.fluorescence = [
-            fluorescenceLabels[startIndex],
-            fluorescenceLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.fluorescence = [
+              fluorescenceLabels[maxIndex],
+              fluorescenceLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minFluorescence = fluorescenceLabels[startIndex];
+            const maxFluorescence = fluorescenceLabels[endIndex] + '_MAX';
+            values.fluorescence = [minFluorescence, maxFluorescence];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minFluorescence = fluorescenceLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.fluorescence = [minFluorescence];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.fluorescence = [minFluorescence];
+            } else {
+              // Normal range with exclusive end
+              values.fluorescence = [
+                minFluorescence,
+                fluorescenceLabels[adjustedEndIndex],
+              ];
+            }
+          }
         }
       }
 
@@ -144,15 +243,39 @@ if (typeof window !== 'undefined') {
         const handles = polishSliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = polishLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.polish = [polishLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.polish = [
-            polishLabels[startIndex],
-            polishLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.polish = [
+              polishLabels[maxIndex],
+              polishLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minPolish = polishLabels[startIndex];
+            const maxPolish = polishLabels[endIndex] + '_MAX';
+            values.polish = [minPolish, maxPolish];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minPolish = polishLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.polish = [minPolish];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.polish = [minPolish];
+            } else {
+              // Normal range with exclusive end
+              values.polish = [minPolish, polishLabels[adjustedEndIndex]];
+            }
+          }
         }
       }
 
@@ -165,15 +288,39 @@ if (typeof window !== 'undefined') {
         const handles = symmetrySliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = symmetryLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.symmetry = [symmetryLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.symmetry = [
-            symmetryLabels[startIndex],
-            symmetryLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.symmetry = [
+              symmetryLabels[maxIndex],
+              symmetryLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minSymmetry = symmetryLabels[startIndex];
+            const maxSymmetry = symmetryLabels[endIndex] + '_MAX';
+            values.symmetry = [minSymmetry, maxSymmetry];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minSymmetry = symmetryLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.symmetry = [minSymmetry];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.symmetry = [minSymmetry];
+            } else {
+              // Normal range with exclusive end
+              values.symmetry = [minSymmetry, symmetryLabels[adjustedEndIndex]];
+            }
+          }
         }
       }
 
@@ -207,15 +354,42 @@ if (typeof window !== 'undefined') {
         const handles = fancyIntensitySliderEl.noUiSlider.get(true);
         const startIndex = Math.round(handles[0]);
         const endIndex = Math.round(handles[1]);
+        const maxIndex = intensityLabels.length - 1;
 
         if (startIndex === endIndex) {
           values.fancyIntensity = [intensityLabels[startIndex]];
         } else {
-          // Only return min and max values, not all values in between
-          values.fancyIntensity = [
-            intensityLabels[startIndex],
-            intensityLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
-          ];
+          // Special case: if both thumbs are at or very close to the max position,
+          // user wants only the highest grade
+          if (endIndex === maxIndex && startIndex >= maxIndex - 1) {
+            values.fancyIntensity = [
+              intensityLabels[maxIndex],
+              intensityLabels[maxIndex] + '_MAX',
+            ];
+          } else if (endIndex === maxIndex) {
+            // Right thumb at max but left thumb not close to it
+            const minIntensity = intensityLabels[startIndex];
+            const maxIntensity = intensityLabels[endIndex] + '_MAX';
+            values.fancyIntensity = [minIntensity, maxIntensity];
+          } else {
+            // Normal range case - make the max exclusive by subtracting 1
+            const minIntensity = intensityLabels[startIndex];
+            const adjustedEndIndex = endIndex - 1;
+
+            if (adjustedEndIndex < startIndex) {
+              // If adjusted end is less than start, we want only the start value
+              values.fancyIntensity = [minIntensity];
+            } else if (adjustedEndIndex === startIndex) {
+              // If adjusted end equals start, we want only that value
+              values.fancyIntensity = [minIntensity];
+            } else {
+              // Normal range with exclusive end
+              values.fancyIntensity = [
+                minIntensity,
+                intensityLabels[adjustedEndIndex],
+              ];
+            }
+          }
         }
       }
 
@@ -275,6 +449,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.price,
         connect: true,
         step: 1000,
+        margin: 1000,
         range: {
           min: 2500,
           max: 10000000,
@@ -358,6 +533,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.carat,
         connect: true,
         step: 0.05,
+        margin: 0.05,
         range: {
           min: 0.1,
           max: 30.0,
@@ -739,6 +915,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.table,
         connect: true,
         step: 1,
+        margin: 1,
         range: {
           min: 0,
           max: 100,
@@ -805,6 +982,7 @@ if (typeof window !== 'undefined') {
         start: state.DEFAULT_FILTER_RANGES.ratio,
         connect: true,
         step: 0.01,
+        margin: 0.01,
         range: {
           min: 0.8,
           max: 3.0,

@@ -416,8 +416,13 @@ export async function getFilteredDiamonds(
     ];
 
     if (filters.minClarity && filters.maxClarity) {
+      // Handle _MAX suffix for maxClarity
+      const maxClarityValue = filters.maxClarity
+        .toUpperCase()
+        .replace('_MAX', '');
+
       const minIdx = clarityLabels.indexOf(filters.minClarity.toUpperCase());
-      const maxIdx = clarityLabels.indexOf(filters.maxClarity.toUpperCase());
+      const maxIdx = clarityLabels.indexOf(maxClarityValue);
       if (minIdx !== -1 && maxIdx !== -1) {
         where.clarity = { in: clarityLabels.slice(minIdx, maxIdx + 1) };
       }
@@ -443,11 +448,14 @@ export async function getFilteredDiamonds(
     const cutGradeLabels = ['Fair', 'Good', 'Very Good', 'Excellent', 'Ideal'];
 
     if (filters.minCutGrade && filters.maxCutGrade) {
+      // Handle _MAX suffix for maxCutGrade
+      const maxCutGradeValue = filters.maxCutGrade.replace(/_MAX$/i, '');
+
       const minIdx = cutGradeLabels.findIndex(
         (g) => g.toLowerCase() === filters.minCutGrade!.toLowerCase()
       );
       const maxIdx = cutGradeLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxCutGrade!.toLowerCase()
+        (g) => g.toLowerCase() === maxCutGradeValue.toLowerCase()
       );
       if (minIdx !== -1 && maxIdx !== -1) {
         // Include all grades from min to max, and also include Ideal if Excellent is the max
@@ -488,11 +496,14 @@ export async function getFilteredDiamonds(
     const polishLabels = ['Good', 'Very Good', 'Excellent'];
 
     if (filters.minPolish && filters.maxPolish) {
+      // Handle _MAX suffix for maxPolish
+      const maxPolishValue = filters.maxPolish.replace(/_MAX$/i, '');
+
       const minIdx = polishLabels.findIndex(
         (g) => g.toLowerCase() === filters.minPolish!.toLowerCase()
       );
       const maxIdx = polishLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxPolish!.toLowerCase()
+        (g) => g.toLowerCase() === maxPolishValue.toLowerCase()
       );
       if (minIdx !== -1 && maxIdx !== -1) {
         where.polish = { in: polishLabels.slice(minIdx, maxIdx + 1) };
@@ -521,11 +532,14 @@ export async function getFilteredDiamonds(
     const symmetryLabels = ['Good', 'Very Good', 'Excellent'];
 
     if (filters.minSymmetry && filters.maxSymmetry) {
+      // Handle _MAX suffix for maxSymmetry
+      const maxSymmetryValue = filters.maxSymmetry.replace(/_MAX$/i, '');
+
       const minIdx = symmetryLabels.findIndex(
         (g) => g.toLowerCase() === filters.minSymmetry!.toLowerCase()
       );
       const maxIdx = symmetryLabels.findIndex(
-        (g) => g.toLowerCase() === filters.maxSymmetry!.toLowerCase()
+        (g) => g.toLowerCase() === maxSymmetryValue.toLowerCase()
       );
       if (minIdx !== -1 && maxIdx !== -1) {
         where.symmetry = { in: symmetryLabels.slice(minIdx, maxIdx + 1) };

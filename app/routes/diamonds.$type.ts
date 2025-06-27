@@ -1,7 +1,8 @@
 import { json, LoaderFunctionArgs } from '@remix-run/node';
 import type { DiamondType } from '../models/diamond.server';
 import { getDiamondsByType } from '../services/diamond-db.server';
-import { refreshDiamondsByType } from '../services/diamond-updater.server';
+// TEMPORARILY DISABLED: Auto fetching import
+// import { refreshDiamondsByType } from '../services/diamond-updater.server';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
@@ -33,19 +34,20 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   try {
     const { data, totalCount } = await getDiamondsByType(type, offset, limit);
 
+    // TEMPORARILY DISABLED: Auto fetching when no diamonds found
     // If no diamonds found, trigger a background refresh
-    if (totalCount === 0) {
-      console.log(
-        `API Route: No ${type} diamonds in database. Triggering background refresh.`
-      );
-      // Trigger refresh but don't await it for this request to keep it responsive
-      refreshDiamondsByType(type).catch((err: Error) => {
-        console.error(
-          `API Route: Background refresh for ${type} failed:`,
-          err.message
-        );
-      });
-    }
+    // if (totalCount === 0) {
+    //   console.log(
+    //     `API Route: No ${type} diamonds in database. Triggering background refresh.`
+    //   );
+    //   // Trigger refresh but don't await it for this request to keep it responsive
+    //   refreshDiamondsByType(type).catch((err: Error) => {
+    //     console.error(
+    //       `API Route: Background refresh for ${type} failed:`,
+    //       err.message
+    //     );
+    //   });
+    // }
 
     return json({
       data,

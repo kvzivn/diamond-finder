@@ -62,6 +62,11 @@ if (typeof window !== 'undefined') {
           if (!isNaN(minCarat)) params.append('minCarat', minCarat.toString());
           if (!isNaN(maxCarat)) params.append('maxCarat', maxCarat.toString());
         }
+      } else {
+        // Fallback: Always apply default carat filter when slider isn't available
+        const defaultCaratRange = state.DEFAULT_FILTER_RANGES.carat;
+        params.append('minCarat', defaultCaratRange[0].toString());
+        params.append('maxCarat', defaultCaratRange[1].toString());
       }
 
       // Add colour filters from sliders

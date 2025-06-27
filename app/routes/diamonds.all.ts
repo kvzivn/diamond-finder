@@ -1,7 +1,8 @@
 import { json, LoaderFunctionArgs } from '@remix-run/node';
 import { getFilteredDiamonds } from '../services/diamond-db.server';
-import { refreshDiamondsByType } from '../services/diamond-updater.server';
-import type { DiamondType } from '../models/diamond.server';
+// TEMPORARILY DISABLED: Auto fetching imports
+// import { refreshDiamondsByType } from '../services/diamond-updater.server';
+// import type { DiamondType } from '../models/diamond.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -80,23 +81,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
     // Get filtered diamonds from database
     const { data, totalCount } = await getFilteredDiamonds(filters);
 
+    // TEMPORARILY DISABLED: Auto fetching when no diamonds found
     // If no diamonds found and a specific type is requested, trigger a background refresh
-    if (
-      data.length === 0 &&
-      filters.type &&
-      (filters.type === 'natural' || filters.type === 'lab')
-    ) {
-      console.log(
-        `No ${filters.type} diamonds found. Triggering background refresh.`
-      );
-      // Trigger refresh but don't await it
-      refreshDiamondsByType(filters.type as DiamondType).catch((err: Error) => {
-        console.error(
-          `Background refresh for ${filters.type} failed:`,
-          err.message
-        );
-      });
-    }
+    // if (
+    //   data.length === 0 &&
+    //   filters.type &&
+    //   (filters.type === 'natural' || filters.type === 'lab')
+    // ) {
+    //   console.log(
+    //     `No ${filters.type} diamonds found. Triggering background refresh.`
+    //   );
+    //   // Trigger refresh but don't await it
+    //   refreshDiamondsByType(filters.type as DiamondType).catch((err: Error) => {
+    //     console.error(
+    //       `Background refresh for ${filters.type} failed:`,
+    //       err.message
+    //     );
+    //   });
+    // }
 
     // Calculate pagination info
     const totalPages = Math.ceil(totalCount / limit);
