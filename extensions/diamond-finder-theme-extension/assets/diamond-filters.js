@@ -223,26 +223,10 @@ if (typeof window !== 'undefined') {
       const activeColourTab = document.querySelector(
         '#ds-colour-tab-white[data-active="true"], #ds-colour-tab-fancy[data-active="true"]'
       );
-      console.log('[COLOR TAB DEBUG] activeColourTab:', activeColourTab);
       if (activeColourTab) {
         values.colourType = activeColourTab.dataset.tab;
-        console.log('[COLOR TAB DEBUG] colourType set to:', values.colourType);
       } else {
-        values.colourType = 'white'; // Default to white if no tab is found active
-        console.log(
-          '[COLOR TAB DEBUG] No active tab found, defaulting to white'
-        );
-        // Debug: Let's see what the tabs look like
-        const whiteTab = document.getElementById('ds-colour-tab-white');
-        const fancyTab = document.getElementById('ds-colour-tab-fancy');
-        console.log(
-          '[COLOR TAB DEBUG] White tab data-active:',
-          whiteTab?.dataset.active
-        );
-        console.log(
-          '[COLOR TAB DEBUG] Fancy tab data-active:',
-          fancyTab?.dataset.active
-        );
+        values.colourType = 'white';
       }
 
       return values;

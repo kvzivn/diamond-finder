@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://rid-sites-human-congratulations.trycloudflare.com"
+application_url = "https://bike-operated-stand-invited.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,10 +26,10 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://rid-sites-human-congratulations.trycloudflare.com/auth/callback", "https://rid-sites-human-congratulations.trycloudflare.com/auth/shopify/callback", "https://rid-sites-human-congratulations.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://bike-operated-stand-invited.trycloudflare.com/auth/callback", "https://bike-operated-stand-invited.trycloudflare.com/auth/shopify/callback", "https://bike-operated-stand-invited.trycloudflare.com/api/auth/callback"]
 
 [app_proxy]
-url = "https://rid-sites-human-congratulations.trycloudflare.com"
+url = "https://bike-operated-stand-invited.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

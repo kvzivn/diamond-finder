@@ -199,6 +199,10 @@ if (typeof window !== 'undefined') {
 
         const specs = [
           {
+            label: 'URSPRUNG:',
+            value: diamond.type === 'lab' ? 'Labbodlad' : 'Naturlig',
+          },
+          {
             label: 'SLIPNING:',
             value:
               this.translateShapeToSwedish(diamond.cut) || 'Ej tillgänglig',

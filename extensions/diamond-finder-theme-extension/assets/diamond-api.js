@@ -15,7 +15,15 @@ if (typeof window !== 'undefined') {
 
       // Add type filter
       if (state.getFilter('ds-type')) {
-        params.append('type', state.getFilter('ds-type'));
+        // Map display values to API values
+        const typeValue = state.getFilter('ds-type');
+        const apiTypeValue =
+          typeValue === 'Natural'
+            ? 'natural'
+            : typeValue === 'Lab Grown'
+              ? 'lab'
+              : typeValue;
+        params.append('type', apiTypeValue);
       }
 
       // Add sorting parameter
@@ -58,10 +66,6 @@ if (typeof window !== 'undefined') {
 
       // Add colour filters from sliders
       const filterValues = window.DiamondFilters.getSliderValues();
-      console.log(
-        '[API DEBUG] filterValues.colourType:',
-        filterValues.colourType
-      );
 
       if (
         (filterValues.colourType === 'white' || !filterValues.colourType) &&
@@ -307,7 +311,6 @@ if (typeof window !== 'undefined') {
         }
       }
 
-      console.log('[API DEBUG] Full query string:', params.toString());
       return params.toString();
     },
 
