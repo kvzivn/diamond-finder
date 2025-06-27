@@ -179,6 +179,35 @@ if (typeof window !== 'undefined') {
       const endIndex = Math.round(handles[1]);
       const maxIndex = labels.length - 1;
 
+      // Special handling for cutGrade filter
+      if (filterType === 'cutGrade') {
+        // For cut grade, we need special logic to handle Excellent_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at Excellent_MAX position - return only Excellent
+            return ['Excellent', 'Excellent'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at Excellent_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at Excellent, right at Excellent_MAX - only Excellent
+            return ['Excellent', 'Excellent'];
+          } else {
+            // Include all grades from start to Excellent (inclusive)
+            return [labels[startIndex], 'Excellent'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
+      // Original logic for other filter types
       if (startIndex === endIndex) {
         return [labels[startIndex]];
       } else {

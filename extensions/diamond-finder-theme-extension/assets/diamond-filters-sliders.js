@@ -40,7 +40,7 @@ if (typeof window !== 'undefined') {
       window.noUiSlider.create(priceSlider, {
         start: state.DEFAULT_FILTER_RANGES.price,
         connect: true,
-        step: 1000,
+        step: 100,
         margin: 1000,
         range: {
           min: 2500,
@@ -67,21 +67,8 @@ if (typeof window !== 'undefined') {
 
       priceSlider.noUiSlider.on('change', debounceFetch);
 
-      minPriceInput.addEventListener('change', function () {
-        const cleanValue = this.value.replace(/\s/g, '');
-        const numericValue = parseFloat(cleanValue);
-        if (!isNaN(numericValue)) {
-          priceSlider.noUiSlider.set([numericValue, null]);
-        }
-      });
-
-      maxPriceInput.addEventListener('change', function () {
-        const cleanValue = this.value.replace(/\s/g, '');
-        const numericValue = parseFloat(cleanValue);
-        if (!isNaN(numericValue)) {
-          priceSlider.noUiSlider.set([null, numericValue]);
-        }
-      });
+      // Note: Input event handlers for price inputs are handled in diamond-ui.js
+      // with debouncing to prevent immediate slider updates that cause rounding issues
 
       state.markSliderInitialized('price');
     },
@@ -308,11 +295,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 4, // Updated to 4 since we have 5 cut grade levels (0-4)
+          max: 3, // Updated to 3 since we have 4 cut grade levels (0-3)
         },
         format: {
           to: function (value) {
-            return cutGradeLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = cutGradeLabels[index];
+            // Display "Excellent" for both position 2 and 3 (Excellent_MAX)
+            return label === 'Excellent_MAX' ? 'Excellent' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {

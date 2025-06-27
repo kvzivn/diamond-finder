@@ -273,8 +273,18 @@ if (typeof window !== 'undefined') {
               } else {
                 sliderElement.noUiSlider.set([null, inputValue]);
               }
+
+              // Trigger filter update after setting slider value
+              if (
+                window.DiamondFiltersUtils &&
+                window.DiamondFiltersUtils.createDebouncedFetch
+              ) {
+                const debounceFetch =
+                  window.DiamondFiltersUtils.createDebouncedFetch();
+                debounceFetch();
+              }
             }
-          }, 750);
+          }, 500);
         });
       });
     },

@@ -445,48 +445,50 @@ export async function getFilteredDiamonds(
 
   // Cut Grade filters
   if (filters.minCutGrade || filters.maxCutGrade) {
-    const cutGradeLabels = ['Fair', 'Good', 'Very Good', 'Excellent', 'Ideal'];
+    // These are the actual cut grade values that exist in the database
+    const actualCutGradeLabels = ['Good', 'Very Good', 'Excellent'];
+
+    // Map filter values to actual database values
+    const getActualCutGrade = (value: string) => {
+      const cleanValue = value.replace(/_MAX$/i, '');
+      // Handle Excellent_MAX as Excellent
+      return cleanValue === 'Excellent_MAX' ? 'Excellent' : cleanValue;
+    };
 
     if (filters.minCutGrade && filters.maxCutGrade) {
-      // Handle _MAX suffix for maxCutGrade
-      const maxCutGradeValue = filters.maxCutGrade.replace(/_MAX$/i, '');
+      const minCutGrade = getActualCutGrade(filters.minCutGrade);
+      const maxCutGrade = getActualCutGrade(filters.maxCutGrade);
 
-      const minIdx = cutGradeLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minCutGrade!.toLowerCase()
+      const minIdx = actualCutGradeLabels.findIndex(
+        (g) => g.toLowerCase() === minCutGrade.toLowerCase()
       );
-      const maxIdx = cutGradeLabels.findIndex(
-        (g) => g.toLowerCase() === maxCutGradeValue.toLowerCase()
+      const maxIdx = actualCutGradeLabels.findIndex(
+        (g) => g.toLowerCase() === maxCutGrade.toLowerCase()
       );
+
       if (minIdx !== -1 && maxIdx !== -1) {
-        // Include all grades from min to max, and also include Ideal if Excellent is the max
-        let gradesToInclude = cutGradeLabels.slice(minIdx, maxIdx + 1);
-        if (maxIdx >= 3 && !gradesToInclude.includes('Ideal')) {
-          // 3 is index of Excellent
-          gradesToInclude.push('Ideal');
-        }
-        where.cutGrade = { in: gradesToInclude };
+        // Get the range of cut grades to include
+        const cutGradesToInclude = actualCutGradeLabels.slice(
+          minIdx,
+          maxIdx + 1
+        );
+        where.cutGrade = { in: cutGradesToInclude };
       }
     } else if (filters.minCutGrade) {
-      const minIdx = cutGradeLabels.findIndex(
-        (g) => g.toLowerCase() === filters.minCutGrade!.toLowerCase()
+      const minCutGrade = getActualCutGrade(filters.minCutGrade);
+      const minIdx = actualCutGradeLabels.findIndex(
+        (g) => g.toLowerCase() === minCutGrade.toLowerCase()
       );
       if (minIdx !== -1) {
-        where.cutGrade = { in: cutGradeLabels.slice(minIdx) };
+        where.cutGrade = { in: actualCutGradeLabels.slice(minIdx) };
       }
     } else if (filters.maxCutGrade) {
-      // Handle _MAX suffix (means include the best/last value)
-      const maxCutGradeValue = filters.maxCutGrade.replace(/_MAX$/i, '');
-      const maxIdx = cutGradeLabels.findIndex(
-        (g) => g.toLowerCase() === maxCutGradeValue.toLowerCase()
+      const maxCutGrade = getActualCutGrade(filters.maxCutGrade);
+      const maxIdx = actualCutGradeLabels.findIndex(
+        (g) => g.toLowerCase() === maxCutGrade.toLowerCase()
       );
       if (maxIdx !== -1) {
-        // Include all grades up to max, and also include Ideal if Excellent is included
-        let gradesToInclude = cutGradeLabels.slice(0, maxIdx + 1);
-        if (maxIdx >= 3 && !gradesToInclude.includes('Ideal')) {
-          // 3 is index of Excellent
-          gradesToInclude.push('Ideal');
-        }
-        where.cutGrade = { in: gradesToInclude };
+        where.cutGrade = { in: actualCutGradeLabels.slice(0, maxIdx + 1) };
       }
     }
   }

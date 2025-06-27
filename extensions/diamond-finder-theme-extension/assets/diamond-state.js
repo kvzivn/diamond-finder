@@ -47,10 +47,10 @@ if (typeof window !== 'undefined') {
     // Configuration constants
     DEFAULT_FILTER_RANGES: {
       price: [2500, 10000000], // SEK range
-      carat: [0.3, 20.0],
+      carat: [0.3, 30.0],
       colour: ['K', 'D_MAX'], // Revert back to K as requested
       clarity: ['SI2', 'FL_MAX'],
-      cutGrade: ['Fair', 'Ideal_MAX'],
+      cutGrade: ['Good', 'Excellent_MAX'],
       fluorescence: ['None', 'Very Strong_MAX'],
       polish: ['Good', 'Excellent_MAX'],
       symmetry: ['Good', 'Excellent_MAX'],
@@ -62,7 +62,7 @@ if (typeof window !== 'undefined') {
     FILTER_LABELS: {
       colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
-      cutGrade: ['Fair', 'Good', 'Very Good', 'Excellent', 'Ideal'],
+      cutGrade: ['Good', 'Very Good', 'Excellent', 'Excellent_MAX'],
       fluorescence: ['None', 'Faint', 'Medium', 'Strong', 'Very Strong'],
       polish: ['Good', 'Very Good', 'Excellent'],
       symmetry: ['Good', 'Very Good', 'Excellent'],
