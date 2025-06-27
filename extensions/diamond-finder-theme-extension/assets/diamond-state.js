@@ -35,31 +35,32 @@ if (typeof window !== 'undefined') {
       carat: [0.5, 20.0],
       colour: ['K', 'D_MAX'], // Revert back to K as requested
       clarity: ['SI2', 'FL_MAX'],
-      cutGrade: ['Good', 'Excellent_MAX'],
+      cutGrade: ['Fair', 'Ideal_MAX'],
       fluorescence: ['Very Strong', 'None_MAX'],
       polish: ['Good', 'Excellent_MAX'],
       symmetry: ['Good', 'Excellent_MAX'],
       table: [0, 100], // Percentage range
       ratio: [0.8, 3.0], // Ratio range
-      fancyIntensity: ['Fancy Deep', 'Faint_MAX'],
+      fancyIntensity: ['Light', 'Vivid_MAX'],
     },
 
     FILTER_LABELS: {
       colour: ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'],
       clarity: ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'],
-      cutGrade: ['Good', 'Very Good', 'Excellent'],
+      cutGrade: ['Fair', 'Good', 'Very Good', 'Excellent', 'Ideal'],
       fluorescence: ['Very Strong', 'Strong', 'Medium', 'Faint', 'None'],
       polish: ['Good', 'Very Good', 'Excellent'],
       symmetry: ['Good', 'Very Good', 'Excellent'],
       fancyIntensity: [
-        'Fancy Deep',
-        'Fancy',
-        'Fancy Intense',
-        'Fancy Dark',
-        'Fancy Light',
         'Light',
         'Very Light',
         'Faint',
+        'Fancy Light',
+        'Fancy',
+        'Fancy Dark',
+        'Intense',
+        'Fancy Deep',
+        'Vivid',
       ],
     },
   };

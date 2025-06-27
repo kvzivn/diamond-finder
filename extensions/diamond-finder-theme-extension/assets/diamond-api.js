@@ -58,8 +58,15 @@ if (typeof window !== 'undefined') {
 
       // Add colour filters from sliders
       const filterValues = window.DiamondFilters.getSliderValues();
+      console.log(
+        '[API DEBUG] filterValues.colourType:',
+        filterValues.colourType
+      );
 
-      if (filterValues.colourType === 'white' || !filterValues.colourType) {
+      if (
+        (filterValues.colourType === 'white' || !filterValues.colourType) &&
+        (!filterValues.fancyColours || filterValues.fancyColours.length === 0)
+      ) {
         // Apply white color filters when white tab is active or no tab is specified
         const colourSliderEl = document.getElementById('ds-colour-slider-noui');
         if (colourSliderEl && colourSliderEl.noUiSlider) {
@@ -87,29 +94,68 @@ if (typeof window !== 'undefined') {
           params.append('minColour', 'K');
           params.append('maxColour', 'D');
         }
-      } else if (
-        filterValues.colourType === 'fancy' &&
-        filterValues.fancyColours &&
-        filterValues.fancyColours.length > 0
-      ) {
-        // Only apply fancy filters if fancy colors are actually selected
-        params.append('fancyColours', filterValues.fancyColours.join(','));
+      } else if (filterValues.colourType === 'fancy') {
+        console.log(
+          '[FANCY COLOR DEBUG] filterValues.fancyColours:',
+          filterValues.fancyColours
+        );
+        if (filterValues.fancyColours && filterValues.fancyColours.length > 0) {
+          // Apply specific fancy color filters when colors are selected
+          const fancyColorParam = filterValues.fancyColours.join(',');
+          console.log(
+            '[FANCY COLOR DEBUG] Adding fancyColours param:',
+            fancyColorParam
+          );
+          params.append('fancyColours', fancyColorParam);
 
-        // Add fancy intensity range
-        if (
-          filterValues.fancyIntensity &&
-          filterValues.fancyIntensity.length > 0
-        ) {
-          const minIntensity = filterValues.fancyIntensity[0];
-          const maxIntensity =
-            filterValues.fancyIntensity[filterValues.fancyIntensity.length - 1];
+          // Only add fancy intensity range when specific colors are selected AND the user has actually moved the intensity slider
+          if (
+            filterValues.fancyIntensity &&
+            filterValues.fancyIntensity.length > 0
+          ) {
+            const minIntensity = filterValues.fancyIntensity[0];
+            const maxIntensity =
+              filterValues.fancyIntensity[
+                filterValues.fancyIntensity.length - 1
+              ];
 
-          if (minIntensity) {
-            params.append('minFancyIntensity', minIntensity);
+            // Check if the intensity slider is at its default full range
+            // The default range is from 'Light' to 'Vivid' after the slider formats it
+            const isFullRange =
+              minIntensity === 'Light' && maxIntensity === 'Vivid';
+
+            console.log('[FANCY COLOR DEBUG] Intensity range check:', {
+              minIntensity,
+              maxIntensity,
+              isFullRange,
+              fancyIntensityArray: filterValues.fancyIntensity,
+              defaultRange:
+                window.DiamondSearchState.DEFAULT_FILTER_RANGES.fancyIntensity,
+            });
+
+            // Only apply intensity filters if user has specifically narrowed the range
+            if (!isFullRange) {
+              console.log('[FANCY COLOR DEBUG] Adding intensity params:', {
+                minIntensity,
+                maxIntensity,
+              });
+              if (minIntensity) {
+                params.append('minFancyIntensity', minIntensity);
+              }
+              if (maxIntensity && maxIntensity !== minIntensity) {
+                params.append('maxFancyIntensity', maxIntensity);
+              }
+            } else {
+              console.log(
+                '[FANCY COLOR DEBUG] Skipping intensity filters - using full range'
+              );
+            }
           }
-          if (maxIntensity && maxIntensity !== minIntensity) {
-            params.append('maxFancyIntensity', maxIntensity);
-          }
+        } else {
+          // Apply "all fancy colors" filter when fancy tab is active but no specific colors selected
+          console.log('[FANCY COLOR DEBUG] Adding ALL_FANCY param');
+          params.append('fancyColours', 'ALL_FANCY');
+          // Note: We intentionally don't add intensity filters when showing ALL_FANCY
         }
       }
 
@@ -261,6 +307,7 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      console.log('[API DEBUG] Full query string:', params.toString());
       return params.toString();
     },
 

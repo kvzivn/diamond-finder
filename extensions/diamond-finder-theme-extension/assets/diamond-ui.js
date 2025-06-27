@@ -79,10 +79,6 @@ if (typeof window !== 'undefined') {
         // Show white panel, hide fancy panel
         whitePanel.classList.remove('tw-hidden');
         fancyPanel.classList.add('tw-hidden');
-
-        console.log(
-          '[INITIAL LOAD] White color tab set as active to exclude fancy diamonds'
-        );
       }
 
       // Setup filter button groups

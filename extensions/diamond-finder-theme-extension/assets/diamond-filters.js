@@ -71,7 +71,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.colour = [
             colourLabels[startIndex],
-            colourLabels[endIndex - 1],
+            colourLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -90,7 +90,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.clarity = [
             clarityLabels[startIndex],
-            clarityLabels[endIndex - 1],
+            clarityLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -111,7 +111,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.cutGrade = [
             cutGradeLabels[startIndex],
-            cutGradeLabels[endIndex - 1],
+            cutGradeLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -132,7 +132,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.fluorescence = [
             fluorescenceLabels[startIndex],
-            fluorescenceLabels[endIndex - 1],
+            fluorescenceLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -151,7 +151,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.polish = [
             polishLabels[startIndex],
-            polishLabels[endIndex - 1],
+            polishLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -172,7 +172,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.symmetry = [
             symmetryLabels[startIndex],
-            symmetryLabels[endIndex - 1],
+            symmetryLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -187,14 +187,14 @@ if (typeof window !== 'undefined') {
         values.ratio = ratioSliderEl.noUiSlider.get();
       }
 
-      // Get fancy colour selections
-      const fancyColourButtons = document.querySelectorAll(
-        '[data-filter-group="ds-fancy-colour"] button[data-active="true"]'
-      );
-      if (fancyColourButtons.length > 0) {
-        values.fancyColours = Array.from(fancyColourButtons).map(
-          (btn) => btn.dataset.value
-        );
+      // Get fancy colour selections from state instead of DOM
+      const fancyColours = state.getFilter('ds-fancy-colour');
+      if (
+        fancyColours &&
+        Array.isArray(fancyColours) &&
+        fancyColours.length > 0
+      ) {
+        values.fancyColours = fancyColours;
       }
 
       // Get fancy intensity values
@@ -214,7 +214,7 @@ if (typeof window !== 'undefined') {
           // Only return min and max values, not all values in between
           values.fancyIntensity = [
             intensityLabels[startIndex],
-            intensityLabels[endIndex - 1],
+            intensityLabels[endIndex], // Fixed: Should be endIndex, not endIndex - 1
           ];
         }
       }
@@ -223,10 +223,26 @@ if (typeof window !== 'undefined') {
       const activeColourTab = document.querySelector(
         '#ds-colour-tab-white[data-active="true"], #ds-colour-tab-fancy[data-active="true"]'
       );
+      console.log('[COLOR TAB DEBUG] activeColourTab:', activeColourTab);
       if (activeColourTab) {
         values.colourType = activeColourTab.dataset.tab;
+        console.log('[COLOR TAB DEBUG] colourType set to:', values.colourType);
       } else {
         values.colourType = 'white'; // Default to white if no tab is found active
+        console.log(
+          '[COLOR TAB DEBUG] No active tab found, defaulting to white'
+        );
+        // Debug: Let's see what the tabs look like
+        const whiteTab = document.getElementById('ds-colour-tab-white');
+        const fancyTab = document.getElementById('ds-colour-tab-fancy');
+        console.log(
+          '[COLOR TAB DEBUG] White tab data-active:',
+          whiteTab?.dataset.active
+        );
+        console.log(
+          '[COLOR TAB DEBUG] Fancy tab data-active:',
+          fancyTab?.dataset.active
+        );
       }
 
       return values;
@@ -542,7 +558,7 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 2,
+          max: 4, // Updated to 4 since we have 5 cut grade levels (0-4)
         },
         format: {
           to: function (value) {
@@ -1027,13 +1043,13 @@ if (typeof window !== 'undefined') {
       const intensityLabels = state.FILTER_LABELS.fancyIntensity;
 
       window.noUiSlider.create(fancyIntensitySlider, {
-        start: state.DEFAULT_FILTER_RANGES.fancyIntensity,
+        start: state.DEFAULT_FILTER_RANGES.fancyIntensity, // Use default range from state
         connect: true,
         step: 1,
         margin: 1,
         range: {
           min: 0,
-          max: 7,
+          max: 8, // Updated to 8 since we have 9 intensity levels (0-8)
         },
         format: {
           to: function (value) {
@@ -1113,8 +1129,35 @@ if (typeof window !== 'undefined') {
             whiteTab.dataset.active
           );
 
-          // Don't trigger fetch when switching to fancy tab
-          // Fetch will only happen when fancy colors are selected
+          // Clear any previously selected fancy colors when switching to fancy tab
+          const state = window.DiamondSearchState;
+          state.setFilter('ds-fancy-colour', []);
+
+          // Reset all fancy color buttons to inactive state
+          const fancyColorButtons = document.querySelectorAll(
+            '[data-filter-group="ds-fancy-colour"] button'
+          );
+          fancyColorButtons.forEach((button) => {
+            button.dataset.active = 'false';
+            button.setAttribute('aria-pressed', 'false');
+          });
+
+          // Reset fancy intensity slider to show all intensities
+          const fancyIntensitySlider = document.getElementById(
+            'ds-fancy-intensity-slider'
+          );
+          if (fancyIntensitySlider && fancyIntensitySlider.noUiSlider) {
+            const state = window.DiamondSearchState;
+            const defaultRange = state.DEFAULT_FILTER_RANGES.fancyIntensity;
+            // Reset to default full range using label values
+            fancyIntensitySlider.noUiSlider.set(defaultRange);
+          }
+
+          // Trigger fetch to show all fancy colored diamonds
+          window.DiamondAPI.fetchDiamondData(
+            1,
+            state.paginationInfo.limit || 24
+          );
         }
       };
 
@@ -1177,11 +1220,35 @@ if (typeof window !== 'undefined') {
       }
 
       state.setFilter('ds-fancy-colour', currentFilters);
-      console.log('[FANCY COLOR SELECTED]', currentFilters);
+
+      // Reset fancy intensity slider to full range whenever a color is selected/deselected
+      const fancyIntensitySlider = document.getElementById(
+        'ds-fancy-intensity-slider'
+      );
+      if (fancyIntensitySlider && fancyIntensitySlider.noUiSlider) {
+        const state = window.DiamondSearchState;
+        const defaultRange = state.DEFAULT_FILTER_RANGES.fancyIntensity;
+        console.log(
+          '[FANCY COLOR DEBUG] Resetting intensity slider to:',
+          defaultRange
+        );
+        // Reset to default full range using label values
+        fancyIntensitySlider.noUiSlider.set(defaultRange);
+        // Verify the reset worked
+        const newValues = fancyIntensitySlider.noUiSlider.get();
+        console.log(
+          '[FANCY COLOR DEBUG] Intensity slider after reset:',
+          newValues
+        );
+      }
+
       state.logCurrentFilters();
 
-      // Trigger diamond data fetch with current filters
-      window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
+      // Small delay to ensure slider reset takes effect before API call
+      setTimeout(() => {
+        // Trigger diamond data fetch with current filters
+        window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
+      }, 100);
     },
   };
 }

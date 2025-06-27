@@ -176,133 +176,155 @@ export async function getFilteredDiamonds(
     const fancyColorConditions: Prisma.DiamondWhereInput[] = [];
 
     if (filters.fancyColours) {
-      const fancyColourList = filters.fancyColours
-        .split(',')
-        .map((c) => c.toLowerCase());
-
-      fancyColourList.forEach((fancyColor) => {
-        if (fancyColor === 'other') {
-          // Complex "other" logic - diamonds with fancy colors not in main list
-          fancyColorConditions.push({
-            AND: [
-              { naturalFancyColor: { not: null } },
-              { naturalFancyColor: { not: '' } },
-              {
-                NOT: {
-                  OR: [
-                    {
-                      naturalFancyColor: {
-                        contains: 'yellow',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'pink',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'blue',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'red',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'green',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'purple',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'orange',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'violet',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'gray',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'black',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'brown',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'cognac',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'white',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'salt',
-                        mode: 'insensitive',
-                      },
-                    },
-                    {
-                      naturalFancyColor: {
-                        contains: 'pepper',
-                        mode: 'insensitive',
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          });
-        } else if (fancyColor === 's-and-p') {
-          fancyColorConditions.push({
-            OR: [
-              { naturalFancyColor: { contains: 'salt', mode: 'insensitive' } },
-              {
-                naturalFancyColor: { contains: 'pepper', mode: 'insensitive' },
-              },
-            ],
-          });
-        } else {
-          fancyColorConditions.push({
-            naturalFancyColor: { contains: fancyColor, mode: 'insensitive' },
-          });
+      // Special case: if fancyColours is "ALL_FANCY", show all fancy colored diamonds
+      if (filters.fancyColours === 'ALL_FANCY') {
+        if (!where.AND) {
+          where.AND = [];
+        } else if (!Array.isArray(where.AND)) {
+          where.AND = [where.AND];
         }
-      });
+        (where.AND as Prisma.DiamondWhereInput[]).push({
+          AND: [
+            { naturalFancyColor: { not: null } },
+            { naturalFancyColor: { not: '' } },
+            { naturalFancyColor: { not: { in: ['', ' ', '  '] } } },
+          ],
+        });
+      } else {
+        // Handle specific fancy colors
+        const fancyColourList = filters.fancyColours
+          .split(',')
+          .map((c) => c.toLowerCase());
+
+        fancyColourList.forEach((fancyColor) => {
+          if (fancyColor === 'other') {
+            // Complex "other" logic - diamonds with fancy colors not in main list
+            fancyColorConditions.push({
+              AND: [
+                { naturalFancyColor: { not: null } },
+                { naturalFancyColor: { not: '' } },
+                {
+                  NOT: {
+                    OR: [
+                      {
+                        naturalFancyColor: {
+                          contains: 'yellow',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'pink',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'blue',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'red',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'green',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'purple',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'orange',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'violet',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'gray',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'black',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'brown',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'cognac',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'white',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'salt',
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        naturalFancyColor: {
+                          contains: 'pepper',
+                          mode: 'insensitive',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            });
+          } else if (fancyColor === 's-and-p') {
+            fancyColorConditions.push({
+              OR: [
+                {
+                  naturalFancyColor: { contains: 'salt', mode: 'insensitive' },
+                },
+                {
+                  naturalFancyColor: {
+                    contains: 'pepper',
+                    mode: 'insensitive',
+                  },
+                },
+              ],
+            });
+          } else {
+            fancyColorConditions.push({
+              naturalFancyColor: { contains: fancyColor, mode: 'insensitive' },
+            });
+          }
+        });
+      }
     }
 
-    // Apply fancy color conditions
+    // Apply fancy color conditions (only for specific colors, not for ALL_FANCY)
     if (fancyColorConditions.length > 0) {
       if (!where.AND) {
         where.AND = [];
@@ -320,20 +342,63 @@ export async function getFilteredDiamonds(
 
     // Intensity filters would require similar complex logic
     // For now, keeping them as simple contains queries
-    if (filters.minFancyIntensity || filters.maxFancyIntensity) {
-      const intensityCondition: Prisma.DiamondWhereInput = {};
+    // But don't apply intensity filters when ALL_FANCY is specified
+    if (
+      (filters.minFancyIntensity || filters.maxFancyIntensity) &&
+      filters.fancyColours !== 'ALL_FANCY'
+    ) {
+      // Define intensity levels in order from least to most intense
+      const intensityLabels = [
+        'Light',
+        'Very Light',
+        'Faint',
+        'Fancy Light',
+        'Fancy',
+        'Fancy Dark',
+        'Intense',
+        'Fancy Deep',
+        'Vivid',
+      ];
+
+      let minIdx = 0; // Default to least intense
+      let maxIdx = intensityLabels.length - 1; // Default to most intense
+
       if (filters.minFancyIntensity) {
-        intensityCondition.naturalFancyColorIntensity = {
-          contains: filters.minFancyIntensity,
-          mode: 'insensitive',
-        };
+        const cleanMinIntensity = filters.minFancyIntensity.replace(
+          /_MAX$/i,
+          ''
+        );
+        const idx = intensityLabels.findIndex(
+          (intensity) =>
+            intensity.toLowerCase() === cleanMinIntensity.toLowerCase()
+        );
+        if (idx !== -1) minIdx = idx;
       }
-      if (!where.AND) {
-        where.AND = [];
-      } else if (!Array.isArray(where.AND)) {
-        where.AND = [where.AND];
+
+      if (filters.maxFancyIntensity) {
+        const cleanMaxIntensity = filters.maxFancyIntensity.replace(
+          /_MAX$/i,
+          ''
+        );
+        const idx = intensityLabels.findIndex(
+          (intensity) =>
+            intensity.toLowerCase() === cleanMaxIntensity.toLowerCase()
+        );
+        if (idx !== -1) maxIdx = idx;
       }
-      (where.AND as Prisma.DiamondWhereInput[]).push(intensityCondition);
+
+      // Get the range of valid intensity values
+      if (minIdx <= maxIdx) {
+        const validIntensities = intensityLabels.slice(minIdx, maxIdx + 1);
+        if (!where.AND) {
+          where.AND = [];
+        } else if (!Array.isArray(where.AND)) {
+          where.AND = [where.AND];
+        }
+        (where.AND as Prisma.DiamondWhereInput[]).push({
+          naturalFancyColorIntensity: { in: validIntensities },
+        });
+      }
     }
   }
 
@@ -375,7 +440,7 @@ export async function getFilteredDiamonds(
 
   // Cut Grade filters
   if (filters.minCutGrade || filters.maxCutGrade) {
-    const cutGradeLabels = ['Good', 'Very Good', 'Excellent'];
+    const cutGradeLabels = ['Fair', 'Good', 'Very Good', 'Excellent', 'Ideal'];
 
     if (filters.minCutGrade && filters.maxCutGrade) {
       const minIdx = cutGradeLabels.findIndex(
@@ -385,7 +450,13 @@ export async function getFilteredDiamonds(
         (g) => g.toLowerCase() === filters.maxCutGrade!.toLowerCase()
       );
       if (minIdx !== -1 && maxIdx !== -1) {
-        where.cutGrade = { in: cutGradeLabels.slice(minIdx, maxIdx + 1) };
+        // Include all grades from min to max, and also include Ideal if Excellent is the max
+        let gradesToInclude = cutGradeLabels.slice(minIdx, maxIdx + 1);
+        if (maxIdx >= 3 && !gradesToInclude.includes('Ideal')) {
+          // 3 is index of Excellent
+          gradesToInclude.push('Ideal');
+        }
+        where.cutGrade = { in: gradesToInclude };
       }
     } else if (filters.minCutGrade) {
       const minIdx = cutGradeLabels.findIndex(
@@ -401,7 +472,13 @@ export async function getFilteredDiamonds(
         (g) => g.toLowerCase() === maxCutGradeValue.toLowerCase()
       );
       if (maxIdx !== -1) {
-        where.cutGrade = { in: cutGradeLabels.slice(0, maxIdx + 1) };
+        // Include all grades up to max, and also include Ideal if Excellent is included
+        let gradesToInclude = cutGradeLabels.slice(0, maxIdx + 1);
+        if (maxIdx >= 3 && !gradesToInclude.includes('Ideal')) {
+          // 3 is index of Excellent
+          gradesToInclude.push('Ideal');
+        }
+        where.cutGrade = { in: gradesToInclude };
       }
     }
   }
