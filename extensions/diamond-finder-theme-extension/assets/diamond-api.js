@@ -104,23 +104,16 @@ if (typeof window !== 'undefined') {
           params.append('maxColour', 'D');
         }
       } else if (filterValues.colourType === 'fancy') {
-        console.log(
-          '[FANCY COLOR DEBUG] filterValues.fancyColours:',
-          filterValues.fancyColours
-        );
         if (filterValues.fancyColours && filterValues.fancyColours.length > 0) {
           // Apply specific fancy color filters when colors are selected
           const fancyColorParam = filterValues.fancyColours.join(',');
-          console.log(
-            '[FANCY COLOR DEBUG] Adding fancyColours param:',
-            fancyColorParam
-          );
           params.append('fancyColours', fancyColorParam);
 
           // Only add fancy intensity range when specific colors are selected AND the user has actually moved the intensity slider
           if (
             filterValues.fancyIntensity &&
-            filterValues.fancyIntensity.length > 0
+            filterValues.fancyIntensity.length > 0 &&
+            state.hasSliderChanged('fancyIntensity')
           ) {
             const minIntensity = filterValues.fancyIntensity[0];
             const maxIntensity =
@@ -129,42 +122,51 @@ if (typeof window !== 'undefined') {
               ];
 
             // Check if the intensity slider is at its default full range
-            // The default range is from 'Light' to 'Vivid' after the slider formats it
+            // The default range is from 'Light' to 'Dark' after the slider formats it
             const isFullRange =
-              minIntensity === 'Light' && maxIntensity === 'Vivid';
-
-            console.log('[FANCY COLOR DEBUG] Intensity range check:', {
-              minIntensity,
-              maxIntensity,
-              isFullRange,
-              fancyIntensityArray: filterValues.fancyIntensity,
-              defaultRange:
-                window.DiamondSearchState.DEFAULT_FILTER_RANGES.fancyIntensity,
-            });
+              minIntensity === 'Light' && maxIntensity === 'Dark';
 
             // Only apply intensity filters if user has specifically narrowed the range
             if (!isFullRange) {
-              console.log('[FANCY COLOR DEBUG] Adding intensity params:', {
-                minIntensity,
-                maxIntensity,
-              });
               if (minIntensity) {
                 params.append('minFancyIntensity', minIntensity);
               }
               if (maxIntensity && maxIntensity !== minIntensity) {
                 params.append('maxFancyIntensity', maxIntensity);
               }
-            } else {
-              console.log(
-                '[FANCY COLOR DEBUG] Skipping intensity filters - using full range'
-              );
             }
           }
         } else {
           // Apply "all fancy colors" filter when fancy tab is active but no specific colors selected
-          console.log('[FANCY COLOR DEBUG] Adding ALL_FANCY param');
           params.append('fancyColours', 'ALL_FANCY');
-          // Note: We intentionally don't add intensity filters when showing ALL_FANCY
+
+          // Also check for intensity filters when showing ALL_FANCY
+          if (
+            filterValues.fancyIntensity &&
+            filterValues.fancyIntensity.length > 0 &&
+            state.hasSliderChanged('fancyIntensity')
+          ) {
+            const minIntensity = filterValues.fancyIntensity[0];
+            const maxIntensity =
+              filterValues.fancyIntensity[
+                filterValues.fancyIntensity.length - 1
+              ];
+
+            // Check if the intensity slider is at its default full range
+            // The default range is from 'Light' to 'Dark' after the slider formats it
+            const isFullRange =
+              minIntensity === 'Light' && maxIntensity === 'Dark';
+
+            // Only apply intensity filters if user has specifically narrowed the range
+            if (!isFullRange) {
+              if (minIntensity) {
+                params.append('minFancyIntensity', minIntensity);
+              }
+              if (maxIntensity && maxIntensity !== minIntensity) {
+                params.append('maxFancyIntensity', maxIntensity);
+              }
+            }
+          }
         }
       }
 
@@ -344,64 +346,134 @@ if (typeof window !== 'undefined') {
 
     // Log all filters being applied to the API
     logAppliedFilters(params) {
-      const appliedFilters = {};
-      const basicFilters = {};
-      const advancedFilters = {};
-      const otherFilters = {};
+      // Group filters by type with min/max pairs together
+      const groupedFilters = {
+        basic: {
+          shape: null,
+          type: null,
+          price: {},
+          carat: {},
+          colour: {},
+          clarity: {},
+          cutGrade: {},
+          gradingLab: null,
+          fancyColours: null,
+          fancyIntensity: {},
+        },
+        advanced: {
+          fluorescence: {},
+          polish: {},
+          symmetry: {},
+          table: {},
+          ratio: {},
+        },
+        other: {
+          sort: null,
+        },
+      };
 
-      // Convert URLSearchParams to a plain object and categorize
+      // Process all parameters and group them
       for (const [key, value] of params.entries()) {
-        appliedFilters[key] = value;
-
-        // Categorize filters
-        if (
-          [
-            'shape',
-            'type',
-            'minPriceSek',
-            'maxPriceSek',
-            'minCarat',
-            'maxCarat',
-            'minColour',
-            'maxColour',
-            'minClarity',
-            'maxClarity',
-            'minCutGrade',
-            'maxCutGrade',
-            'gradingLab',
-          ].includes(key)
-        ) {
-          basicFilters[key] = value;
-        } else if (
-          [
-            'minFluorescence',
-            'maxFluorescence',
-            'minPolish',
-            'maxPolish',
-            'minSymmetry',
-            'maxSymmetry',
-            'minTable',
-            'maxTable',
-            'minRatio',
-            'maxRatio',
-          ].includes(key)
-        ) {
-          advancedFilters[key] = value;
-        } else {
-          otherFilters[key] = value;
-        }
+        // Basic filters
+        if (key === 'shape') groupedFilters.basic.shape = value;
+        else if (key === 'type') groupedFilters.basic.type = value;
+        else if (key === 'minPriceSek') groupedFilters.basic.price.min = value;
+        else if (key === 'maxPriceSek') groupedFilters.basic.price.max = value;
+        else if (key === 'minCarat') groupedFilters.basic.carat.min = value;
+        else if (key === 'maxCarat') groupedFilters.basic.carat.max = value;
+        else if (key === 'minColour') groupedFilters.basic.colour.min = value;
+        else if (key === 'maxColour') groupedFilters.basic.colour.max = value;
+        else if (key === 'minClarity') groupedFilters.basic.clarity.min = value;
+        else if (key === 'maxClarity') groupedFilters.basic.clarity.max = value;
+        else if (key === 'minCutGrade')
+          groupedFilters.basic.cutGrade.min = value;
+        else if (key === 'maxCutGrade')
+          groupedFilters.basic.cutGrade.max = value;
+        else if (key === 'gradingLab') groupedFilters.basic.gradingLab = value;
+        else if (key === 'fancyColours')
+          groupedFilters.basic.fancyColours = value;
+        else if (key === 'minFancyIntensity')
+          groupedFilters.basic.fancyIntensity.min = value;
+        else if (key === 'maxFancyIntensity')
+          groupedFilters.basic.fancyIntensity.max = value;
+        // Advanced filters
+        else if (key === 'minFluorescence')
+          groupedFilters.advanced.fluorescence.min = value;
+        else if (key === 'maxFluorescence')
+          groupedFilters.advanced.fluorescence.max = value;
+        else if (key === 'minPolish')
+          groupedFilters.advanced.polish.min = value;
+        else if (key === 'maxPolish')
+          groupedFilters.advanced.polish.max = value;
+        else if (key === 'minSymmetry')
+          groupedFilters.advanced.symmetry.min = value;
+        else if (key === 'maxSymmetry')
+          groupedFilters.advanced.symmetry.max = value;
+        else if (key === 'minTable') groupedFilters.advanced.table.min = value;
+        else if (key === 'maxTable') groupedFilters.advanced.table.max = value;
+        else if (key === 'minRatio') groupedFilters.advanced.ratio.min = value;
+        else if (key === 'maxRatio') groupedFilters.advanced.ratio.max = value;
+        // Other filters
+        else if (key === 'sort') groupedFilters.other.sort = value;
+        else groupedFilters.other[key] = value;
       }
 
-      console.log('[FILTERS APPLIED]', {
-        totalFilters: params
-          .toString()
-          .split('&')
-          .filter((p) => p).length,
-        basicFilters: basicFilters,
-        advancedFilters: advancedFilters,
-        otherFilters: otherFilters,
-        fullQueryString: params.toString(),
-      });
+      // Clean up empty objects and format for display
+      const formatFilters = (filters) => {
+        const formatted = {};
+        for (const [key, value] of Object.entries(filters)) {
+          if (
+            value &&
+            typeof value === 'object' &&
+            Object.keys(value).length > 0
+          ) {
+            // Format min/max pairs
+            if (value.min && value.max) {
+              formatted[key] =
+                value.min === value.max
+                  ? value.min
+                  : `${value.min} - ${value.max}`;
+            } else if (value.min) {
+              formatted[key] = `${value.min}+`;
+            } else if (value.max) {
+              formatted[key] = `up to ${value.max}`;
+            }
+          } else if (value !== null && value !== undefined) {
+            formatted[key] = value;
+          }
+        }
+        return formatted;
+      };
+
+      const activeBasicFilters = formatFilters(groupedFilters.basic);
+      const activeAdvancedFilters = formatFilters(groupedFilters.advanced);
+      const activeOtherFilters = formatFilters(groupedFilters.other);
+
+      // Create summary for console
+      const totalFilters = params
+        .toString()
+        .split('&')
+        .filter((p) => p).length;
+
+      console.log(`[FILTERS APPLIED] ${totalFilters} filters active`);
+
+      // Log each category with a cleaner format
+      if (Object.keys(activeBasicFilters).length > 0) {
+        console.log('📊 Basic Filters:', activeBasicFilters);
+      }
+
+      if (Object.keys(activeAdvancedFilters).length > 0) {
+        console.log('⚙️  Advanced Filters:', activeAdvancedFilters);
+      }
+
+      if (Object.keys(activeOtherFilters).length > 0) {
+        console.log('🔧 Other:', activeOtherFilters);
+      }
+
+      // Show the full query string in a collapsed format
+      console.groupCollapsed('🔗 Full Query String');
+      console.log(params.toString());
+      console.groupEnd();
     },
 
     // Fetch diamond data from API

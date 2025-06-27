@@ -263,6 +263,34 @@ if (typeof window !== 'undefined') {
         }
       }
 
+      // Special handling for fancyIntensity filter
+      if (filterType === 'fancyIntensity') {
+        // For fancy intensity, we need special logic to handle Dark_MAX
+        if (startIndex === endIndex) {
+          // Both thumbs at same position
+          if (endIndex === maxIndex) {
+            // Both at Dark_MAX position - return only Dark
+            return ['Dark', 'Dark'];
+          }
+          return [labels[startIndex], labels[startIndex]];
+        } else if (endIndex === maxIndex) {
+          // Right thumb at Dark_MAX
+          if (startIndex === maxIndex - 1) {
+            // Left at Dark, right at Dark_MAX - only Dark
+            return ['Dark', 'Dark'];
+          } else {
+            // Include all grades from start to Dark (inclusive)
+            return [labels[startIndex], 'Dark'];
+          }
+        } else {
+          // Right thumb not at max - exclude the end position
+          if (endIndex <= startIndex) {
+            return [labels[startIndex], labels[startIndex]];
+          }
+          return [labels[startIndex], labels[endIndex - 1]];
+        }
+      }
+
       // Original logic for other filter types
       if (startIndex === endIndex) {
         return [labels[startIndex]];

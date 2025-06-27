@@ -55,7 +55,6 @@ if (typeof window !== 'undefined') {
 
     // Handle filter button click
     handleFilterButtonClick(button, groupId, isMultiSelect) {
-      const state = window.DiamondSearchState;
       const value = button.dataset.value;
 
       if (isMultiSelect && groupId === 'ds-certificate') {
@@ -208,20 +207,10 @@ if (typeof window !== 'undefined') {
         'ds-fancy-intensity-slider'
       );
       if (fancyIntensitySlider && fancyIntensitySlider.noUiSlider) {
-        const state = window.DiamondSearchState;
         const defaultRange = state.DEFAULT_FILTER_RANGES.fancyIntensity;
-        console.log(
-          '[FANCY COLOR DEBUG] Resetting intensity slider to:',
-          defaultRange
-        );
-        // Reset to default full range using label values
         fancyIntensitySlider.noUiSlider.set(defaultRange);
-        // Verify the reset worked
-        const newValues = fancyIntensitySlider.noUiSlider.get();
-        console.log(
-          '[FANCY COLOR DEBUG] Intensity slider after reset:',
-          newValues
-        );
+        // Reset the slider changed state since we're resetting to defaults
+        state.resetSliderChangedState('fancyIntensity');
       }
 
       state.logCurrentFilters();

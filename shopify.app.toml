@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://mean-shark-fortune-sig.trycloudflare.com"
+application_url = "https://vegetarian-prize-your-extremely.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,10 +26,10 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://mean-shark-fortune-sig.trycloudflare.com/auth/callback", "https://mean-shark-fortune-sig.trycloudflare.com/auth/shopify/callback", "https://mean-shark-fortune-sig.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://vegetarian-prize-your-extremely.trycloudflare.com/auth/callback", "https://vegetarian-prize-your-extremely.trycloudflare.com/auth/shopify/callback", "https://vegetarian-prize-your-extremely.trycloudflare.com/api/auth/callback"]
 
 [app_proxy]
-url = "https://mean-shark-fortune-sig.trycloudflare.com"
+url = "https://vegetarian-prize-your-extremely.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

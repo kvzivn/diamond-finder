@@ -56,7 +56,7 @@ if (typeof window !== 'undefined') {
       symmetry: ['Good', 'Excellent_MAX'],
       table: [0, 100], // Percentage range
       ratio: [0.8, 3.0], // Ratio range
-      fancyIntensity: ['Light', 'Vivid_MAX'],
+      fancyIntensity: ['Light', 'Dark_MAX'],
     },
 
     FILTER_LABELS: {
@@ -78,14 +78,12 @@ if (typeof window !== 'undefined') {
       symmetry: ['Good', 'Very Good', 'Excellent'],
       fancyIntensity: [
         'Light',
-        'Very Light',
-        'Faint',
-        'Fancy Light',
         'Fancy',
-        'Fancy Dark',
         'Intense',
-        'Fancy Deep',
         'Vivid',
+        'Deep',
+        'Dark',
+        'Dark_MAX',
       ],
     },
   };
@@ -111,6 +109,7 @@ if (typeof window !== 'undefined') {
     this.sliderChangedState.symmetry = false;
     this.sliderChangedState.table = false;
     this.sliderChangedState.ratio = false;
+    this.sliderChangedState.fancyIntensity = false;
   };
 
   window.DiamondSearchState.markSliderInitialized = function (sliderType) {
@@ -190,13 +189,16 @@ if (typeof window !== 'undefined') {
     if (this.hasSliderChanged('ratio') && sliderValues.ratio) {
       appliedSliderValues.ratio = sliderValues.ratio;
     }
+    if (
+      this.hasSliderChanged('fancyIntensity') &&
+      sliderValues.fancyIntensity
+    ) {
+      appliedSliderValues.fancyIntensity = sliderValues.fancyIntensity;
+    }
 
     // Include fancy color related values if applicable
     if (sliderValues.fancyColours) {
       appliedSliderValues.fancyColours = sliderValues.fancyColours;
-    }
-    if (sliderValues.fancyIntensity) {
-      appliedSliderValues.fancyIntensity = sliderValues.fancyIntensity;
     }
     if (sliderValues.colourType) {
       appliedSliderValues.colourType = sliderValues.colourType;

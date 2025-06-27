@@ -392,64 +392,127 @@ export async function getFilteredDiamonds(
       });
     }
 
-    // Intensity filters would require similar complex logic
-    // For now, keeping them as simple contains queries
-    // But don't apply intensity filters when ALL_FANCY is specified
-    if (
-      (filters.minFancyIntensity || filters.maxFancyIntensity) &&
-      filters.fancyColours !== 'ALL_FANCY'
-    ) {
-      // Define intensity levels in order from least to most intense
-      const intensityLabels = [
+    // Intensity filters with updated logic
+    if (filters.minFancyIntensity || filters.maxFancyIntensity) {
+      // Map filter values to actual database values
+      const getActualIntensity = (value: string) => {
+        const cleanValue = value.replace(/_MAX$/i, '');
+        // Handle Dark_MAX as Dark
+        if (cleanValue === 'Dark_MAX') return 'Dark';
+
+        // Map our simplified labels to actual database values
+        switch (cleanValue) {
+          case 'Light':
+            return ['Light', 'Very Light', 'Faint', 'Fancy Light'];
+          case 'Fancy':
+            return ['Fancy'];
+          case 'Intense':
+            return ['Intense'];
+          case 'Vivid':
+            return ['Vivid'];
+          case 'Deep':
+            return ['Fancy Deep'];
+          case 'Dark':
+            return ['Fancy Dark'];
+          default:
+            return cleanValue;
+        }
+      };
+
+      // Get the full range of intensities based on min and max
+      const simplifiedLabels = [
         'Light',
-        'Very Light',
-        'Faint',
-        'Fancy Light',
         'Fancy',
-        'Fancy Dark',
         'Intense',
-        'Fancy Deep',
         'Vivid',
+        'Deep',
+        'Dark',
       ];
 
-      let minIdx = 0; // Default to least intense
-      let maxIdx = intensityLabels.length - 1; // Default to most intense
+      if (filters.minFancyIntensity && filters.maxFancyIntensity) {
+        const minIntensity = filters.minFancyIntensity.replace(/_MAX$/i, '');
+        const maxIntensity = filters.maxFancyIntensity.replace(/_MAX$/i, '');
 
-      if (filters.minFancyIntensity) {
-        const cleanMinIntensity = filters.minFancyIntensity.replace(
-          /_MAX$/i,
-          ''
+        const minIdx = simplifiedLabels.findIndex(
+          (intensity) => intensity.toLowerCase() === minIntensity.toLowerCase()
         );
-        const idx = intensityLabels.findIndex(
-          (intensity) =>
-            intensity.toLowerCase() === cleanMinIntensity.toLowerCase()
+        const maxIdx = simplifiedLabels.findIndex(
+          (intensity) => intensity.toLowerCase() === maxIntensity.toLowerCase()
         );
-        if (idx !== -1) minIdx = idx;
-      }
 
-      if (filters.maxFancyIntensity) {
-        const cleanMaxIntensity = filters.maxFancyIntensity.replace(
-          /_MAX$/i,
-          ''
-        );
-        const idx = intensityLabels.findIndex(
-          (intensity) =>
-            intensity.toLowerCase() === cleanMaxIntensity.toLowerCase()
-        );
-        if (idx !== -1) maxIdx = idx;
-      }
+        if (minIdx !== -1 && maxIdx !== -1) {
+          // Get all intensities in the range
+          let validIntensities: string[] = [];
+          for (let i = minIdx; i <= maxIdx; i++) {
+            const mapped = getActualIntensity(simplifiedLabels[i]);
+            if (Array.isArray(mapped)) {
+              validIntensities = validIntensities.concat(mapped);
+            } else {
+              validIntensities.push(mapped);
+            }
+          }
 
-      // Get the range of valid intensity values
-      if (minIdx <= maxIdx) {
-        const validIntensities = intensityLabels.slice(minIdx, maxIdx + 1);
-        if (!where.AND) {
-          where.AND = [];
-        } else if (!Array.isArray(where.AND)) {
-          where.AND = [where.AND];
+          if (!where.AND) {
+            where.AND = [];
+          } else if (!Array.isArray(where.AND)) {
+            where.AND = [where.AND];
+          }
+          (where.AND as Prisma.DiamondWhereInput[]).push({
+            naturalFancyColorIntensity: { in: validIntensities },
+          });
         }
-        (where.AND as Prisma.DiamondWhereInput[]).push({
-          naturalFancyColorIntensity: { in: validIntensities },
-        });
+      } else if (filters.minFancyIntensity) {
+        const minIntensity = filters.minFancyIntensity.replace(/_MAX$/i, '');
+        const minIdx = simplifiedLabels.findIndex(
+          (intensity) => intensity.toLowerCase() === minIntensity.toLowerCase()
+        );
+
+        if (minIdx !== -1) {
+          let validIntensities: string[] = [];
+          for (let i = minIdx; i < simplifiedLabels.length; i++) {
+            const mapped = getActualIntensity(simplifiedLabels[i]);
+            if (Array.isArray(mapped)) {
+              validIntensities = validIntensities.concat(mapped);
+            } else {
+              validIntensities.push(mapped);
+            }
+          }
+
+          if (!where.AND) {
+            where.AND = [];
+          } else if (!Array.isArray(where.AND)) {
+            where.AND = [where.AND];
+          }
+          (where.AND as Prisma.DiamondWhereInput[]).push({
+            naturalFancyColorIntensity: { in: validIntensities },
+          });
+        }
+      } else if (filters.maxFancyIntensity) {
+        const maxIntensity = filters.maxFancyIntensity.replace(/_MAX$/i, '');
+        const maxIdx = simplifiedLabels.findIndex(
+          (intensity) => intensity.toLowerCase() === maxIntensity.toLowerCase()
+        );
+
+        if (maxIdx !== -1) {
+          let validIntensities: string[] = [];
+          for (let i = 0; i <= maxIdx; i++) {
+            const mapped = getActualIntensity(simplifiedLabels[i]);
+            if (Array.isArray(mapped)) {
+              validIntensities = validIntensities.concat(mapped);
+            } else {
+              validIntensities.push(mapped);
+            }
+          }
+
+          if (!where.AND) {
+            where.AND = [];
+          } else if (!Array.isArray(where.AND)) {
+            where.AND = [where.AND];
+          }
+          (where.AND as Prisma.DiamondWhereInput[]).push({
+            naturalFancyColorIntensity: { in: validIntensities },
+          });
+        }
       }
     }
   }

@@ -16,8 +16,6 @@ if (typeof window !== 'undefined') {
       if (!whiteTab || !fancyTab || !whitePanel || !fancyPanel) return;
 
       const switchTab = (activeTab) => {
-        console.log('[TABS DEBUG] Switching to tab:', activeTab);
-
         if (activeTab === 'white') {
           // Show white panel
           whitePanel.classList.remove('tw-hidden');
@@ -29,15 +27,6 @@ if (typeof window !== 'undefined') {
 
           fancyTab.dataset.active = 'false';
           fancyTab.setAttribute('aria-pressed', 'false');
-
-          console.log(
-            '[TABS DEBUG] White tab data-active:',
-            whiteTab.dataset.active
-          );
-          console.log(
-            '[TABS DEBUG] Fancy tab data-active:',
-            fancyTab.dataset.active
-          );
 
           // Trigger fetch when switching back to white tab
           const debounceFetch =
@@ -54,15 +43,6 @@ if (typeof window !== 'undefined') {
 
           whiteTab.dataset.active = 'false';
           whiteTab.setAttribute('aria-pressed', 'false');
-
-          console.log(
-            '[TABS DEBUG] Fancy tab data-active:',
-            fancyTab.dataset.active
-          );
-          console.log(
-            '[TABS DEBUG] White tab data-active:',
-            whiteTab.dataset.active
-          );
 
           // Clear any previously selected fancy colors when switching to fancy tab
           const state = window.DiamondSearchState;
@@ -86,6 +66,8 @@ if (typeof window !== 'undefined') {
             const defaultRange = state.DEFAULT_FILTER_RANGES.fancyIntensity;
             // Reset to default full range using label values
             fancyIntensitySlider.noUiSlider.set(defaultRange);
+            // Reset the slider changed state since we're resetting to defaults
+            state.resetSliderChangedState('fancyIntensity');
           }
 
           // Trigger fetch to show all fancy colored diamonds

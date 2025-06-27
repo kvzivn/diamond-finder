@@ -667,11 +667,14 @@ if (typeof window !== 'undefined') {
         margin: 1,
         range: {
           min: 0,
-          max: 8, // Updated to 8 since we have 9 intensity levels (0-8)
+          max: 6, // Updated to 6 since we have 7 intensity levels (0-6)
         },
         format: {
           to: function (value) {
-            return intensityLabels[Math.round(value)];
+            const index = Math.round(value);
+            const label = intensityLabels[index];
+            // Display "Dark" for both position 5 and 6 (Dark_MAX)
+            return label === 'Dark_MAX' ? 'Dark' : label;
           },
           from: function (value) {
             if (value.endsWith('_MAX')) {
@@ -684,6 +687,11 @@ if (typeof window !== 'undefined') {
 
       const debounceFetch = window.DiamondFiltersUtils.createDebouncedFetch();
       fancyIntensitySlider.noUiSlider.on('change', debounceFetch);
+
+      // Track when user changes the slider
+      fancyIntensitySlider.noUiSlider.on('change', function () {
+        state.markSliderChanged('fancyIntensity');
+      });
 
       setTimeout(() => {
         state.markSliderInitialized('fancyIntensity');
