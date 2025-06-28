@@ -398,11 +398,10 @@ export async function fetchDiamondsFromApi(
       if (typeof diamond.totalPrice === 'number' && diamond.carat) {
         // First convert USD to SEK
         const basePriceSek = diamond.totalPrice * exchangeRate;
-        // Then apply markup based on carat and type, with rounding to nearest 100 SEK
+        // Then apply markup (100% for all diamonds) with rounding to nearest 100 SEK
         diamondWithSek.totalPriceSek = calculateFinalPriceSek(
           basePriceSek,
-          diamond.carat,
-          type
+          diamond.carat
         );
       }
 
@@ -647,11 +646,10 @@ export async function* fetchDiamondsStream(
     ) {
       // First convert USD to SEK
       const basePriceSek = diamond.totalPrice * exchangeRate;
-      // Then apply markup based on carat and type, with rounding to nearest 100 SEK
+      // Then apply markup (100% for all diamonds) with rounding to nearest 100 SEK
       diamond.totalPriceSek = calculateFinalPriceSek(
         basePriceSek,
-        diamond.carat,
-        type
+        diamond.carat
       );
     }
 
