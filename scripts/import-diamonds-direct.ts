@@ -1,13 +1,15 @@
 #!/usr/bin/env tsx
 
+import * as dotenv from 'dotenv';
 import { Pool } from 'pg';
 import { fetchDiamondsStream } from '../app/services/idex.service.server.js';
 import type { DiamondType } from '../app/models/diamond.server.js';
 
+// Load environment variables
+dotenv.config();
+
 // Configuration
-const DATABASE_URL =
-  'postgres://diamond_finder:lWudLMIG7134IEs@localhost:5432/diamond_finder?sslmode=disable';
-// const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL;
 const BATCH_SIZE = 500; // Optimized for PostgreSQL performance
 
 interface ImportStats {

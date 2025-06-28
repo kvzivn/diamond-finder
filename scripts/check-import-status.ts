@@ -1,10 +1,12 @@
 #!/usr/bin/env tsx
 
+import * as dotenv from 'dotenv';
 import { Pool } from 'pg';
 
-const DATABASE_URL =
-  'postgres://diamond_finder:lWudLMIG7134IEs@localhost:5432/diamond_finder?sslmode=disable';
-// const DATABASE_URL = process.env.DATABASE_URL;
+// Load environment variables
+dotenv.config();
+
+const DATABASE_URL = process.env.DATABASE_URL;
 
 async function checkImportStatus() {
   if (!DATABASE_URL) {
