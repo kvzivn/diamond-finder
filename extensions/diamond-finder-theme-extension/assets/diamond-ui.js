@@ -20,14 +20,23 @@ if (typeof window !== 'undefined') {
       this.setupInfiniteScroll();
       this.setupInputFilters();
       this.setupColourSliderImages();
-      this.applyInitialFilters();
+      // Note: applyInitialFilters() is now called only after all sliders are initialized
+      // This is handled by DiamondSearchApp.triggerInitialLoad()
     },
 
     // Apply initial filters and fetch data
     applyInitialFilters() {
       const state = window.DiamondSearchState;
 
-      if (state.initialLoadComplete) return;
+      console.log('[DIAMOND UI] applyInitialFilters called', {
+        initialLoadComplete: state.initialLoadComplete,
+        allSlidersInitialized: state.areAllSlidersInitialized(),
+      });
+
+      if (state.initialLoadComplete) {
+        console.log('[DIAMOND UI] Initial load already complete, skipping');
+        return;
+      }
 
       // Set default type filter
       state.setFilter('ds-type', 'Natural');
@@ -100,12 +109,27 @@ if (typeof window !== 'undefined') {
         sliders: appliedFilters,
       });
 
+      // Show the filter UI and search header now that sliders are ready
+      const filterUI = document.querySelector('.diamond-filters-ui');
+      const searchHeader = document.getElementById('diamond-search-header');
+
+      if (filterUI) {
+        filterUI.classList.remove('tw-hidden');
+        console.log('[DIAMOND UI] Filter UI shown');
+      }
+      if (searchHeader) {
+        searchHeader.classList.remove('tw-hidden');
+        console.log('[DIAMOND UI] Search header shown');
+      }
+
       // Fetch initial data
       // Basic filters (shape, type, price, carat, color, clarity, cut grade) will be applied
       // Advanced filters (fluorescence, polish, symmetry, table, ratio) will NOT be applied unless the user changes them
       // Certificates will include all by default (GIA, IGI, HRD)
+      console.log('[DIAMOND UI] Making initial API call with sliders ready');
       window.DiamondAPI.fetchDiamondData(1, state.paginationInfo.limit || 24);
       state.initialLoadComplete = true;
+      console.log('[DIAMOND UI] Initial load complete flag set to true');
     },
 
     // Setup sort dropdown

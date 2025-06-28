@@ -24,6 +24,9 @@ if (typeof window !== 'undefined') {
               ? 'lab'
               : typeValue;
         params.append('type', apiTypeValue);
+      } else if (!state.initialLoadComplete) {
+        // Default to natural diamonds on initial load
+        params.append('type', 'natural');
       }
 
       // Add sorting parameter
@@ -33,6 +36,7 @@ if (typeof window !== 'undefined') {
 
       // Add price filters from sliders
       const priceSliderEl = document.getElementById('ds-price-slider');
+      let priceApplied = false;
       if (priceSliderEl && priceSliderEl.noUiSlider) {
         const priceValues = priceSliderEl.noUiSlider.get();
         if (priceValues && priceValues.length === 2) {
@@ -42,28 +46,36 @@ if (typeof window !== 'undefined') {
           const maxPrice = parseFloat(
             String(priceValues[1]).replace(/\s/g, '')
           );
-          if (!isNaN(minPrice))
+          if (!isNaN(minPrice)) {
             params.append('minPriceSek', minPrice.toString());
+            priceApplied = true;
+          }
           if (!isNaN(maxPrice))
             params.append('maxPriceSek', maxPrice.toString());
         }
-      } else {
-        // Fallback: Always apply default minimum price filter of 2500 SEK when slider isn't available
+      }
+      if (!priceApplied) {
+        // Fallback: Always apply default minimum price filter of 2500 SEK when slider isn't available or returns invalid values
         params.append('minPriceSek', '2500');
       }
 
       // Add carat filters from sliders
       const caratSliderEl = document.getElementById('ds-carat-slider');
+      let caratApplied = false;
       if (caratSliderEl && caratSliderEl.noUiSlider) {
         const caratValues = caratSliderEl.noUiSlider.get();
         if (caratValues && caratValues.length === 2) {
           const minCarat = parseFloat(caratValues[0]);
           const maxCarat = parseFloat(caratValues[1]);
-          if (!isNaN(minCarat)) params.append('minCarat', minCarat.toString());
+          if (!isNaN(minCarat)) {
+            params.append('minCarat', minCarat.toString());
+            caratApplied = true;
+          }
           if (!isNaN(maxCarat)) params.append('maxCarat', maxCarat.toString());
         }
-      } else {
-        // Fallback: Always apply default carat filter when slider isn't available
+      }
+      if (!caratApplied) {
+        // Fallback: Always apply default carat filter when slider isn't available or returns invalid values
         const defaultCaratRange = state.DEFAULT_FILTER_RANGES.carat;
         params.append('minCarat', defaultCaratRange[0].toString());
         params.append('maxCarat', defaultCaratRange[1].toString());
@@ -78,6 +90,7 @@ if (typeof window !== 'undefined') {
       ) {
         // Apply white color filters when white tab is active or no tab is specified
         const colourSliderEl = document.getElementById('ds-colour-slider-noui');
+        let colourApplied = false;
         if (colourSliderEl && colourSliderEl.noUiSlider) {
           const colourValues = window.DiamondFilters.getSliderValues().colour;
           if (colourValues && colourValues.length > 0) {
@@ -88,18 +101,19 @@ if (typeof window !== 'undefined') {
               // Single value selected - only send one parameter
               params.append('minColour', minColour);
               params.append('maxColour', minColour);
+              colourApplied = true;
             } else {
               // Range selected
-              if (minColour) params.append('minColour', minColour);
+              if (minColour) {
+                params.append('minColour', minColour);
+                colourApplied = true;
+              }
               if (maxColour) params.append('maxColour', maxColour);
             }
-          } else {
-            // Apply default white color range when slider isn't ready
-            params.append('minColour', 'K');
-            params.append('maxColour', 'D');
           }
-        } else {
-          // Apply default white color range when slider isn't initialized
+        }
+        if (!colourApplied) {
+          // Apply default white color range when slider isn't initialized or returns invalid values
           params.append('minColour', 'K');
           params.append('maxColour', 'D');
         }

@@ -1,5 +1,5 @@
 <!-- Diamond Search Results Section -->
-<div class='tw-flex tw-justify-between tw-items-center tw-mb-4'>
+<div id='diamond-search-header' class='tw-flex tw-justify-between tw-items-center tw-mb-4 tw-hidden'>
   <p class='tw-text-base tw-text-gray-700'>Resultat - <span id='ds-results-count'>0 diamanter</span></p>
 
   <div>
@@ -18,7 +18,7 @@
 </div>
 
 <!-- Initial Loading Spinner (only shows on first load) -->
-<div id='diamond-initial-loading' class='tw-flex tw-items-center tw-justify-center tw-py-20 tw-hidden'>
+<div id='diamond-initial-loading' class='tw-flex tw-items-center tw-justify-center tw-py-20'>
   <svg
     xmlns='http://www.w3.org/2000/svg'
     width='18'
@@ -34,9 +34,19 @@
     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
   </svg>
   <span class='tw-text-gray-600 tw-text-2xl'>Hämtar diamanter...</span>
+
+  <noscript>
+    <style>
+      #diamond-initial-loading > div:first-child {
+        display: none !important;
+      }
+    </style>
+    <div class='tw-text-center tw-text-red-600'>
+      JavaScript krävs för att visa diamanter. Vänligen aktivera JavaScript i din webbläsare.
+    </div>
+  </noscript>
 </div>
 
-<div id='diamond-grid-area' class='tw-transition-opacity tw-duration-300'>
-  <!-- JS will put initial loading message here -->
+<div id='diamond-grid-area' class='tw-transition-opacity tw-duration-300 tw-hidden'>
   <!-- Products will be dynamically inserted here by renderDiamonds -->
 </div>

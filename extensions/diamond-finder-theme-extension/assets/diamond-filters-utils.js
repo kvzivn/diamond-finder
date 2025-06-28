@@ -2,7 +2,7 @@
 if (typeof window !== 'undefined') {
   window.DiamondFiltersUtils = {
     // Wait for noUiSlider to be available
-    waitForNoUiSlider(callback, maxAttempts = 100) {
+    waitForNoUiSlider(callback, maxAttempts = 200) {
       let attempts = 0;
       const checkInterval = setInterval(() => {
         attempts++;
@@ -12,13 +12,18 @@ if (typeof window !== 'undefined') {
           typeof window.noUiSlider.create === 'function'
         ) {
           clearInterval(checkInterval);
+          console.log(
+            '[DIAMOND FILTERS] noUiSlider loaded successfully after',
+            attempts * 50,
+            'ms'
+          );
           callback();
         } else if (attempts >= maxAttempts) {
           clearInterval(checkInterval);
           console.error(
             '[DIAMOND FILTERS] noUiSlider library failed to load after',
             maxAttempts * 50,
-            'ms'
+            'ms - this will cause slider initialization to fail'
           );
         }
       }, 50);
