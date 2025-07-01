@@ -23,6 +23,7 @@ interface ImportStats {
 class DirectDiamondImporter {
   private pool: Pool;
   private stats: ImportStats;
+  private typeChangedCount: number = 0;
 
   constructor() {
     if (!DATABASE_URL) {
@@ -107,14 +108,23 @@ class DirectDiamondImporter {
     const client = await this.pool.connect();
     try {
       // Generate UUIDs for new diamonds
-      const diamondsWithIds = diamonds.map((diamond) => ({
-        ...diamond,
-        id: crypto.randomUUID(),
-        type: type,
-        importJobId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }));
+      const diamondsWithIds = diamonds.map((diamond) => {
+        const isTypeChanged =
+          (diamond as any)._shouldBeLabType && type === 'natural';
+        if (isTypeChanged) {
+          this.typeChangedCount++;
+        }
+
+        return {
+          ...diamond,
+          id: crypto.randomUUID(),
+          // Check if this diamond should be marked as lab type (based on LG certificate)
+          type: (diamond as any)._shouldBeLabType ? 'lab' : type,
+          importJobId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      });
 
       // Build the VALUES clause for bulk insert
       const values: any[] = [];
@@ -234,6 +244,9 @@ class DirectDiamondImporter {
   async importDiamonds(type: DiamondType) {
     console.log(`[IMPORT] Starting ${type} diamond import...`);
 
+    // Reset type changed counter for this import
+    this.typeChangedCount = 0;
+
     try {
       // Create import job
       this.stats.importJobId = await this.createImportJob(type);
@@ -338,6 +351,11 @@ class DirectDiamondImporter {
     );
     console.log(`Total Inserted: ${this.stats.totalInserted.toLocaleString()}`);
     console.log(`Errors: ${this.stats.errors.toLocaleString()}`);
+    if (type === 'natural' && this.typeChangedCount > 0) {
+      console.log(
+        `Lab-grown in Natural: ${this.typeChangedCount.toLocaleString()} (moved to lab type)`
+      );
+    }
     console.log(`Duration: ${minutes}m ${seconds}s`);
     console.log(
       `Rate: ${Math.round(this.stats.totalProcessed / (duration / 1000))} diamonds/sec`

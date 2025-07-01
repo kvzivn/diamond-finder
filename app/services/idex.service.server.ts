@@ -384,6 +384,27 @@ export async function fetchDiamondsFromApi(
   console.log(`Parsing CSV data for ${type} diamonds...`);
   let diamonds = parseCSV(csvString, headers);
 
+  // Check for lab-grown diamonds in natural endpoint based on certificate number
+  let labGrownInNaturalCount = 0;
+  diamonds = diamonds.map((diamond) => {
+    // Check if certificate number contains "LG" (case insensitive)
+    if (
+      diamond.certificateNumber &&
+      diamond.certificateNumber.toUpperCase().includes('LG')
+    ) {
+      labGrownInNaturalCount++;
+      // Add a flag to indicate this should be treated as lab-grown
+      return { ...diamond, _shouldBeLabType: true };
+    }
+    return diamond;
+  });
+
+  if (labGrownInNaturalCount > 0) {
+    console.log(
+      `[IDEX SERVICE] Found ${labGrownInNaturalCount} lab-grown diamonds (with LG certificate) in ${type} endpoint. These will be marked as type='lab'.`
+    );
+  }
+
   // Fetch exchange rate and convert prices to SEK
   try {
     const exchangeRate = await getUsdToSekExchangeRate();
@@ -399,10 +420,12 @@ export async function fetchDiamondsFromApi(
         // First convert USD to SEK
         const basePriceSek = diamond.totalPrice * exchangeRate;
         // Then apply markup based on carat and type, with rounding to nearest 100 SEK
+        // Use lab type for diamonds with LG certificate numbers
+        const effectiveType = (diamond as any)._shouldBeLabType ? 'lab' : type;
         diamondWithSek.totalPriceSek = calculateFinalPriceSek(
           basePriceSek,
           diamond.carat,
-          type
+          effectiveType
         );
       }
 
@@ -573,6 +596,7 @@ export async function* fetchDiamondsStream(
 
   let chunk: Diamond[] = [];
   let processedCount = 0;
+  let labGrownInNaturalCount = 0;
 
   for (const line of lines) {
     processedCount++;
@@ -639,6 +663,16 @@ export async function* fetchDiamondsStream(
       }
     });
 
+    // Check for lab-grown diamonds in natural endpoint based on certificate number
+    if (
+      diamond.certificateNumber &&
+      diamond.certificateNumber.toUpperCase().includes('LG')
+    ) {
+      // Add a flag to indicate this should be treated as lab-grown
+      (diamond as any)._shouldBeLabType = true;
+      labGrownInNaturalCount++;
+    }
+
     // Apply exchange rate and markup if available
     if (
       exchangeRate &&
@@ -648,10 +682,12 @@ export async function* fetchDiamondsStream(
       // First convert USD to SEK
       const basePriceSek = diamond.totalPrice * exchangeRate;
       // Then apply markup based on carat and type, with rounding to nearest 100 SEK
+      // Use lab type for diamonds with LG certificate numbers
+      const effectiveType = (diamond as any)._shouldBeLabType ? 'lab' : type;
       diamond.totalPriceSek = calculateFinalPriceSek(
         basePriceSek,
         diamond.carat,
-        type
+        effectiveType
       );
     }
 
@@ -677,5 +713,12 @@ export async function* fetchDiamondsStream(
   if (chunk.length > 0) {
     console.log(`[IDEX SERVICE] Final batch: ${chunk.length} ${type} diamonds`);
     yield chunk;
+  }
+
+  // Log lab-grown diamonds found in natural endpoint
+  if (type === 'natural' && labGrownInNaturalCount > 0) {
+    console.log(
+      `[IDEX SERVICE] Found ${labGrownInNaturalCount} lab-grown diamonds (with LG certificate) in natural endpoint. These will be marked as type='lab'.`
+    );
   }
 }
