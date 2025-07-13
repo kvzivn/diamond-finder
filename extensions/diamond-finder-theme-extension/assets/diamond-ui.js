@@ -20,6 +20,7 @@ if (typeof window !== 'undefined') {
       this.setupInfiniteScroll();
       this.setupInputFilters();
       this.setupColourSliderImages();
+      this.setupClaritySliderImages();
       // Note: applyInitialFilters() is now called only after all sliders are initialized
       // This is handled by DiamondSearchApp.triggerInitialLoad()
     },
@@ -359,6 +360,49 @@ if (typeof window !== 'undefined') {
       // Keep images visible when hovering
       colorImagesDiv.addEventListener('mouseenter', showImages);
       colorImagesDiv.addEventListener('mouseleave', () => {
+        if (!isSliderDragging) {
+          hideImages();
+        }
+      });
+    },
+
+    setupClaritySliderImages() {
+      const claritySlider = document.getElementById('ds-clarity-slider-noui');
+      const clarityImagesDiv = document.getElementById('ds-clarity-images');
+      if (!claritySlider || !clarityImagesDiv) return;
+      let isSliderDragging = false;
+      const showImages = () => {
+        clarityImagesDiv.style.opacity = '1';
+        clarityImagesDiv.style.pointerEvents = 'auto';
+      };
+      const hideImages = () => {
+        if (!isSliderDragging) {
+          clarityImagesDiv.style.opacity = '0';
+          clarityImagesDiv.style.pointerEvents = 'none';
+        }
+      };
+      // Setup slider event handlers
+      const setupSliderEvents = () => {
+        if (claritySlider.noUiSlider) {
+          claritySlider.noUiSlider.on('start', function () {
+            isSliderDragging = true;
+            showImages();
+          });
+          claritySlider.noUiSlider.on('end', function () {
+            isSliderDragging = false;
+            hideImages();
+          });
+        }
+      };
+      // Try immediately or wait for slider initialization
+      if (claritySlider.noUiSlider) {
+        setupSliderEvents();
+      } else {
+        setTimeout(setupSliderEvents, 100);
+      }
+      // Keep images visible when hovering
+      clarityImagesDiv.addEventListener('mouseenter', showImages);
+      clarityImagesDiv.addEventListener('mouseleave', () => {
         if (!isSliderDragging) {
           hideImages();
         }

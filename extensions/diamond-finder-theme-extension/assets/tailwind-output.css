@@ -594,6 +594,10 @@ video {
   top: 0px;
 }
 
+.tw-left-1\/2 {
+  left: 50%;
+}
+
 .tw-z-10 {
   z-index: 10;
 }
@@ -744,12 +748,30 @@ video {
   width: 100%;
 }
 
+.tw-w-max {
+  width: -moz-max-content;
+  width: max-content;
+}
+
+.tw-min-w-full {
+  min-width: 100%;
+}
+
 .tw-max-w-\[81\.25rem\] {
   max-width: 81.25rem;
 }
 
 .tw-flex-1 {
   flex: 1 1 0%;
+}
+
+.tw--translate-x-1\/2 {
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.tw-transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 @keyframes tw-spin {
@@ -1331,6 +1353,22 @@ video {
 }
 
 @media (min-width: 768px) {
+  .md\:tw-h-24 {
+    height: 6rem;
+  }
+
+  .md\:tw-h-48 {
+    height: 12rem;
+  }
+
+  .md\:tw-h-36 {
+    height: 9rem;
+  }
+
+  .md\:tw-h-32 {
+    height: 8rem;
+  }
+
   .md\:tw-grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

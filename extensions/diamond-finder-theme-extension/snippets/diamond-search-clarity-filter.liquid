@@ -1,6 +1,24 @@
 <div>
   <label for='ds-clarity-slider' class='tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2'>Klarhet</label>
   <div class='tw-relative'>
+    <div
+      id='ds-clarity-images'
+      class='tw-absolute tw-bottom-full tw-left-1/2 tw-transform tw--translate-x-1/2 tw-flex tw-justify-between tw-items-end tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-6 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10 tw-w-max tw-min-w-full'
+    >
+      {% assign clarity_grades_for_images = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' %}
+      {% for grade_img_filename in clarity_grades_for_images %}
+        <div class='tw-text-center'>
+          <img
+            src='{{ grade_img_filename | append: '.jpg' | asset_url }}'
+            alt='{{ grade_img_filename }} clarity'
+            class='tw-mx-auto tw-h-12 tw-w-auto tw-rounded-sm md:tw-h-32'
+            width='48'
+            height='48'
+          >
+        </div>
+      {% endfor %}
+    </div>
+
     <div id='ds-clarity-slider-noui' class='tw-mt-8'></div>
 
     <div class='label-container tw-flex tw-mt-4 tw-text-sm tw-text-gray-500' id='ds-clarity-labels'>
