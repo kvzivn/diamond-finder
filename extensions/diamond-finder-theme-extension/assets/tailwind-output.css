@@ -1127,6 +1127,11 @@ video {
   color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 
+.tw-text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1));
+}
+
 .tw-text-slate-700 {
   --tw-text-opacity: 1;
   color: rgb(51 65 85 / var(--tw-text-opacity, 1));
@@ -1143,10 +1148,6 @@ video {
 
 .tw-opacity-60 {
   opacity: 0.6;
-}
-
-.tw-opacity-100 {
-  opacity: 1;
 }
 
 .tw-shadow-md {

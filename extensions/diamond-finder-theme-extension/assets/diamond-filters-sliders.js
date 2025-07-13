@@ -44,7 +44,7 @@ if (typeof window !== 'undefined') {
         margin: 1000,
         range: {
           min: 2500,
-          max: 10000000,
+          max: 1000000,
         },
         format: {
           to: function (value) {

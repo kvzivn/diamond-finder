@@ -11,10 +11,11 @@ This is a Shopify app for diamond search functionality built with Remix and Type
 
 ### Key Architecture Patterns
 
-- **Diamond Data Flow**: IDEX API → Remix backend → Diamond cache service → Theme extension via API routes
+- **Diamond Data Flow**: IDEX API → Remix backend → PostgreSQL Database → Theme extension via API routes
 - **Modular Frontend**: The theme extension uses a modular JavaScript architecture with separate files for state management, API calls, rendering, filters, and UI components
-- **Currency Conversion**: Prices are fetched in USD and converted to SEK using Open Exchange Rates API
+- **Currency Conversion**: Prices are fetched in USD and converted to SEK using Open Exchange Rates API with carat-based markup pricing
 - **File Processing**: IDEX API returns ZIP files containing CSV data that is parsed into Diamond objects
+- **Database Storage**: Diamond data is persisted in PostgreSQL with optimized indexes for performance
 
 ## Common Development Commands
 
@@ -23,24 +24,31 @@ This is a Shopify app for diamond search functionality built with Remix and Type
 npm run dev              # Start Shopify app development with tunneling
 npm run build           # Build the Remix application
 npm run setup           # Generate Prisma client and run migrations
+npm run deploy          # Deploy app to Shopify
 
 # Linting and Formatting
 npm run lint            # Run ESLint
 
 # Testing and Type Safety
-npm run typecheck       # Run TypeScript type checking (if available)
+npm run typecheck       # Run TypeScript type checking
 
 # Database
 npm run prisma          # Access Prisma CLI
 npx prisma generate     # Generate Prisma client
 npx prisma migrate deploy # Deploy migrations
+npx prisma migrate dev  # Create new migration in development
+
+# Diamond Import Scripts
+npm run import:all      # Import all diamonds (natural + lab) to database
+npm run import:natural  # Import natural diamonds only
+npm run import:lab      # Import lab-grown diamonds only
+npm run import:status   # Check status of import jobs
 
 # Theme Extension Assets
 npm run tailwind:build  # Build Tailwind CSS for theme extension
 npm run tailwind:watch  # Watch and rebuild Tailwind CSS
 
 # Shopify CLI
-npm run deploy          # Deploy app to Shopify
 npm run generate        # Generate new Shopify app components
 ```
 
@@ -52,57 +60,102 @@ npm run generate        # Generate new Shopify app components
 - Handles ZIP file extraction and CSV parsing
 - Converts USD prices to SEK using exchange rates
 - Maps CSV headers to Diamond interface properties
+- Applies carat-based markup pricing
+
+### Diamond DB Service (`app/services/diamond-db.server.ts`)
+
+- Manages all database operations for diamonds
+- Provides filtered queries with pagination
+- Handles bulk inserts and updates
+- Replaces deprecated cache service with persistent storage
+
+### Diamond Pricing Service (`app/services/diamond-pricing.server.ts`)
+
+- Implements carat-based markup calculation
+- Handles SEK price rounding to nearest 100
+- Markup formula: `baseMarkup + (caratWeight * caratMultiplier)`
+
+### Diamond Updater Service (`app/services/diamond-updater.server.ts`)
+
+- Manages background refresh of diamond data
+- Tracks import jobs with status and progress
+- Handles both full and partial updates
 
 ### Diamond Model (`app/models/diamond.server.ts`)
 
 - Defines Diamond interface with 60+ properties
 - Supports both natural and lab-grown diamond types
 - Includes price fields in both USD and SEK
-
-### Diamond Cache Service (`app/services/diamond-cache.server.ts`)
-
-- Caches diamond data to reduce API calls
-- Manages data freshness and invalidation
+- Database indexes on frequently queried fields
 
 ## Theme Extension Structure
 
 The theme extension follows a modular architecture documented in `extensions/diamond-finder-theme-extension/README-DIAMOND-SEARCH-ARCHITECTURE.md`:
 
+- **diamond-finder-init.js**: Application initialization and setup
 - **diamond-state.js**: Global state management
 - **diamond-api.js**: API communication and query building
 - **diamond-renderer.js**: Diamond display and sorting
 - **Diamond Filter Modules**:
+  - **diamond-filters-core.js**: Main coordination module
   - **diamond-filters-utils.js**: Shared utilities and helpers
   - **diamond-filters-sliders.js**: All slider components
   - **diamond-filters-buttons.js**: Button filter groups
   - **diamond-filters-tabs.js**: Color tab switching
-  - **diamond-filters-core.js**: Main coordination module
 - **diamond-ui.js**: UI interactions and events
-- **diamond-finder-init.js**: Application initialization
+- **diamond-details.js**: Individual diamond detail views
 
 ## Environment Variables Required
 
 ```bash
+# API Keys
 IDEX_API_KEY=           # IDEX API key for diamond data
 IDEX_API_SECRET=        # IDEX API secret
 EXCHANGE_RATE_APP_ID=   # Open Exchange Rates API key for USD→SEK conversion
+
+# Database
+DATABASE_URL=           # PostgreSQL connection string
+
+# Shopify (auto-generated by Shopify CLI)
+SHOPIFY_API_KEY=
+SHOPIFY_API_SECRET=
+SCOPES=
+SHOPIFY_APP_URL=
 ```
 
-## Database
+## Database Schema
 
-Uses Prisma with SQLite for development. Main model is `Session` for Shopify app authentication. Diamond data is not persisted in database - it's cached in memory via the cache service.
+Uses Prisma with PostgreSQL. Main models:
+
+- **Diamond**: Full diamond data with optimized indexes
+- **Session**: Shopify app authentication
+- **ImportJob**: Tracks diamond import processes
+- **ExchangeRate**: Historical currency conversion rates
+
+Key indexes on Diamond table:
+- `type` (natural/lab)
+- `shapeCode`
+- `pricePerCaratUSD`
+- `priceRetailUSD`
+- `caratWeight`
+- Composite indexes for common filter combinations
 
 ## API Routes
 
-- `/diamonds/all` - Returns all cached diamond data
+- `/diamonds/all` - Returns filtered diamond data with pagination
 - `/diamonds/natural` - Returns natural diamonds only
 - `/diamonds/lab` - Returns lab-grown diamonds only
-- `/admin/trigger-refresh` - Forces refresh of diamond cache
+- `/admin/trigger-refresh` - Forces refresh of all diamond data
+- `/admin/trigger-refresh-partial` - Refresh specific diamond type
+- `/admin/trigger-import` - UI for manual import management
 
 ## Development Notes
 
 - Diamond data is fetched as compressed CSV files from IDEX API
 - Frontend uses infinite scroll and debounced filtering for performance
-- All prices are stored in USD and converted to SEK for display
+- All prices are stored in USD and converted to SEK with markup for display
 - Theme extension supports advanced filtering by shape, price, carat, color, clarity, cut grade, and certificates
-- CSS is built using Tailwind and output to the theme extension assets
+- CSS is built using Tailwind with `tw-` prefix to avoid conflicts
+- Database migrations should be tested locally before deploying
+- Import jobs run asynchronously and can be monitored via status endpoint
+- The app uses Cloudflare tunnels for local development with Shopify
