@@ -586,16 +586,16 @@ video {
   left: 0px;
 }
 
+.tw-left-1\/2 {
+  left: 50%;
+}
+
 .tw-right-0 {
   right: 0px;
 }
 
 .tw-top-0 {
   top: 0px;
-}
-
-.tw-left-1\/2 {
-  left: 50%;
 }
 
 .tw-z-10 {
@@ -1353,18 +1353,6 @@ video {
 }
 
 @media (min-width: 768px) {
-  .md\:tw-h-24 {
-    height: 6rem;
-  }
-
-  .md\:tw-h-48 {
-    height: 12rem;
-  }
-
-  .md\:tw-h-36 {
-    height: 9rem;
-  }
-
   .md\:tw-h-32 {
     height: 8rem;
   }

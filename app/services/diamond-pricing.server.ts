@@ -3,33 +3,32 @@ import type { DiamondType } from '../models/diamond.server';
 interface CaratRange {
   min: number;
   max: number;
-  markupPercent: number;
   multiplier: number;
 }
 
 // Markup configuration based on the provided table
 const NATURAL_DIAMOND_MARKUPS: CaratRange[] = [
-  { min: 0, max: 0.5, markupPercent: 180, multiplier: 2.8 },
-  { min: 0.5, max: 0.7, markupPercent: 170, multiplier: 2.7 },
-  { min: 0.7, max: 1, markupPercent: 165, multiplier: 2.65 },
-  { min: 1, max: 1.1, markupPercent: 150, multiplier: 2.5 },
-  { min: 1.1, max: 1.5, markupPercent: 145, multiplier: 2.45 },
-  { min: 1.5, max: 2, markupPercent: 140, multiplier: 2.4 },
-  { min: 2, max: 3, markupPercent: 130, multiplier: 2.3 },
-  { min: 3, max: 5, markupPercent: 125, multiplier: 2.25 },
-  { min: 5, max: 150, markupPercent: 118, multiplier: 2.18 },
+  { min: 0, max: 0.5, multiplier: 2.8 },
+  { min: 0.5, max: 0.7, multiplier: 2.7 },
+  { min: 0.7, max: 1, multiplier: 2.65 },
+  { min: 1, max: 1.1, multiplier: 2.5 },
+  { min: 1.1, max: 1.5, multiplier: 2.45 },
+  { min: 1.5, max: 2, multiplier: 2.4 },
+  { min: 2, max: 3, multiplier: 2.3 },
+  { min: 3, max: 5, multiplier: 2.25 },
+  { min: 5, max: 150, multiplier: 2.18 },
 ];
 
 const LAB_GROWN_DIAMOND_MARKUPS: CaratRange[] = [
-  { min: 0, max: 0.5, markupPercent: 250, multiplier: 3.5 },
-  { min: 0.5, max: 0.7, markupPercent: 200, multiplier: 3.0 },
-  { min: 0.7, max: 1, markupPercent: 190, multiplier: 2.9 },
-  { min: 1, max: 1.1, markupPercent: 180, multiplier: 2.8 },
-  { min: 1.1, max: 1.5, markupPercent: 175, multiplier: 2.75 },
-  { min: 1.5, max: 2, markupPercent: 160, multiplier: 2.6 },
-  { min: 2, max: 3, markupPercent: 150, multiplier: 2.5 },
-  { min: 3, max: 5, markupPercent: 140, multiplier: 2.4 },
-  { min: 5, max: 150, markupPercent: 130, multiplier: 2.3 },
+  { min: 0, max: 0.5, multiplier: 3.5 },
+  { min: 0.5, max: 0.7, multiplier: 3.0 },
+  { min: 0.7, max: 1, multiplier: 2.9 },
+  { min: 1, max: 1.1, multiplier: 2.8 },
+  { min: 1.1, max: 1.5, multiplier: 2.75 },
+  { min: 1.5, max: 2, multiplier: 2.6 },
+  { min: 2, max: 3, multiplier: 2.5 },
+  { min: 3, max: 5, multiplier: 2.4 },
+  { min: 5, max: 150, multiplier: 2.3 },
 ];
 
 /**
