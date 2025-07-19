@@ -1,0 +1,43 @@
+name: Scheduled Diamond Refresh
+
+on:
+  schedule:
+    # Run every 12 hours at 6 AM and 6 PM UTC
+    - cron: '0 6,18 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  refresh-diamonds:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Diamond Refresh
+        run: |
+          echo "Starting scheduled diamond refresh..."
+          
+          # Call the admin trigger endpoint
+          response=$(curl -s -w "%{http_code}" -X POST \
+            "https://diamond-finder.fly.dev/admin/trigger-refresh" \
+            -H "Content-Type: application/json" \
+            -o response_body.txt)
+          
+          # Check if the request was successful
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Diamond refresh triggered successfully"
+            echo "Response:"
+            cat response_body.txt
+          else
+            echo "❌ Failed to trigger diamond refresh (HTTP $response)"
+            echo "Response:"
+            cat response_body.txt
+            exit 1
+          fi
+          
+      - name: Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "🎉 Scheduled diamond refresh completed successfully"
+          else
+            echo "⚠️ Scheduled diamond refresh failed"
+          fi
