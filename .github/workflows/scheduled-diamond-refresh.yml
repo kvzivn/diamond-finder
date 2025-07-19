@@ -19,6 +19,7 @@ jobs:
           response=$(curl -s -w "%{http_code}" -X POST \
             "https://diamond-finder.fly.dev/admin/trigger-refresh" \
             -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.REFRESH_API_KEY }}" \
             -o response_body.txt)
           
           # Check if the request was successful

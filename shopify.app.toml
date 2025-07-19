@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://transportation-initial-portraits-minnesota.trycloudflare.com"
+application_url = "https://art-burner-subtle-coffee.trycloudflare.com"
 embedded = true
 
 [build]
@@ -23,13 +23,13 @@ api_version = "2025-04"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,read_themes"
 
 [auth]
-redirect_urls = ["https://transportation-initial-portraits-minnesota.trycloudflare.com/auth/callback", "https://transportation-initial-portraits-minnesota.trycloudflare.com/auth/shopify/callback", "https://transportation-initial-portraits-minnesota.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://art-burner-subtle-coffee.trycloudflare.com/auth/callback", "https://art-burner-subtle-coffee.trycloudflare.com/auth/shopify/callback", "https://art-burner-subtle-coffee.trycloudflare.com/api/auth/callback"]
 
 [app_proxy]
-url = "https://transportation-initial-portraits-minnesota.trycloudflare.com"
+url = "https://art-burner-subtle-coffee.trycloudflare.com"
 subpath = "api"
 prefix = "apps"
 

@@ -20,6 +20,28 @@ interface UpdateStatus {
 }
 
 /**
+ * Get the shop domain from the most recent session
+ */
+async function getShopDomain(): Promise<string | null> {
+  try {
+    const session = await prisma.session.findFirst({
+      where: {
+        shop: {
+          not: null
+        }
+      },
+      orderBy: {
+        expires: 'desc'
+      }
+    });
+    return session?.shop || null;
+  } catch (error) {
+    console.error('[DIAMOND UPDATER] Error getting shop domain:', error);
+    return null;
+  }
+}
+
+/**
  * Refreshes the diamonds in the database for a specific type.
  * @param type - The type of diamonds to refresh ('natural' or 'lab').
  * @param force - Whether to force a refresh even if one is in progress.
@@ -77,9 +99,20 @@ export async function refreshDiamondsByType(
         `Cleared ${deletedCount} existing ${type} diamonds from database.`
       );
 
+      // Get shop domain for theme settings
+      const shop = await getShopDomain();
+      if (shop) {
+        console.log(`[DIAMOND UPDATER] Using shop domain for theme settings: ${shop}`);
+      } else {
+        console.log('[DIAMOND UPDATER] No shop domain found, using default markup (0 multiplier)');
+      }
+
       // Fetch and import diamonds in chunks
       let totalImported = 0;
-      const diamondStream = fetchDiamondsStream(type);
+      const diamondStream = fetchDiamondsStream(type, { 
+        shop: shop || undefined,
+        limit: 1000 // Temporary limit for testing
+      });
 
       for await (const diamondChunk of diamondStream) {
         const importedCount = await importDiamondsBatch(

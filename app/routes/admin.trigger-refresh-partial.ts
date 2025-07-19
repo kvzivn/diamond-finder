@@ -3,6 +3,26 @@ import { refreshDiamondsByType } from '../services/diamond-updater.server';
 import type { DiamondType } from '../models/diamond.server';
 
 /**
+ * Validates the API key from the Authorization header
+ */
+function validateApiKey(request: Request): boolean {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+  
+  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+  const expectedKey = process.env.REFRESH_API_KEY;
+  
+  if (!expectedKey) {
+    console.error('[AUTH] REFRESH_API_KEY environment variable not set');
+    return false;
+  }
+  
+  return token === expectedKey;
+}
+
+/**
  * Action to manually trigger a refresh of a specific diamond type.
  * This runs as a "fire-and-forget" background job to prevent proxy timeouts.
  * Monitor progress via `fly logs`.
@@ -16,6 +36,14 @@ export async function action({ request }: ActionFunctionArgs) {
     return json(
       { message: 'Method not allowed. Please use POST.' },
       { status: 405 }
+    );
+  }
+
+  // Validate API key
+  if (!validateApiKey(request)) {
+    return json(
+      { message: 'Unauthorized. Valid API key required.' },
+      { status: 401 }
     );
   }
 

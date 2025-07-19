@@ -1,7 +1,8 @@
 import JSZip from 'jszip';
 import type { Diamond, DiamondType } from '../models/diamond.server';
 import { saveExchangeRate } from './diamond-db.server';
-import { calculateFinalPriceSek } from './diamond-pricing.server';
+import { calculateFinalPriceSek, type CaratRange } from './diamond-pricing.server';
+import { fetchThemeSettings, parseThemeSettingsToRanges } from './theme-settings.server';
 
 const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 
@@ -309,7 +310,8 @@ async function getUsdToSekExchangeRate(): Promise<number> {
 }
 
 export async function fetchDiamondsFromApi(
-  type: DiamondType
+  type: DiamondType,
+  options?: { limit?: number; shop?: string }
 ): Promise<Diamond[]> {
   const apiKey = process.env.IDEX_API_KEY;
   const apiSecret = process.env.IDEX_API_SECRET;
@@ -409,6 +411,40 @@ export async function fetchDiamondsFromApi(
   try {
     const exchangeRate = await getUsdToSekExchangeRate();
 
+    // Fetch theme settings for markup if shop is provided
+    let themeSettings = null;
+    let naturalMarkupRanges: CaratRange[] | null = null;
+    let labMarkupRanges: CaratRange[] | null = null;
+    
+    if (options?.shop) {
+      try {
+        themeSettings = await fetchThemeSettings(options.shop);
+        naturalMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'natural');
+        labMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'lab');
+        console.log(`[IDEX SERVICE] Fetched theme settings for shop: ${options.shop}`);
+      } catch (error) {
+        console.error('[IDEX SERVICE] Failed to fetch theme settings:', error);
+      }
+    }
+    
+    // Use default ranges (0 multiplier) if theme settings not available
+    if (!naturalMarkupRanges || !labMarkupRanges) {
+      const defaultRanges: CaratRange[] = [
+        { min: 0, max: 0.5, multiplier: 0 },
+        { min: 0.5, max: 0.7, multiplier: 0 },
+        { min: 0.7, max: 1, multiplier: 0 },
+        { min: 1, max: 1.1, multiplier: 0 },
+        { min: 1.1, max: 1.5, multiplier: 0 },
+        { min: 1.5, max: 2, multiplier: 0 },
+        { min: 2, max: 3, multiplier: 0 },
+        { min: 3, max: 5, multiplier: 0 },
+        { min: 5, max: 150, multiplier: 0 },
+      ];
+      naturalMarkupRanges = defaultRanges;
+      labMarkupRanges = defaultRanges;
+      console.log('[IDEX SERVICE] Using default markup ranges (0 multiplier)');
+    }
+
     // Convert USD prices to SEK and apply markup
     console.log(
       `[IDEX SERVICE] Applying pricing for ${diamonds.length} ${type} diamonds...`
@@ -422,10 +458,12 @@ export async function fetchDiamondsFromApi(
         // Then apply markup based on carat and type, with rounding to nearest 100 SEK
         // Use lab type for diamonds with LG certificate numbers
         const effectiveType = (diamond as any)._shouldBeLabType ? 'lab' : type;
+        const markupRanges = effectiveType === 'natural' ? naturalMarkupRanges : labMarkupRanges;
         diamondWithSek.totalPriceSek = calculateFinalPriceSek(
           basePriceSek,
           diamond.carat,
-          effectiveType
+          effectiveType,
+          markupRanges
         );
       }
 
@@ -496,13 +534,20 @@ export async function fetchDiamondsFromApi(
     console.log(`[IDEX SERVICE] No ${type} diamonds found or parsed.`);
   }
 
+  // Apply temporary limit for testing if specified
+  if (options?.limit && diamonds.length > options.limit) {
+    console.log(`[IDEX SERVICE] Limiting ${type} diamonds from ${diamonds.length} to ${options.limit} for testing`);
+    diamonds = diamonds.slice(0, options.limit);
+  }
+
   console.log(`Successfully parsed ${diamonds.length} ${type} diamonds.`);
   return diamonds;
 }
 
 // New function that returns a stream of parsed diamonds for database import
 export async function* fetchDiamondsStream(
-  type: DiamondType
+  type: DiamondType,
+  options?: { limit?: number; shop?: string }
 ): AsyncGenerator<Diamond[], void, unknown> {
   const apiKey = process.env.IDEX_API_KEY;
   const apiSecret = process.env.IDEX_API_SECRET;
@@ -584,6 +629,40 @@ export async function* fetchDiamondsStream(
     );
   }
 
+  // Fetch theme settings for markup if shop is provided
+  let themeSettings = null;
+  let naturalMarkupRanges: CaratRange[] | null = null;
+  let labMarkupRanges: CaratRange[] | null = null;
+  
+  if (options?.shop) {
+    try {
+      themeSettings = await fetchThemeSettings(options.shop);
+      naturalMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'natural');
+      labMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'lab');
+      console.log(`[IDEX SERVICE] Fetched theme settings for shop: ${options.shop}`);
+    } catch (error) {
+      console.error('[IDEX SERVICE] Failed to fetch theme settings:', error);
+    }
+  }
+  
+  // Use default ranges (0 multiplier) if theme settings not available
+  if (!naturalMarkupRanges || !labMarkupRanges) {
+    const defaultRanges: CaratRange[] = [
+      { min: 0, max: 0.5, multiplier: 0 },
+      { min: 0.5, max: 0.7, multiplier: 0 },
+      { min: 0.7, max: 1, multiplier: 0 },
+      { min: 1, max: 1.1, multiplier: 0 },
+      { min: 1.1, max: 1.5, multiplier: 0 },
+      { min: 1.5, max: 2, multiplier: 0 },
+      { min: 2, max: 3, multiplier: 0 },
+      { min: 3, max: 5, multiplier: 0 },
+      { min: 5, max: 150, multiplier: 0 },
+    ];
+    naturalMarkupRanges = defaultRanges;
+    labMarkupRanges = defaultRanges;
+    console.log('[IDEX SERVICE] Using default markup ranges (0 multiplier)');
+  }
+
   // Parse and yield diamonds in chunks for memory efficiency
   const lines = csvString.trim().split('\n');
   const diamondKeys = headers.map(headerToCamelCase);
@@ -597,8 +676,14 @@ export async function* fetchDiamondsStream(
   let chunk: Diamond[] = [];
   let processedCount = 0;
   let labGrownInNaturalCount = 0;
+  let totalYielded = 0;
 
   for (const line of lines) {
+    // Check if we've reached the limit
+    if (options?.limit && totalYielded >= options.limit) {
+      console.log(`[IDEX SERVICE] Reached limit of ${options.limit} ${type} diamonds`);
+      break;
+    }
     processedCount++;
     const values = line.split(',');
     const diamond: Partial<Diamond> = {};
@@ -684,21 +769,31 @@ export async function* fetchDiamondsStream(
       // Then apply markup based on carat and type, with rounding to nearest 100 SEK
       // Use lab type for diamonds with LG certificate numbers
       const effectiveType = (diamond as any)._shouldBeLabType ? 'lab' : type;
+      const markupRanges = effectiveType === 'natural' ? naturalMarkupRanges : labMarkupRanges;
       diamond.totalPriceSek = calculateFinalPriceSek(
         basePriceSek,
         diamond.carat,
-        effectiveType
+        effectiveType,
+        markupRanges
       );
     }
 
     if (diamond.itemId) {
       chunk.push(diamond as Diamond);
 
-      if (chunk.length >= CHUNK_SIZE) {
+      if (chunk.length >= CHUNK_SIZE || (options?.limit && totalYielded + chunk.length >= options.limit)) {
+        // Apply limit if specified
+        let yieldChunk = chunk;
+        if (options?.limit && totalYielded + chunk.length > options.limit) {
+          const remaining = options.limit - totalYielded;
+          yieldChunk = chunk.slice(0, remaining);
+        }
+        
         console.log(
-          `[IDEX SERVICE] Processed ${processedCount}/${totalLines} lines, yielding optimized batch of ${chunk.length} ${type} diamonds`
+          `[IDEX SERVICE] Processed ${processedCount}/${totalLines} lines, yielding optimized batch of ${yieldChunk.length} ${type} diamonds`
         );
-        yield chunk;
+        yield yieldChunk;
+        totalYielded += yieldChunk.length;
         chunk = [];
 
         // Add small memory cleanup hint
@@ -710,9 +805,16 @@ export async function* fetchDiamondsStream(
   }
 
   // Yield any remaining diamonds
-  if (chunk.length > 0) {
-    console.log(`[IDEX SERVICE] Final batch: ${chunk.length} ${type} diamonds`);
-    yield chunk;
+  if (chunk.length > 0 && (!options?.limit || totalYielded < options.limit)) {
+    // Apply limit if specified
+    let yieldChunk = chunk;
+    if (options?.limit && totalYielded + chunk.length > options.limit) {
+      const remaining = options.limit - totalYielded;
+      yieldChunk = chunk.slice(0, remaining);
+    }
+    console.log(`[IDEX SERVICE] Final batch: ${yieldChunk.length} ${type} diamonds`);
+    yield yieldChunk;
+    totalYielded += yieldChunk.length;
   }
 
   // Log lab-grown diamonds found in natural endpoint
