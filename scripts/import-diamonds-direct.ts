@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
 import * as dotenv from 'dotenv';
+import { randomUUID } from 'crypto';
 import { Pool } from 'pg';
 import { fetchDiamondsStream } from '../app/services/idex.service.server.js';
 import type { DiamondType } from '../app/models/diamond.server.js';
@@ -122,7 +123,7 @@ class DirectDiamondImporter {
 
         return {
           ...diamond,
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           // Check if this diamond should be marked as lab type (based on LG certificate)
           type: (diamond as any)._shouldBeLabType ? 'lab' : type,
           importJobId,
