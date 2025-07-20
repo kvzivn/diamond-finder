@@ -93,7 +93,7 @@ export async function refreshDiamondsByType(
       let totalImported = 0;
       const diamondStream = fetchDiamondsStream(type, { 
         shop: shop,
-        limit: 1000 // Temporary limit for testing
+        limit: 10000 // Testing with larger dataset
       });
 
       for await (const diamondChunk of diamondStream) {

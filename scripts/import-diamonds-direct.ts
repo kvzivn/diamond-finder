@@ -11,7 +11,7 @@ dotenv.config();
 
 // Configuration
 const DATABASE_URL = process.env.DATABASE_URL;
-const BATCH_SIZE = 250; // Reduced for memory efficiency on Fly.io
+const BATCH_SIZE = 200; // Optimized for 2GB Fly.io instance
 
 interface ImportStats {
   totalProcessed: number;
@@ -271,7 +271,7 @@ class DirectDiamondImporter {
 
       for await (const diamonds of fetchDiamondsStream(type, { 
         shop: shop,
-        limit: 1000 // Temporary limit for testing
+        limit: 10000 // Testing with larger dataset
       })) {
         // Add diamonds to current batch
         batch.push(...diamonds);

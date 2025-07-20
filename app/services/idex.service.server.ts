@@ -666,7 +666,7 @@ export async function* fetchDiamondsStream(
   // Parse and yield diamonds in chunks for memory efficiency
   const lines = csvString.trim().split('\n');
   const diamondKeys = headers.map(headerToCamelCase);
-  const CHUNK_SIZE = 800; // Optimized for 1GB App / 2GB instance
+  const CHUNK_SIZE = 400; // Optimized for 2GB instance with memory safety
   const totalLines = lines.length;
 
   console.log(
