@@ -3,7 +3,7 @@
 client_id = "2ac3ecb03ede9c4719272d4c65719ec6"
 name = "diamond-finder"
 handle = "diamond-finder-1"
-application_url = "https://art-burner-subtle-coffee.trycloudflare.com"
+application_url = "https://diamond-finder.fly.dev"
 embedded = true
 
 [build]
@@ -26,10 +26,10 @@ api_version = "2025-04"
 scopes = "write_products,read_themes"
 
 [auth]
-redirect_urls = ["https://art-burner-subtle-coffee.trycloudflare.com/auth/callback", "https://art-burner-subtle-coffee.trycloudflare.com/auth/shopify/callback", "https://art-burner-subtle-coffee.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://diamond-finder.fly.dev/auth/callback", "https://diamond-finder.fly.dev/auth/shopify/callback", "https://diamond-finder.fly.dev/api/auth/callback"]
 
 [app_proxy]
-url = "https://art-burner-subtle-coffee.trycloudflare.com"
+url = "https://diamond-finder.fly.dev"
 subpath = "api"
 prefix = "apps"
 
