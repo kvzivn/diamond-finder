@@ -20,25 +20,11 @@ interface UpdateStatus {
 }
 
 /**
- * Get the shop domain from the most recent session
+ * Get the production shop domain for theme settings
  */
-async function getShopDomain(): Promise<string | null> {
-  try {
-    const session = await prisma.session.findFirst({
-      where: {
-        shop: {
-          not: null
-        }
-      },
-      orderBy: {
-        expires: 'desc'
-      }
-    });
-    return session?.shop || null;
-  } catch (error) {
-    console.error('[DIAMOND UPDATER] Error getting shop domain:', error);
-    return null;
-  }
+function getShopDomain(): string {
+  // Always use production store for theme settings
+  return 'swedia1.myshopify.com';
 }
 
 /**
@@ -100,17 +86,13 @@ export async function refreshDiamondsByType(
       );
 
       // Get shop domain for theme settings
-      const shop = await getShopDomain();
-      if (shop) {
-        console.log(`[DIAMOND UPDATER] Using shop domain for theme settings: ${shop}`);
-      } else {
-        console.log('[DIAMOND UPDATER] No shop domain found, using default markup (0 multiplier)');
-      }
+      const shop = getShopDomain();
+      console.log(`[DIAMOND UPDATER] Using shop domain for theme settings: ${shop}`);
 
       // Fetch and import diamonds in chunks
       let totalImported = 0;
       const diamondStream = fetchDiamondsStream(type, { 
-        shop: shop || undefined,
+        shop: shop,
         limit: 1000 // Temporary limit for testing
       });
 

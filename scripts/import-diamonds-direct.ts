@@ -46,22 +46,9 @@ class DirectDiamondImporter {
     };
   }
 
-  async getShopDomain(): Promise<string | null> {
-    const client = await this.pool.connect();
-    try {
-      const result = await client.query(
-        `SELECT shop FROM "Session" 
-         WHERE shop IS NOT NULL 
-         ORDER BY expires DESC NULLS LAST 
-         LIMIT 1`
-      );
-      return result.rows[0]?.shop || null;
-    } catch (error) {
-      console.error('[IMPORT] Error getting shop domain:', error);
-      return null;
-    } finally {
-      client.release();
-    }
+  getShopDomain(): string {
+    // Always use production store for theme settings
+    return 'swedia1.myshopify.com';
   }
 
   async createImportJob(type: DiamondType): Promise<string> {
@@ -274,19 +261,15 @@ class DirectDiamondImporter {
       await this.clearExistingDiamonds(type);
 
       // Get shop domain for theme settings
-      const shop = await this.getShopDomain();
-      if (shop) {
-        console.log(`[IMPORT] Using shop domain for theme settings: ${shop}`);
-      } else {
-        console.log('[IMPORT] No shop domain found, using default markup (0 multiplier)');
-      }
+      const shop = this.getShopDomain();
+      console.log(`[IMPORT] Using shop domain for theme settings: ${shop}`);
 
       // Process diamonds in batches using the streaming API
       let batch: any[] = [];
       let batchCount = 0;
 
       for await (const diamonds of fetchDiamondsStream(type, { 
-        shop: shop || undefined,
+        shop: shop,
         limit: 1000 // Temporary limit for testing
       })) {
         // Add diamonds to current batch
