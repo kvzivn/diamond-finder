@@ -9,36 +9,48 @@ on:
 jobs:
   refresh-diamonds:
     runs-on: ubuntu-latest
+    timeout-minutes: 120 # 2 hour timeout for large imports
     
     steps:
-      - name: Trigger Diamond Refresh
+      - name: Setup Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Import All Diamonds
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
-          echo "Starting scheduled diamond refresh..."
+          echo "Starting scheduled diamond refresh using direct import script..."
           
-          # Call the admin trigger endpoint
-          response=$(curl -s -w "%{http_code}" -X POST \
-            "https://diamond-finder.fly.dev/admin/trigger-refresh" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.REFRESH_API_KEY }}" \
-            -o response_body.txt)
-          
-          # Check if the request was successful
-          if [ "$response" -eq 200 ]; then
-            echo "✅ Diamond refresh triggered successfully"
-            echo "Response:"
-            cat response_body.txt
-          else
-            echo "❌ Failed to trigger diamond refresh (HTTP $response)"
-            echo "Response:"
-            cat response_body.txt
+          # Run the import script inside the Fly app
+          fly ssh console -a diamond-finder -C "npm run import:all" || {
+            echo "❌ Failed to run import script"
             exit 1
-          fi
+          }
+          
+          echo "✅ Import script completed"
+          
+      - name: Check Import Status
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          echo "Checking import status..."
+          
+          # Give it a moment for the status to update
+          sleep 5
+          
+          # Check the import status
+          fly ssh console -a diamond-finder -C "npm run import:status" || {
+            echo "❌ Failed to check import status"
+            exit 1
+          }
           
       - name: Notification
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
             echo "🎉 Scheduled diamond refresh completed successfully"
+            echo "✅ All diamonds have been imported to the database"
           else
             echo "⚠️ Scheduled diamond refresh failed"
+            echo "❌ Please check the logs for error details"
           fi
