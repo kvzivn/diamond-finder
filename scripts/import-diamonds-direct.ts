@@ -11,7 +11,7 @@ dotenv.config();
 
 // Configuration
 const DATABASE_URL = process.env.DATABASE_URL;
-const BATCH_SIZE = 500; // Optimized for PostgreSQL performance
+const BATCH_SIZE = 250; // Reduced for memory efficiency on Fly.io
 
 interface ImportStats {
   totalProcessed: number;
