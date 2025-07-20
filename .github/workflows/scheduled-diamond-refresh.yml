@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Setup Fly CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
+        with:
+          version: latest
 
       - name: Import All Diamonds
         env:
@@ -22,7 +24,7 @@ jobs:
           echo "Starting scheduled diamond refresh using direct import script..."
           
           # Run the import script inside the Fly app
-          fly ssh console -a diamond-finder -C "npm run import:all" || {
+          flyctl ssh console -a diamond-finder -C "npm run import:all" || {
             echo "❌ Failed to run import script"
             exit 1
           }
@@ -39,7 +41,7 @@ jobs:
           sleep 5
           
           # Check the import status
-          fly ssh console -a diamond-finder -C "npm run import:status" || {
+          flyctl ssh console -a diamond-finder -C "npm run import:status" || {
             echo "❌ Failed to check import status"
             exit 1
           }
