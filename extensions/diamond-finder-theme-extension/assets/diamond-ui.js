@@ -150,14 +150,14 @@ if (typeof window !== 'undefined') {
       sortDropdown.value = 'Price: low to high';
       state.updateSort('price-low-high');
 
-      sortDropdown.addEventListener('change', function () {
+      sortDropdown.addEventListener('change', async function () {
         const selectedValue = this.value;
         const mappedSort = sortMapping[selectedValue];
 
         if (mappedSort) {
           state.updateSort(mappedSort);
           console.log(`[SORT CHANGED] New sort: ${state.currentSort}`);
-          window.DiamondRenderer.renderDiamonds(state.allDiamonds);
+          await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
         }
       });
     },

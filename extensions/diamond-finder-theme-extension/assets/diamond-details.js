@@ -49,7 +49,7 @@ if (typeof window !== 'undefined') {
     },
 
     // Show diamond details view
-    showDiamondDetails(diamond) {
+    async showDiamondDetails(diamond) {
       const searchView = document.getElementById('diamond-search-view');
       const detailsView = document.getElementById('diamond-details-view');
 
@@ -60,7 +60,7 @@ if (typeof window !== 'undefined') {
       detailsView.classList.remove('tw-hidden');
 
       // Populate diamond details
-      this.populateDiamondDetails(diamond);
+      await this.populateDiamondDetails(diamond);
 
       // Scroll to top
       window.scrollTo(0, 0);
@@ -82,7 +82,7 @@ if (typeof window !== 'undefined') {
     },
 
     // Populate diamond details in the view
-    populateDiamondDetails(diamond) {
+    async populateDiamondDetails(diamond) {
       // Update image or SVG
       const imageContainer = document.getElementById('diamond-details-image');
       if (imageContainer) {
@@ -173,15 +173,28 @@ if (typeof window !== 'undefined') {
         title.textContent = `Diamant ${shapeName}`;
       }
 
-      // Update price
+      // Update price - apply client-side markup
       const price = document.getElementById('diamond-details-price');
       if (price) {
         let displayPrice = 'Pris ej tillgängligt';
-        if (
+        
+        // Apply markup using the new pricing module
+        if (window.DiamondPricing && diamond.totalPriceSek) {
+          try {
+            const diamondWithMarkup = await window.DiamondPricing.applyMarkupToDiamond(diamond);
+            if (diamondWithMarkup.finalPriceSek && diamondWithMarkup.finalPriceSek > 0) {
+              displayPrice = `${diamondWithMarkup.finalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
+            }
+          } catch (error) {
+            console.warn('[DIAMOND DETAILS] Error applying markup, using base price:', error);
+            // Fallback to base price
+            displayPrice = `${diamond.totalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
+          }
+        } else if (
           diamond.totalPriceSek !== null &&
           typeof diamond.totalPriceSek === 'number'
         ) {
-          // Price is already rounded to nearest 100 SEK in the backend
+          // Fallback to base price if pricing module not available
           displayPrice = `${diamond.totalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
         } else if (
           diamond.totalPrice !== null &&

@@ -92,8 +92,8 @@ export async function refreshDiamondsByType(
       // Fetch and import diamonds in chunks
       let totalImported = 0;
       const diamondStream = fetchDiamondsStream(type, { 
-        shop: shop,
-        limit: 10000 // Testing with larger dataset
+        shop: shop
+        // Removed limit for production - import all diamonds
       });
 
       for await (const diamondChunk of diamondStream) {

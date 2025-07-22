@@ -271,7 +271,7 @@ class DirectDiamondImporter {
 
       for await (const diamonds of fetchDiamondsStream(type, { 
         shop: shop,
-        limit: 10000 // Testing with larger dataset
+        // Removed limit for production - import all diamonds
       })) {
         // Add diamonds to current batch
         batch.push(...diamonds);

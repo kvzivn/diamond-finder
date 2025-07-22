@@ -87,7 +87,7 @@ if (typeof window !== 'undefined') {
     },
 
     // Create individual diamond card element
-    createDiamondCard(diamond) {
+    async createDiamondCard(diamond) {
       const diamondCard = document.createElement('div');
       diamondCard.className =
         'tw-flex tw-flex-col tw-bg-white tw-border tw-rounded-lg tw-py-4 tw-px-6 tw-transition hover:tw-border-gray-300 hover:tw-shadow-md tw-overflow-hidden tw-cursor-pointer';
@@ -221,18 +221,34 @@ if (typeof window !== 'undefined') {
       priceCertWrapper.className =
         'tw-flex tw-justify-between tw-items-center tw-mb-1';
 
-      // Price
+      // Price - apply client-side markup
       const price = document.createElement('p');
       price.className = 'tw-text-lg tw-font-bold text-gray-900';
 
       let displayPrice = 'Pris ej tillgängligt';
       let displayCurrency = 'SEK';
 
-      if (
+      // Apply markup using the new pricing module
+      if (window.DiamondPricing && diamond.totalPriceSek) {
+        try {
+          const diamondWithMarkup = await window.DiamondPricing.applyMarkupToDiamond(diamond);
+          if (diamondWithMarkup.finalPriceSek && diamondWithMarkup.finalPriceSek > 0) {
+            displayPrice = diamondWithMarkup.finalPriceSek
+              .toLocaleString('sv-SE')
+              .replace(/,/g, ' ');
+          }
+        } catch (error) {
+          console.warn('[DIAMOND RENDERER] Error applying markup, using base price:', error);
+          // Fallback to base price
+          displayPrice = diamond.totalPriceSek
+            .toLocaleString('sv-SE')
+            .replace(/,/g, ' ');
+        }
+      } else if (
         diamond.totalPriceSek !== null &&
         typeof diamond.totalPriceSek === 'number'
       ) {
-        // Price is already rounded to nearest 100 SEK in the backend
+        // Fallback to base price if pricing module not available
         displayPrice = diamond.totalPriceSek
           .toLocaleString('sv-SE')
           .replace(/,/g, ' ');
@@ -274,7 +290,7 @@ if (typeof window !== 'undefined') {
     },
 
     // Main render function
-    renderDiamonds(diamondsToRender) {
+    async renderDiamonds(diamondsToRender) {
       const state = window.DiamondSearchState;
       const gridArea = document.getElementById('diamond-grid-area');
       const resultsCountEl = document.getElementById('ds-results-count');
@@ -314,10 +330,11 @@ if (typeof window !== 'undefined') {
           'tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-6';
         gridArea.appendChild(grid);
 
-        sortedDiamonds.forEach((diamond) => {
-          const diamondCard = this.createDiamondCard(diamond);
+        // Create diamond cards with proper async handling
+        for (const diamond of sortedDiamonds) {
+          const diamondCard = await this.createDiamondCard(diamond);
           grid.appendChild(diamondCard);
-        });
+        }
       }
 
       // Update results count

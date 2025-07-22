@@ -555,7 +555,7 @@ if (typeof window !== 'undefined') {
 
         // Render diamonds
         if (window.DiamondRenderer) {
-          window.DiamondRenderer.renderDiamonds(state.allDiamonds);
+          await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
         }
       } catch (error) {
         console.error('Failed to fetch diamond data:', error);

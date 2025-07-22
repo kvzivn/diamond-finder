@@ -1,8 +1,6 @@
 import JSZip from 'jszip';
 import type { Diamond, DiamondType } from '../models/diamond.server';
 import { saveExchangeRate } from './diamond-db.server';
-import { calculateFinalPriceSek, type CaratRange } from './diamond-pricing.server';
-import { fetchThemeSettings, parseThemeSettingsToRanges } from './theme-settings.server';
 
 const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 
@@ -411,66 +409,23 @@ export async function fetchDiamondsFromApi(
   try {
     const exchangeRate = await getUsdToSekExchangeRate();
 
-    // Fetch theme settings for markup if shop is provided
-    let themeSettings = null;
-    let naturalMarkupRanges: CaratRange[] | null = null;
-    let labMarkupRanges: CaratRange[] | null = null;
-    
-    if (options?.shop) {
-      try {
-        themeSettings = await fetchThemeSettings(options.shop);
-        naturalMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'natural');
-        labMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'lab');
-        console.log(`[IDEX SERVICE] Fetched theme settings for shop: ${options.shop}`);
-      } catch (error) {
-        console.error('[IDEX SERVICE] Failed to fetch theme settings:', error);
-      }
-    }
-    
-    // Use default ranges (0 multiplier) if theme settings not available
-    if (!naturalMarkupRanges || !labMarkupRanges) {
-      const defaultRanges: CaratRange[] = [
-        { min: 0, max: 0.5, multiplier: 0 },
-        { min: 0.5, max: 0.7, multiplier: 0 },
-        { min: 0.7, max: 1, multiplier: 0 },
-        { min: 1, max: 1.1, multiplier: 0 },
-        { min: 1.1, max: 1.5, multiplier: 0 },
-        { min: 1.5, max: 2, multiplier: 0 },
-        { min: 2, max: 3, multiplier: 0 },
-        { min: 3, max: 5, multiplier: 0 },
-        { min: 5, max: 150, multiplier: 0 },
-      ];
-      naturalMarkupRanges = defaultRanges;
-      labMarkupRanges = defaultRanges;
-      console.log('[IDEX SERVICE] Using default markup ranges (0 multiplier)');
-    }
 
-    // Convert USD prices to SEK and apply markup
+    // Convert USD prices to SEK (base prices without markup)
     console.log(
-      `[IDEX SERVICE] Applying pricing for ${diamonds.length} ${type} diamonds...`
+      `[IDEX SERVICE] Converting USD prices to SEK for ${diamonds.length} ${type} diamonds...`
     );
 
     diamonds = diamonds.map((diamond, index) => {
       const diamondWithSek = { ...diamond };
-      if (typeof diamond.totalPrice === 'number' && diamond.carat) {
-        // First convert USD to SEK
-        const basePriceSek = diamond.totalPrice * exchangeRate;
-        // Then apply markup based on carat and type, with rounding to nearest 100 SEK
-        // Use lab type for diamonds with LG certificate numbers
-        const effectiveType = (diamond as any)._shouldBeLabType ? 'lab' : type;
-        const markupRanges = effectiveType === 'natural' ? naturalMarkupRanges : labMarkupRanges;
-        diamondWithSek.totalPriceSek = calculateFinalPriceSek(
-          basePriceSek,
-          diamond.carat,
-          effectiveType,
-          markupRanges
-        );
+      if (typeof diamond.totalPrice === 'number') {
+        // Convert USD to SEK without markup (markup will be applied on client side)
+        diamondWithSek.totalPriceSek = diamond.totalPrice * exchangeRate;
       }
 
       // Progress indicator every 5000 diamonds
       if ((index + 1) % 5000 === 0 || index === diamonds.length - 1) {
         console.log(
-          `[IDEX SERVICE] Price calculation progress: ${index + 1}/${diamonds.length} ${type} diamonds processed`
+          `[IDEX SERVICE] Price conversion progress: ${index + 1}/${diamonds.length} ${type} diamonds processed`
         );
       }
 
@@ -478,11 +433,11 @@ export async function fetchDiamondsFromApi(
     });
 
     console.log(
-      `[IDEX SERVICE] Applied USD to SEK conversion with carat-based markup for ${diamonds.length} diamonds using exchange rate: ${exchangeRate}`
+      `[IDEX SERVICE] Applied USD to SEK conversion for ${diamonds.length} diamonds using exchange rate: ${exchangeRate}`
     );
   } catch (error) {
     console.error(
-      '[IDEX SERVICE] Failed to fetch exchange rate or apply currency conversion with markup. Proceeding with USD prices only.',
+      '[IDEX SERVICE] Failed to fetch exchange rate or apply currency conversion. Proceeding with USD prices only.',
       error
     );
     // Continue without SEK conversion - diamonds will only have USD prices
@@ -624,44 +579,11 @@ export async function* fetchDiamondsStream(
     console.log(`[IDEX SERVICE] Using exchange rate: ${exchangeRate}`);
   } catch (error) {
     console.error(
-      '[IDEX SERVICE] Failed to fetch exchange rate. Proceeding without SEK conversion and markup.',
+      '[IDEX SERVICE] Failed to fetch exchange rate. Proceeding without SEK conversion.',
       error
     );
   }
 
-  // Fetch theme settings for markup if shop is provided
-  let themeSettings = null;
-  let naturalMarkupRanges: CaratRange[] | null = null;
-  let labMarkupRanges: CaratRange[] | null = null;
-  
-  if (options?.shop) {
-    try {
-      themeSettings = await fetchThemeSettings(options.shop);
-      naturalMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'natural');
-      labMarkupRanges = parseThemeSettingsToRanges(themeSettings, 'lab');
-      console.log(`[IDEX SERVICE] Fetched theme settings for shop: ${options.shop}`);
-    } catch (error) {
-      console.error('[IDEX SERVICE] Failed to fetch theme settings:', error);
-    }
-  }
-  
-  // Use default ranges (0 multiplier) if theme settings not available
-  if (!naturalMarkupRanges || !labMarkupRanges) {
-    const defaultRanges: CaratRange[] = [
-      { min: 0, max: 0.5, multiplier: 0 },
-      { min: 0.5, max: 0.7, multiplier: 0 },
-      { min: 0.7, max: 1, multiplier: 0 },
-      { min: 1, max: 1.1, multiplier: 0 },
-      { min: 1.1, max: 1.5, multiplier: 0 },
-      { min: 1.5, max: 2, multiplier: 0 },
-      { min: 2, max: 3, multiplier: 0 },
-      { min: 3, max: 5, multiplier: 0 },
-      { min: 5, max: 150, multiplier: 0 },
-    ];
-    naturalMarkupRanges = defaultRanges;
-    labMarkupRanges = defaultRanges;
-    console.log('[IDEX SERVICE] Using default markup ranges (0 multiplier)');
-  }
 
   // Parse and yield diamonds in chunks for memory efficiency
   const lines = csvString.trim().split('\n');
@@ -758,24 +680,10 @@ export async function* fetchDiamondsStream(
       labGrownInNaturalCount++;
     }
 
-    // Apply exchange rate and markup if available
-    if (
-      exchangeRate &&
-      typeof diamond.totalPrice === 'number' &&
-      diamond.carat
-    ) {
-      // First convert USD to SEK
-      const basePriceSek = diamond.totalPrice * exchangeRate;
-      // Then apply markup based on carat and type, with rounding to nearest 100 SEK
-      // Use lab type for diamonds with LG certificate numbers
-      const effectiveType = (diamond as any)._shouldBeLabType ? 'lab' : type;
-      const markupRanges = effectiveType === 'natural' ? naturalMarkupRanges : labMarkupRanges;
-      diamond.totalPriceSek = calculateFinalPriceSek(
-        basePriceSek,
-        diamond.carat,
-        effectiveType,
-        markupRanges
-      );
+    // Apply exchange rate conversion (base prices without markup)
+    if (exchangeRate && typeof diamond.totalPrice === 'number') {
+      // Convert USD to SEK without markup (markup will be applied on client side)
+      diamond.totalPriceSek = diamond.totalPrice * exchangeRate;
     }
 
     if (diamond.itemId) {
