@@ -216,61 +216,137 @@ if (typeof window !== 'undefined') {
         subtitle.appendChild(detailRow);
       }
 
-      // Price and certification wrapper
-      const priceCertWrapper = document.createElement('div');
-      priceCertWrapper.className =
-        'tw-flex tw-justify-between tw-items-center tw-mb-1';
+      // Price and certification container - improved layout with separate rows
+      const priceCertContainer = document.createElement('div');
+      priceCertContainer.className = 'tw-flex tw-flex-col tw-space-y-2 tw-mb-1';
 
-      // Price - apply client-side markup
-      const price = document.createElement('p');
-      price.className = 'tw-text-lg tw-font-bold text-gray-900';
-
-      let displayPrice = 'Pris ej tillgängligt';
+      let originalPrice = 'Pris ej tillgängligt';
+      let finalPrice = 'Pris ej tillgängligt';
       let displayCurrency = 'SEK';
+      let markupApplied = false;
 
       // Apply markup using the new pricing module
       if (window.DiamondPricing && diamond.totalPriceSek) {
         try {
-          const diamondWithMarkup = await window.DiamondPricing.applyMarkupToDiamond(diamond);
-          if (diamondWithMarkup.finalPriceSek && diamondWithMarkup.finalPriceSek > 0) {
-            displayPrice = diamondWithMarkup.finalPriceSek
-              .toLocaleString('sv-SE')
-              .replace(/,/g, ' ');
-          }
-        } catch (error) {
-          console.warn('[DIAMOND RENDERER] Error applying markup, using base price:', error);
-          // Fallback to base price
-          displayPrice = diamond.totalPriceSek
+          const diamondWithMarkup =
+            await window.DiamondPricing.applyMarkupToDiamond(diamond);
+
+          // Round original price to nearest 100 SEK for consistency with markup price
+          const roundedOriginalPrice =
+            Math.round(diamond.totalPriceSek / 100) * 100;
+          originalPrice = roundedOriginalPrice
             .toLocaleString('sv-SE')
             .replace(/,/g, ' ');
+
+          if (
+            diamondWithMarkup.finalPriceSek &&
+            diamondWithMarkup.finalPriceSek > 0
+          ) {
+            finalPrice = diamondWithMarkup.finalPriceSek
+              .toLocaleString('sv-SE')
+              .replace(/,/g, ' ');
+            markupApplied = diamondWithMarkup.markupApplied;
+          } else {
+            finalPrice = originalPrice; // Fallback to original price
+          }
+        } catch (error) {
+          console.warn(
+            '[DIAMOND RENDERER] Error applying markup, using base price:',
+            error
+          );
+          // Fallback to base price for both
+          const roundedOriginalPrice =
+            Math.round(diamond.totalPriceSek / 100) * 100;
+          originalPrice = roundedOriginalPrice
+            .toLocaleString('sv-SE')
+            .replace(/,/g, ' ');
+          finalPrice = originalPrice;
         }
       } else if (
         diamond.totalPriceSek !== null &&
         typeof diamond.totalPriceSek === 'number'
       ) {
         // Fallback to base price if pricing module not available
-        displayPrice = diamond.totalPriceSek
+        const roundedOriginalPrice =
+          Math.round(diamond.totalPriceSek / 100) * 100;
+        originalPrice = roundedOriginalPrice
           .toLocaleString('sv-SE')
           .replace(/,/g, ' ');
+        finalPrice = originalPrice;
       } else if (
         diamond.totalPrice !== null &&
         typeof diamond.totalPrice === 'number'
       ) {
-        displayPrice = diamond.totalPrice.toLocaleString();
+        originalPrice = diamond.totalPrice.toLocaleString();
+        finalPrice = originalPrice;
         displayCurrency = 'USD';
       }
 
-      price.textContent = `${displayPrice} ${displayCurrency}`.trim();
+      // Original price row (always show if markup is applied)
+      if (markupApplied && originalPrice !== finalPrice) {
+        const originalPriceRow = document.createElement('div');
+        originalPriceRow.className =
+          'tw-flex tw-justify-between tw-items-center tw-text-sm';
 
-      // Certification info
-      const certInfo = document.createElement('p');
-      certInfo.className = 'tw-text-sm tw-text-gray-800';
-      certInfo.textContent = diamond.gradingLab
-        ? `${diamond.gradingLab} Certifierad`
-        : 'Certifiering ej tillgänglig';
+        const originalPriceLabel = document.createElement('span');
+        originalPriceLabel.className = 'tw-text-gray-500';
+        originalPriceLabel.textContent = 'Ursprungspris:';
 
-      priceCertWrapper.appendChild(price);
-      priceCertWrapper.appendChild(certInfo);
+        const originalPriceValue = document.createElement('span');
+        originalPriceValue.className = 'tw-text-gray-500';
+        originalPriceValue.textContent = `${originalPrice} ${displayCurrency}`;
+
+        originalPriceRow.appendChild(originalPriceLabel);
+        originalPriceRow.appendChild(originalPriceValue);
+        priceCertContainer.appendChild(originalPriceRow);
+      }
+
+      // Final price row (main price display)
+      const finalPriceRow = document.createElement('div');
+      finalPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
+
+      const finalPriceLabel = document.createElement('span');
+      finalPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+      if (markupApplied && originalPrice !== finalPrice) {
+        finalPriceLabel.textContent = 'Slutpris:';
+      } else {
+        finalPriceLabel.textContent = 'Pris:';
+      }
+
+      const finalPriceValue = document.createElement('span');
+      finalPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+      finalPriceValue.textContent = `${finalPrice} ${displayCurrency}`;
+
+      // Add markup indicator if applicable
+      if (markupApplied && originalPrice !== finalPrice) {
+        const markupIndicator = document.createElement('span');
+        markupIndicator.className = 'tw-text-xs tw-text-green-600 tw-ml-1';
+        markupIndicator.textContent = '(markup)';
+        finalPriceValue.appendChild(markupIndicator);
+      }
+
+      finalPriceRow.appendChild(finalPriceLabel);
+      finalPriceRow.appendChild(finalPriceValue);
+      priceCertContainer.appendChild(finalPriceRow);
+
+      // Certification row
+      const certificationRow = document.createElement('div');
+      certificationRow.className =
+        'tw-flex tw-justify-between tw-items-center tw-text-sm';
+
+      const certificationLabel = document.createElement('span');
+      certificationLabel.className = 'tw-text-gray-700';
+      certificationLabel.textContent = 'Certifiering:';
+
+      const certificationValue = document.createElement('span');
+      certificationValue.className = 'tw-text-gray-800';
+      certificationValue.textContent = diamond.gradingLab
+        ? `${diamond.gradingLab}`
+        : 'Ej tillgänglig';
+
+      certificationRow.appendChild(certificationLabel);
+      certificationRow.appendChild(certificationValue);
+      priceCertContainer.appendChild(certificationRow);
 
       // Add to cart button
       // const addButton = document.createElement('button');
@@ -283,7 +359,7 @@ if (typeof window !== 'undefined') {
       diamondCard.appendChild(imageElement);
       diamondCard.appendChild(title);
       diamondCard.appendChild(subtitle);
-      diamondCard.appendChild(priceCertWrapper);
+      diamondCard.appendChild(priceCertContainer);
       // diamondCard.appendChild(addButton);
 
       return diamondCard;

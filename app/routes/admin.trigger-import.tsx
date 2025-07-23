@@ -1,4 +1,5 @@
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node';
+import type { ActionFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -27,7 +28,7 @@ interface ActionData {
 /**
  * Loader to show current import status and provide import form
  */
-export async function loader({}: LoaderFunctionArgs) {
+export async function loader() {
   const DATABASE_URL = process.env.DATABASE_URL;
 
   if (!DATABASE_URL) {

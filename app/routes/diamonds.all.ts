@@ -1,4 +1,5 @@
-import { json, LoaderFunctionArgs } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { getFilteredDiamonds } from '../services/diamond-db.server';
 // TEMPORARILY DISABLED: Auto fetching imports
 // import { refreshDiamondsByType } from '../services/diamond-updater.server';

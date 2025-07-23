@@ -1,4 +1,5 @@
-import { ActionFunctionArgs, json } from '@remix-run/node';
+import type { ActionFunctionArgs} from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { refreshDiamondsByType } from '../services/diamond-updater.server';
 import type { DiamondType } from '../models/diamond.server';
 

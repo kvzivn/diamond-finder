@@ -1,9 +1,10 @@
-import {
-  PrismaClient,
+import type {
   DiamondType,
   Diamond as PrismaDiamond,
-  ImportStatus,
-  Prisma,
+  Prisma} from '@prisma/client';
+import {
+  PrismaClient,
+  ImportStatus
 } from '@prisma/client';
 import type { Diamond } from '../models/diamond.server';
 

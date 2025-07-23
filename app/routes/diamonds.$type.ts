@@ -1,4 +1,5 @@
-import { json, LoaderFunctionArgs } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import type { DiamondType } from '../models/diamond.server';
 import { getDiamondsByType } from '../services/diamond-db.server';
 // TEMPORARILY DISABLED: Auto fetching import

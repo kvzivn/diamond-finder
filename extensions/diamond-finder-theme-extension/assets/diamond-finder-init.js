@@ -50,6 +50,38 @@ if (typeof window !== 'undefined') {
         window.DiamondUI.applyInitialFilters();
       }
     },
+
+    // Refresh diamond pricing after theme settings change
+    async refreshDiamondPricing() {
+      console.log(
+        '[DIAMOND SEARCH APP] Refreshing diamond pricing with updated theme settings...'
+      );
+
+      // Clear the pricing cache to force fresh theme settings fetch
+      if (window.DiamondPricing) {
+        window.DiamondPricing.clearCache();
+      }
+
+      // Re-render all currently displayed diamonds with new pricing
+      const state = window.DiamondSearchState;
+      if (
+        state.allDiamonds &&
+        state.allDiamonds.length > 0 &&
+        window.DiamondRenderer
+      ) {
+        await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
+        console.log(
+          `[DIAMOND SEARCH APP] Re-rendered ${state.allDiamonds.length} diamonds with updated pricing`
+        );
+      }
+    },
+  };
+
+  // Expose refresh function globally for theme settings integration
+  window.refreshDiamondPricing = () => {
+    if (window.DiamondSearchApp) {
+      return window.DiamondSearchApp.refreshDiamondPricing();
+    }
   };
 
   // Auto-initialize when all modules are loaded

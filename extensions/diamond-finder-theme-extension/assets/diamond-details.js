@@ -173,36 +173,82 @@ if (typeof window !== 'undefined') {
         title.textContent = `Diamant ${shapeName}`;
       }
 
-      // Update price - apply client-side markup
+      // Update price - apply client-side markup and show both prices
       const price = document.getElementById('diamond-details-price');
       if (price) {
-        let displayPrice = 'Pris ej tillgängligt';
-        
+        let originalPrice = 'Pris ej tillgängligt';
+        let finalPrice = 'Pris ej tillgängligt';
+        let displayCurrency = 'SEK';
+        let markupApplied = false;
+
         // Apply markup using the new pricing module
         if (window.DiamondPricing && diamond.totalPriceSek) {
           try {
-            const diamondWithMarkup = await window.DiamondPricing.applyMarkupToDiamond(diamond);
-            if (diamondWithMarkup.finalPriceSek && diamondWithMarkup.finalPriceSek > 0) {
-              displayPrice = `${diamondWithMarkup.finalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
+            const diamondWithMarkup =
+              await window.DiamondPricing.applyMarkupToDiamond(diamond);
+
+            // Round original price to nearest 100 SEK for consistency with markup price
+            const roundedOriginalPrice =
+              Math.round(diamond.totalPriceSek / 100) * 100;
+            originalPrice = roundedOriginalPrice
+              .toLocaleString('sv-SE')
+              .replace(/,/g, ' ');
+
+            if (
+              diamondWithMarkup.finalPriceSek &&
+              diamondWithMarkup.finalPriceSek > 0
+            ) {
+              finalPrice = diamondWithMarkup.finalPriceSek
+                .toLocaleString('sv-SE')
+                .replace(/,/g, ' ');
+              markupApplied = diamondWithMarkup.markupApplied;
+            } else {
+              finalPrice = originalPrice; // Fallback to original price
             }
           } catch (error) {
-            console.warn('[DIAMOND DETAILS] Error applying markup, using base price:', error);
-            // Fallback to base price
-            displayPrice = `${diamond.totalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
+            console.warn(
+              '[DIAMOND DETAILS] Error applying markup, using base price:',
+              error
+            );
+            // Fallback to base price for both
+            const roundedOriginalPrice =
+              Math.round(diamond.totalPriceSek / 100) * 100;
+            originalPrice = roundedOriginalPrice
+              .toLocaleString('sv-SE')
+              .replace(/,/g, ' ');
+            finalPrice = originalPrice;
           }
         } else if (
           diamond.totalPriceSek !== null &&
           typeof diamond.totalPriceSek === 'number'
         ) {
           // Fallback to base price if pricing module not available
-          displayPrice = `${diamond.totalPriceSek.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`;
+          const roundedOriginalPrice =
+            Math.round(diamond.totalPriceSek / 100) * 100;
+          originalPrice = roundedOriginalPrice
+            .toLocaleString('sv-SE')
+            .replace(/,/g, ' ');
+          finalPrice = originalPrice;
         } else if (
           diamond.totalPrice !== null &&
           typeof diamond.totalPrice === 'number'
         ) {
-          displayPrice = `${diamond.totalPrice.toLocaleString()} USD`;
+          originalPrice = diamond.totalPrice.toLocaleString();
+          finalPrice = originalPrice;
+          displayCurrency = 'USD';
         }
-        price.textContent = displayPrice;
+
+        // Create price display with both original and final prices
+        if (markupApplied && originalPrice !== finalPrice) {
+          price.innerHTML = `
+            <div class="tw-flex tw-flex-col">
+              <p class="tw-text-sm tw-text-gray-500">Ursprungspris: ${originalPrice} ${displayCurrency}</p>
+              <p class="tw-text-xl tw-font-bold tw-text-gray-900">${finalPrice} ${displayCurrency} <span class="tw-text-sm tw-text-green-600">(markup)</span></p>
+            </div>
+          `;
+        } else {
+          price.textContent = `${finalPrice} ${displayCurrency}`;
+        }
       }
 
       // Update specifications

@@ -37,6 +37,36 @@
 <script src='{{ 'diamond-details.js' | asset_url }}' defer='defer'></script>
 <script src='{{ 'diamond-finder-init.js' | asset_url }}' defer='defer'></script>
 
+<!-- Pass theme settings directly to JavaScript -->
+<script>
+  // Make theme settings available to JavaScript immediately
+  window.DiamondThemeSettings = {
+    {% comment %} Natural diamond settings {% endcomment %}
+    natural_0_0_5: {{ block.settings.natural_0_0_5 | default: '1.0' | json }},
+    natural_0_5_0_7: {{ block.settings.natural_0_5_0_7 | default: '1.0' | json }},
+    natural_0_7_1: {{ block.settings.natural_0_7_1 | default: '1.0' | json }},
+    natural_1_1_1: {{ block.settings.natural_1_1_1 | default: '1.0' | json }},
+    natural_1_1_1_5: {{ block.settings.natural_1_1_1_5 | default: '1.0' | json }},
+    natural_1_5_2: {{ block.settings.natural_1_5_2 | default: '1.0' | json }},
+    natural_2_3: {{ block.settings.natural_2_3 | default: '1.0' | json }},
+    natural_3_5: {{ block.settings.natural_3_5 | default: '1.0' | json }},
+    natural_5_150: {{ block.settings.natural_5_150 | default: '1.0' | json }},
+
+    {% comment %} Lab diamond settings {% endcomment %}
+    lab_0_0_5: {{ block.settings.lab_0_0_5 | default: '1.0' | json }},
+    lab_0_5_0_7: {{ block.settings.lab_0_5_0_7 | default: '1.0' | json }},
+    lab_0_7_1: {{ block.settings.lab_0_7_1 | default: '1.0' | json }},
+    lab_1_1_1: {{ block.settings.lab_1_1_1 | default: '1.0' | json }},
+    lab_1_1_1_5: {{ block.settings.lab_1_1_1_5 | default: '1.0' | json }},
+    lab_1_5_2: {{ block.settings.lab_1_5_2 | default: '1.0' | json }},
+    lab_2_3: {{ block.settings.lab_2_3 | default: '1.0' | json }},
+    lab_3_5: {{ block.settings.lab_3_5 | default: '1.0' | json }},
+    lab_5_150: {{ block.settings.lab_5_150 | default: '1.0' | json }}
+  };
+
+  console.log('[THEME SETTINGS] Loaded from block settings:', window.DiamondThemeSettings);
+</script>
+
 {% schema %}
 {
   "name": "Diamond Search",
@@ -50,55 +80,55 @@
       "type": "text",
       "id": "natural_0_0_5",
       "label": "Natural 0-0.5 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_0_5_0_7",
       "label": "Natural 0.5-0.7 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_0_7_1",
       "label": "Natural 0.7-1 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_1_1_1",
       "label": "Natural 1-1.1 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_1_1_1_5",
       "label": "Natural 1.1-1.5 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_1_5_2",
       "label": "Natural 1.5-2 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_2_3",
       "label": "Natural 2-3 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_3_5",
       "label": "Natural 3-5 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "natural_5_150",
       "label": "Natural 5+ carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "header",
@@ -108,55 +138,55 @@
       "type": "text",
       "id": "lab_0_0_5",
       "label": "Lab 0-0.5 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_0_5_0_7",
       "label": "Lab 0.5-0.7 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_0_7_1",
       "label": "Lab 0.7-1 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_1_1_1",
       "label": "Lab 1-1.1 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_1_1_1_5",
       "label": "Lab 1.1-1.5 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_1_5_2",
       "label": "Lab 1.5-2 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_2_3",
       "label": "Lab 2-3 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_3_5",
       "label": "Lab 3-5 carat multiplier",
-      "default": "0"
+      "default": "1.0"
     },
     {
       "type": "text",
       "id": "lab_5_150",
       "label": "Lab 5+ carat multiplier",
-      "default": "0"
+      "default": "1.0"
     }
   ]
 }
