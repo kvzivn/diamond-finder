@@ -46,16 +46,7 @@ if (typeof window !== 'undefined') {
     triggerInitialLoad() {
       const state = window.DiamondSearchState;
 
-      console.log('[DIAMOND INIT] triggerInitialLoad called', {
-        allSlidersInitialized: state.areAllSlidersInitialized(),
-        initialLoadComplete: state.initialLoadComplete,
-        sliderStates: state.sliderInitializationState,
-      });
-
       if (state.areAllSlidersInitialized() && !state.initialLoadComplete) {
-        console.log(
-          '[DIAMOND INIT] All sliders ready, applying initial filters'
-        );
         window.DiamondUI.applyInitialFilters();
       }
     },
@@ -120,14 +111,6 @@ if (typeof window !== 'undefined') {
     window.DiamondSearchState.markSliderInitialized;
   window.DiamondSearchState.markSliderInitialized = function (sliderType) {
     originalMarkSliderInitialized.call(this, sliderType);
-
-    console.log(`[DIAMOND INIT] Slider initialized: ${sliderType}`, {
-      totalInitialized: Object.values(this.sliderInitializationState).filter(
-        Boolean
-      ).length,
-      totalSliders: Object.keys(this.sliderInitializationState).length,
-      allReady: this.areAllSlidersInitialized(),
-    });
 
     // Check if all sliders are now initialized and trigger initial load
     if (this.areAllSlidersInitialized() && !this.initialLoadComplete) {
