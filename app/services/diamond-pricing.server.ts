@@ -19,9 +19,6 @@ export function getMarkupMultiplier(
   markupRanges: CaratRange[]
 ): number {
   if (!carat || carat <= 0) {
-    console.warn(
-      `[DIAMOND PRICING] Invalid carat value: ${carat}, using multiplier 0`
-    );
     return 0;
   }
 
@@ -37,9 +34,6 @@ export function getMarkupMultiplier(
   });
 
   if (!range) {
-    console.warn(
-      `[DIAMOND PRICING] No markup range found for carat: ${carat}, type: ${type}, using multiplier 0`
-    );
     return 0;
   }
 
@@ -61,7 +55,6 @@ export function calculateFinalPriceSek(
   markupRanges: CaratRange[]
 ): number {
   if (!basePriceSek || basePriceSek <= 0) {
-    console.warn(`[DIAMOND PRICING] Invalid base price: ${basePriceSek}`);
     return 0;
   }
 

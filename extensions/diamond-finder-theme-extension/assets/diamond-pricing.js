@@ -32,25 +32,16 @@ if (typeof window !== 'undefined') {
 
     // Clear cache (useful for testing theme settings changes)
     clearCache() {
-      console.log('[DIAMOND PRICING] Clearing theme settings cache');
       this._themeSettings = null;
     },
 
     // Fetch theme settings from the directly passed settings
     async fetchThemeSettings() {
-      console.log('[DIAMOND PRICING] fetchThemeSettings called');
 
       if (this._themeSettings) {
-        console.log(
-          '[DIAMOND PRICING] Using cached theme settings:',
-          this._themeSettings
-        );
         return this._themeSettings;
       }
 
-      console.log(
-        '[DIAMOND PRICING] Getting theme settings from window.DiamondThemeSettings'
-      );
       this._themeSettings = this._getSettingsFromWindow();
       return this._themeSettings;
     },
@@ -58,67 +49,27 @@ if (typeof window !== 'undefined') {
     // Internal method to get settings from window object
     _getSettingsFromWindow() {
       try {
-        console.log(
-          '[DIAMOND PRICING] Getting settings from window.DiamondThemeSettings'
-        );
 
         if (!window.DiamondThemeSettings) {
-          console.warn(
-            '[DIAMOND PRICING] window.DiamondThemeSettings not found, using defaults'
-          );
           return null;
         }
 
         const settings = window.DiamondThemeSettings;
-        console.log('[DIAMOND PRICING] Found theme settings:', settings);
 
-        // Log specific markup values for debugging
-        const naturalSettings = Object.keys(settings)
-          .filter((key) => key.startsWith('natural_'))
-          .reduce((obj, key) => {
-            obj[key] = settings[key];
-            return obj;
-          }, {});
-        console.log(
-          '[DIAMOND PRICING] Natural diamond markup settings:',
-          naturalSettings
-        );
-
-        const labSettings = Object.keys(settings)
-          .filter((key) => key.startsWith('lab_'))
-          .reduce((obj, key) => {
-            obj[key] = settings[key];
-            return obj;
-          }, {});
-        console.log(
-          '[DIAMOND PRICING] Lab diamond markup settings:',
-          labSettings
-        );
 
         return settings;
       } catch (error) {
-        console.warn(
-          '[DIAMOND PRICING] Error getting theme settings from window:',
-          error
-        );
         return null;
       }
     },
 
     // Parse theme settings into carat ranges with multipliers
     parseThemeSettingsToRanges(settings, type) {
-      console.log(
-        `[DIAMOND PRICING] parseThemeSettingsToRanges called for type: ${type}`,
-        settings
-      );
 
       const defaultRanges =
         this._defaultRanges[type] || this._defaultRanges.natural;
 
       if (!settings) {
-        console.log(
-          '[DIAMOND PRICING] No settings provided, using default ranges'
-        );
         return defaultRanges;
       }
 
@@ -135,7 +86,6 @@ if (typeof window !== 'undefined') {
         `${prefix}5_150`,
       ];
 
-      console.log(`[DIAMOND PRICING] Looking for settings with keys:`, keys);
 
       const ranges = defaultRanges.map((range, index) => {
         const settingKey = keys[index];
@@ -145,9 +95,6 @@ if (typeof window !== 'undefined') {
         // Use 1.0 (no markup) if the value is not a valid number
         const multiplier = isNaN(parsedValue) ? 1.0 : parsedValue;
 
-        console.log(
-          `[DIAMOND PRICING] Range ${index}: ${range.min}-${range.max} carat -> key: ${settingKey}, setting: ${settingValue}, multiplier: ${multiplier}`
-        );
 
         return {
           ...range,
@@ -155,22 +102,7 @@ if (typeof window !== 'undefined') {
         };
       });
 
-      console.log(`[DIAMOND PRICING] Final parsed ranges for ${type}:`, ranges);
 
-      // Log summary of markup multipliers for easy verification
-      const nonDefaultRanges = ranges.filter((r) => r.multiplier !== 1.0);
-      if (nonDefaultRanges.length > 0) {
-        console.log(
-          `[DIAMOND PRICING] ✅ MARKUP ACTIVE for ${type} diamonds:`,
-          nonDefaultRanges
-            .map((r) => `${r.min}-${r.max} carat: ${r.multiplier}x`)
-            .join(', ')
-        );
-      } else {
-        console.log(
-          `[DIAMOND PRICING] ℹ️  No markup multipliers set for ${type} diamonds (all ranges: 1.0x)`
-        );
-      }
 
       return ranges;
     },
@@ -178,9 +110,6 @@ if (typeof window !== 'undefined') {
     // Get markup multiplier for a diamond based on its carat and type
     getMarkupMultiplier(carat, type, markupRanges) {
       if (!carat || carat <= 0) {
-        console.warn(
-          `[DIAMOND PRICING] Invalid carat value: ${carat}, using multiplier 1.0`
-        );
         return 1.0;
       }
 
@@ -194,9 +123,6 @@ if (typeof window !== 'undefined') {
       });
 
       if (!range) {
-        console.warn(
-          `[DIAMOND PRICING] No markup range found for carat: ${carat}, type: ${type}, using multiplier 1.0`
-        );
         return 1.0;
       }
 
@@ -206,7 +132,6 @@ if (typeof window !== 'undefined') {
     // Calculate final price with markup applied and rounded to nearest 100 SEK
     calculateFinalPriceSek(basePriceSek, carat, type, markupRanges) {
       if (!basePriceSek || basePriceSek <= 0) {
-        console.warn(`[DIAMOND PRICING] Invalid base price: ${basePriceSek}`);
         return 0;
       }
 
@@ -264,14 +189,6 @@ if (typeof window !== 'undefined') {
           };
 
           return result;
-        } else {
-          console.warn(
-            `[DIAMOND PRICING] Missing required data for diamond ${diamond.itemId}:`,
-            {
-              hasTotalPriceSek: !!diamond.totalPriceSek,
-              hasCarat: !!diamond.carat,
-            }
-          );
         }
 
         return {
@@ -280,7 +197,6 @@ if (typeof window !== 'undefined') {
           markupApplied: false,
         };
       } catch (error) {
-        console.warn('[DIAMOND PRICING] Error applying markup:', error);
         return {
           ...diamond,
           finalPriceSek: diamond.totalPriceSek || 0,
@@ -297,14 +213,10 @@ if (typeof window !== 'undefined') {
 
   // Expose theme settings test function for debugging
   window.testThemeSettings = () => {
-    console.log('[DIAMOND PRICING TEST] Testing theme settings from window...');
-
     try {
       const result = window.DiamondPricing._getSettingsFromWindow();
-      console.log('[DIAMOND PRICING TEST] Result:', result);
       return result;
     } catch (error) {
-      console.error('[DIAMOND PRICING TEST] Error:', error);
       return null;
     }
   };
