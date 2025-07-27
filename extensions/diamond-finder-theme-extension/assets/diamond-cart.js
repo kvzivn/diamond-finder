@@ -47,6 +47,14 @@ if (typeof window !== 'undefined') {
           throw new Error(variantResult.error || 'Failed to create variant');
         }
 
+        console.log('[DIAMOND CART] Variant result includes diamond data:', {
+          hasDiamond: !!variantResult.diamond,
+          diamondId: variantResult.diamond?.id,
+          certificateNumber: variantResult.diamond?.certificateNumber,
+          imageUrl: variantResult.imageUrl,
+          isExisting: variantResult.isExisting
+        });
+
         // Step 2: Add variant to Shopify cart
         const cartResult = await this.addVariantToShopifyCart(
           variantResult.variantId
@@ -108,6 +116,8 @@ if (typeof window !== 'undefined') {
           variantId: data.variantId,
           sku: data.sku,
           isExisting: data.isExisting,
+          diamond: data.diamond,
+          imageUrl: data.imageUrl,
         });
 
         return data;
@@ -132,6 +142,7 @@ if (typeof window !== 'undefined') {
           ],
         };
 
+        // Step 1: Add to cart
         const response = await fetch('/cart/add.js', {
           method: 'POST',
           headers: {
@@ -145,57 +156,23 @@ if (typeof window !== 'undefined') {
           throw new Error(`Cart add failed: ${errorText}`);
         }
 
-        const cart = await response.json();
+        const addResponse = await response.json();
+        console.log('[DIAMOND CART] Item added to cart:', addResponse);
 
-        console.log('[DIAMOND CART] Successfully added to cart:', cart);
-
-        // Trigger multiple cart update events to match theme behavior
-        
-        // 1. Standard Shopify cart events
-        if (typeof window.Shopify !== 'undefined') {
-          if (window.Shopify.onCartUpdate) {
-            window.Shopify.onCartUpdate(cart);
-          }
-          
-          // Trigger cart drawer update if available
-          if (window.Shopify.theme && window.Shopify.theme.cart) {
-            window.Shopify.theme.cart.updateDrawer();
-          }
+        // Step 2: Immediately fetch fresh cart state (recommended by Shopify)
+        const cartResponse = await fetch('/cart.js');
+        if (!cartResponse.ok) {
+          throw new Error('Failed to fetch updated cart state');
         }
-
-        // 2. CartJS library support
-        if (typeof window.CartJS !== 'undefined') {
-          window.CartJS.getCart();
-        }
-
-        // 3. Theme-specific events (common patterns)
-        const cartEvents = [
-          'cart:updated',
-          'cart:change', 
-          'cart:refresh',
-          'shopify:cart:updated',
-          'theme:cart:updated'
-        ];
         
-        cartEvents.forEach(eventName => {
-          window.dispatchEvent(
-            new CustomEvent(eventName, {
-              detail: { cart, addedVariantId: variantId },
-              bubbles: true
-            })
-          );
-        });
+        const cart = await cartResponse.json();
+        console.log('[DIAMOND CART] Fresh cart data:', cart);
 
-        // 4. Try to trigger form submission events
-        const addToCartEvent = new CustomEvent('product:added-to-cart', {
-          detail: { 
-            variant_id: parseInt(variantId.split('/').pop()),
-            quantity: 1,
-            cart: cart
-          },
-          bubbles: true
-        });
-        document.dispatchEvent(addToCartEvent);
+        // Step 3: Update cart counter with fresh data
+        this.updateCartCounterWithCartData(cart);
+
+        // Step 4: Trigger events for theme compatibility
+        this.triggerCartUpdateEvents(cart, variantId);
 
         return {
           success: true,
@@ -274,57 +251,153 @@ if (typeof window !== 'undefined') {
       }, 3000);
     },
 
-    // Update cart counter in theme
+    // Update cart counter using provided cart data (recommended by Shopify)
+    updateCartCounterWithCartData(cart) {
+      console.log('[DIAMOND CART] Updating cart counter with cart data:', cart);
+      
+      // Check if cart-count-bubble exists, create it if it doesn't
+      let cartCountBubble = document.querySelector('.cart-count-bubble');
+      
+      if (!cartCountBubble && cart.item_count > 0) {
+        // Create the cart count bubble if it doesn't exist
+        console.log('[DIAMOND CART] Cart count bubble not found, creating it');
+        
+        const cartIcon = document.getElementById('cart-icon-bubble');
+        if (cartIcon) {
+          cartCountBubble = document.createElement('div');
+          cartCountBubble.className = 'cart-count-bubble';
+          cartCountBubble.innerHTML = `<span aria-hidden="true">${cart.item_count}</span><span class="visually-hidden">${cart.item_count} item${cart.item_count !== 1 ? 's' : ''}</span>`;
+          cartIcon.appendChild(cartCountBubble);
+          console.log('[DIAMOND CART] Created cart count bubble');
+          
+          // Also update the cart icon SVG from empty to filled
+          const emptyCartIcon = cartIcon.querySelector('.icon-cart-empty');
+          if (emptyCartIcon) {
+            emptyCartIcon.classList.remove('icon-cart-empty');
+            emptyCartIcon.classList.add('icon-cart');
+            // Update the SVG path for filled cart icon
+            const path = emptyCartIcon.querySelector('path');
+            if (path) {
+              path.setAttribute('d', 'M20.5 6.5a4.75 4.75 0 00-4.75 4.75v.56h-3.16l-.77 11.6a5 5 0 004.99 5.34h7.38a5 5 0 004.99-5.33l-.77-11.6h-3.16v-.57A4.75 4.75 0 0020.5 6.5zm3.75 5.31v-.56a3.75 3.75 0 10-7.5 0v.56h7.5zm-7.5 1h7.5v.56a3.75 3.75 0 11-7.5 0v-.56zm-1 0v.56a4.75 4.75 0 109.5 0v-.56h2.22l.71 10.67a4 4 0 01-3.99 4.27h-7.38a4 4 0 01-4-4.27l.72-10.67h2.22z');
+              console.log('[DIAMOND CART] Updated cart icon to filled state');
+            }
+          }
+        }
+      } else if (cartCountBubble) {
+        // Update existing cart count bubble
+        console.log('[DIAMOND CART] Found existing cart count bubble, updating');
+        const cartCounterSpans = cartCountBubble.querySelectorAll('span');
+        console.log(`[DIAMOND CART] Found ${cartCounterSpans.length} cart counter spans`);
+        
+        cartCounterSpans.forEach((span, index) => {
+          const oldValue = span.textContent;
+          if (index === 0) {
+            // First span: just the number
+            span.textContent = cart.item_count;
+          } else {
+            // Second span: "X item(s)"
+            span.textContent = `${cart.item_count} item${cart.item_count !== 1 ? 's' : ''}`;
+          }
+          console.log(`[DIAMOND CART] Updated cart counter span ${index}: ${oldValue} → ${span.textContent}`);
+        });
+      }
+      
+      console.log(`[DIAMOND CART] Cart counter updated to: ${cart.item_count}`);
+      
+      // Call theme-specific cart update functions
+      this.callThemeCartFunctions();
+    },
+
+    // Trigger cart update events for theme compatibility
+    triggerCartUpdateEvents(cart, variantId) {
+      console.log('[DIAMOND CART] Triggering cart update events');
+      
+      // 1. Standard Shopify cart events
+      if (typeof window.Shopify !== 'undefined') {
+        if (window.Shopify.onCartUpdate) {
+          console.log('[DIAMOND CART] Calling Shopify.onCartUpdate()');
+          window.Shopify.onCartUpdate(cart);
+        }
+        
+        // Trigger cart drawer update if available
+        if (window.Shopify.theme && window.Shopify.theme.cart) {
+          console.log('[DIAMOND CART] Calling Shopify.theme.cart.updateDrawer()');
+          window.Shopify.theme.cart.updateDrawer();
+        }
+      }
+
+      // 2. CartJS library support
+      if (typeof window.CartJS !== 'undefined') {
+        console.log('[DIAMOND CART] Calling CartJS.getCart()');
+        window.CartJS.getCart();
+      }
+
+      // 3. Theme-specific events (common patterns)
+      const cartEvents = [
+        'cart:updated',
+        'cart:change', 
+        'cart:refresh',
+        'shopify:cart:updated',
+        'theme:cart:updated'
+      ];
+      
+      cartEvents.forEach(eventName => {
+        console.log(`[DIAMOND CART] Dispatching event: ${eventName}`);
+        window.dispatchEvent(
+          new CustomEvent(eventName, {
+            detail: { cart, addedVariantId: variantId },
+            bubbles: true
+          })
+        );
+      });
+
+      // 4. Product added event
+      const addToCartEvent = new CustomEvent('product:added-to-cart', {
+        detail: { 
+          variant_id: parseInt(variantId.split('/').pop()),
+          quantity: 1,
+          cart: cart
+        },
+        bubbles: true
+      });
+      console.log('[DIAMOND CART] Dispatching product:added-to-cart event');
+      document.dispatchEvent(addToCartEvent);
+    },
+
+    // Call theme-specific cart functions
+    callThemeCartFunctions() {
+      // Update cart drawer if theme supports it
+      if (
+        typeof window.theme !== 'undefined' &&
+        window.theme.cart &&
+        window.theme.cart.updateCartDrawer
+      ) {
+        console.log('[DIAMOND CART] Calling theme.cart.updateCartDrawer()');
+        window.theme.cart.updateCartDrawer();
+      }
+
+      // Trigger theme-specific cart updates
+      if (typeof window.theme !== 'undefined') {
+        if (window.theme.updateCart) {
+          console.log('[DIAMOND CART] Calling theme.updateCart()');
+          window.theme.updateCart();
+        }
+        if (window.theme.refreshCart) {
+          console.log('[DIAMOND CART] Calling theme.refreshCart()');
+          window.theme.refreshCart();
+        }
+      }
+    },
+
+
+    // Legacy cart counter update (fallback method)
     updateCartCounter() {
-      // Try to get current cart count
+      console.log('[DIAMOND CART] Using legacy cart counter update method');
+      
       fetch('/cart.js')
         .then((response) => response.json())
         .then((cart) => {
-          // More comprehensive cart counter selectors
-          const cartCountSelectors = [
-            '.cart-count',
-            '[data-cart-count]',
-            '.cart-item-count',
-            '.cart__count',
-            '.header__cart-count',
-            '.cart-counter',
-            '.js-cart-item-count',
-            '#cart-item-count',
-            '.cart-link .count',
-            '[data-cart-item-count]',
-            '.cart-count-bubble',
-            '.header-cart-count'
-          ];
-          
-          cartCountSelectors.forEach(selector => {
-            const counters = document.querySelectorAll(selector);
-            counters.forEach((counter) => {
-              counter.textContent = cart.item_count;
-              counter.innerHTML = cart.item_count;
-              if (counter.setAttribute) {
-                counter.setAttribute('data-count', cart.item_count);
-              }
-            });
-          });
-
-          // Update cart drawer if theme supports it
-          if (
-            typeof window.theme !== 'undefined' &&
-            window.theme.cart &&
-            window.theme.cart.updateCartDrawer
-          ) {
-            window.theme.cart.updateCartDrawer();
-          }
-
-          // Trigger theme-specific cart updates
-          if (typeof window.theme !== 'undefined') {
-            if (window.theme.updateCart) {
-              window.theme.updateCart();
-            }
-            if (window.theme.refreshCart) {
-              window.theme.refreshCart();
-            }
-          }
+          this.updateCartCounterWithCartData(cart);
         })
         .catch((error) => {
           console.warn('[DIAMOND CART] Could not update cart counter:', error);

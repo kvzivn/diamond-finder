@@ -75,6 +75,8 @@ export async function action({ request }: ActionFunctionArgs) {
         variantId: existingVariant.node.id,
         sku: existingVariant.node.barcode,
         isExisting: true,
+        diamond: diamond, // Include the diamond data in the response
+        imageUrl: diamond.imageUrl || diamond.imagePath || null, // Include the image URL
       });
     }
 
@@ -89,11 +91,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const variantTitle = `${caratWeight} ${shape} ${color} ${clarity}${certificateNum}`;
 
-    // Calculate final price with markup
+    // Calculate final price with markup - prioritize finalPriceSek
     let finalPrice = '0.00';
     if (diamond.finalPriceSek && typeof diamond.finalPriceSek === 'number') {
-      // Use final price with markup if available
-      finalPrice = (diamond.finalPriceSek / 100).toFixed(2); // Convert from öre to SEK
+      // Use final price with markup if available (already in SEK)
+      finalPrice = diamond.finalPriceSek.toFixed(2);
     } else if (
       diamond.totalPriceSek &&
       typeof diamond.totalPriceSek === 'number'
@@ -105,15 +107,43 @@ export async function action({ request }: ActionFunctionArgs) {
       finalPrice = diamond.totalPrice.toFixed(2);
     }
 
-    // Create variant using productVariantsBulkCreate
+    // Get diamond image URL (priority: imagePath > imageUrl > SVG fallback)
+    let imageUrl = '';
+    if (diamond.imagePath) {
+      imageUrl = diamond.imagePath;
+    } else if (diamond.imageUrl) {
+      imageUrl = diamond.imageUrl;
+    } else {
+      // Generate SVG fallback URL for diamond shape
+      const shape = diamond.cut || 'round';
+      imageUrl = `data:image/svg+xml;base64,${btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+          <polygon points="50,10 80,40 50,90 20,40" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+          <text x="50" y="55" text-anchor="middle" font-family="Arial" font-size="12" fill="#6b7280">${shape}</text>
+        </svg>
+      `)}`;
+    }
+
+    // Create variant using productVariantsBulkCreate with media support
     const createVariantMutation = `
-      mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-        productVariantsBulkCreate(productId: $productId, variants: $variants) {
+      mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!, $media: [CreateMediaInput!]) {
+        productVariantsBulkCreate(productId: $productId, variants: $variants, media: $media) {
           productVariants {
             id
             barcode
             price
             displayName
+            media(first: 1) {
+              nodes {
+                id
+                alt
+                ... on MediaImage {
+                  image {
+                    url
+                  }
+                }
+              }
+            }
           }
           userErrors {
             field
@@ -133,6 +163,8 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
+    // Prepare media array and variant input with media association
+    const mediaArray = [];
     const variantInput = {
       barcode: sku,
       price: finalPrice,
@@ -141,10 +173,29 @@ export async function action({ request }: ActionFunctionArgs) {
       ...(optionValues.length > 0 ? { optionValues } : {})
     };
 
+    // Add media if diamond has an image (either imageUrl or imagePath)
+    const realImageUrl = diamond.imageUrl || diamond.imagePath;
+    if (realImageUrl && !realImageUrl.startsWith('data:')) {
+      // Only add real URLs, not data URLs (SVG fallbacks)
+      mediaArray.push({
+        originalSource: realImageUrl,
+        alt: `${diamond.carat}ct ${diamond.cut} ${diamond.color} ${diamond.clarity} - ${diamond.certificateNumber}`,
+        mediaContentType: 'IMAGE'
+      });
+      
+      // Associate the media with the variant
+      variantInput.mediaSrc = [realImageUrl];
+      
+      console.log(`Creating variant with image: ${realImageUrl}`);
+    } else {
+      console.log('No real image URL found for diamond, variant will be created without image');
+    }
+
     const createVariantResponse = await admin.graphql(createVariantMutation, {
       variables: {
         productId: DIAMOND_PRODUCT_ID,
         variants: [variantInput],
+        media: mediaArray,
       },
     });
 
@@ -182,6 +233,8 @@ export async function action({ request }: ActionFunctionArgs) {
       title: createdVariant.displayName,
       price: createdVariant.price,
       isExisting: false,
+      diamond: diamond, // Include the diamond data in the response
+      imageUrl: realImageUrl || null, // Include the image URL used
     });
   } catch (error) {
     console.error('Error creating diamond variant:', error);
