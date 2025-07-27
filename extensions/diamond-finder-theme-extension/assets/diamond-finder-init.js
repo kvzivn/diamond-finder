@@ -22,6 +22,11 @@ if (typeof window !== 'undefined') {
       // Setup diamond details functionality
       window.DiamondDetails.initialize();
 
+      // Setup cart functionality
+      if (window.DiamondCart) {
+        window.DiamondCart.initialize();
+      }
+
       // Setup additional event handlers
       this.setupAdditionalEventHandlers();
     },
@@ -128,6 +133,7 @@ if (typeof window !== 'undefined') {
           DiamondFiltersTabs: window.DiamondFiltersTabs,
           DiamondUI: window.DiamondUI,
           DiamondDetails: window.DiamondDetails,
+          DiamondCart: window.DiamondCart,
         };
         Object.entries(modules).forEach(([name, module]) => {
           if (!module) {

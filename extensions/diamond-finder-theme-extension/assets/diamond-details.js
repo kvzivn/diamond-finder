@@ -55,6 +55,11 @@ if (typeof window !== 'undefined') {
 
       if (!searchView || !detailsView) return;
 
+      // Set current diamond in state
+      if (window.DiamondState && window.DiamondState.setCurrentDiamond) {
+        window.DiamondState.setCurrentDiamond(diamond);
+      }
+
       // Hide search view and show details view
       searchView.classList.add('tw-hidden');
       detailsView.classList.remove('tw-hidden');

@@ -30,7 +30,7 @@ npm run deploy          # Deploy app to Shopify
 npm run lint            # Run ESLint
 
 # Testing and Type Safety
-npm run typecheck       # Run TypeScript type checking
+npx tsc --noEmit        # Run TypeScript type checking
 
 # Database
 npm run prisma          # Access Prisma CLI
@@ -133,6 +133,7 @@ Uses Prisma with PostgreSQL. Main models:
 - **ExchangeRate**: Historical currency conversion rates
 
 Key indexes on Diamond table:
+
 - `type` (natural/lab)
 - `shapeCode`
 - `pricePerCaratUSD`

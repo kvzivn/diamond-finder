@@ -5,6 +5,7 @@ if (typeof window !== 'undefined') {
     // Data state
     allDiamonds: [],
     paginationInfo: {},
+    currentDiamond: null, // Currently selected diamond for details view
 
     // Filter state
     activeFilters: {},
@@ -153,6 +154,14 @@ if (typeof window !== 'undefined') {
     this.paginationInfo = info;
   };
 
+  window.DiamondSearchState.setCurrentDiamond = function (diamond) {
+    this.currentDiamond = diamond;
+  };
+
+  window.DiamondSearchState.getCurrentDiamond = function () {
+    return this.currentDiamond;
+  };
+
   window.DiamondSearchState.resetSliderChangedState = function (sliderType) {
     if (sliderType) {
       this.sliderChangedState[sliderType] = false;
@@ -215,4 +224,7 @@ if (typeof window !== 'undefined') {
     const allFilters = { ...this.activeFilters, sliders: appliedSliderValues };
     console.log(prefix, allFilters);
   };
+
+  // Create alias for DiamondState for backwards compatibility
+  window.DiamondState = window.DiamondSearchState;
 }
