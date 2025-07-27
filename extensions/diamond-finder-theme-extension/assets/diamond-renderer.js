@@ -109,17 +109,28 @@ if (typeof window !== 'undefined') {
 
       let imageElement;
 
-      if (diamond.imagePath) {
+      if ((diamond.imagePath && diamond.imagePath.trim() !== '' && diamond.imagePath !== 'null') || (diamond.imageUrl && diamond.imageUrl.trim() !== '' && diamond.imageUrl !== 'null')) {
         // Use actual diamond image
         imageElement = document.createElement('img');
         imageElement.className =
           'tw-w-full tw-h-48 tw-object-contain tw-rounded-md tw-mb-4';
-        imageElement.src = diamond.imagePath;
+        imageElement.src = (diamond.imagePath && diamond.imagePath.trim() !== '' && diamond.imagePath !== 'null') ? diamond.imagePath : diamond.imageUrl;
         imageElement.alt = `${carats}ct ${shape} ${displayType}`;
 
         // Handle broken images by falling back to SVG icon or placeholder
         imageElement.onerror = () => {
-          // Create parent container to replace the broken image
+          const state = window.DiamondSearchState;
+          
+          // If showNoImage is false (default), hide this diamond completely
+          if (!state.showNoImage) {
+            const cardElement = imageElement.closest('.tw-flex.tw-flex-col.tw-bg-white.tw-border.tw-rounded-lg');
+            if (cardElement) {
+              cardElement.style.display = 'none';
+            }
+            return;
+          }
+          
+          // Otherwise, show SVG fallback
           const parentContainer = imageElement.parentNode;
           if (parentContainer) {
             let fallbackElement;
@@ -378,7 +389,7 @@ if (typeof window !== 'undefined') {
       gridArea.innerHTML = '';
 
       // Filter out diamonds with null prices as a final safeguard
-      const validPriceDiamonds = diamondsToRender.filter((diamond) => {
+      let validPriceDiamonds = diamondsToRender.filter((diamond) => {
         const hasValidPrice =
           (diamond.totalPriceSek && diamond.totalPriceSek > 0) ||
           (diamond.totalPrice && diamond.totalPrice > 0);
@@ -390,6 +401,18 @@ if (typeof window !== 'undefined') {
         }
         return hasValidPrice;
       });
+
+      // Apply image filter based on checkbox state
+      if (!state.showNoImage) {
+        // Default: Only show diamonds with images
+        validPriceDiamonds = validPriceDiamonds.filter((diamond) => {
+          // Check for non-empty strings, not just existence, and exclude "null" strings
+          const hasImagePath = diamond.imagePath && diamond.imagePath.trim() !== '' && diamond.imagePath !== 'null';
+          const hasImageUrl = diamond.imageUrl && diamond.imageUrl.trim() !== '' && diamond.imageUrl !== 'null';
+          
+          return hasImagePath || hasImageUrl;
+        });
+      }
 
       // Sort diamonds
       const sortedDiamonds = this.sortDiamonds(
@@ -427,8 +450,8 @@ if (typeof window !== 'undefined') {
         state.paginationInfo.totalDiamonds !== undefined
       ) {
         const currentlyShown = state.allDiamonds.length;
-        const totalFiltered = state.paginationInfo.totalDiamonds;
-        resultsCountEl.textContent = `Visar ${currentlyShown} av ${totalFiltered.toLocaleString()} diamanter`;
+        const imageFilterNote = !state.showNoImage ? ' (endast med bild)' : '';
+        resultsCountEl.textContent = `Visar ${displayedCount} av ${currentlyShown} hämtade${imageFilterNote}`;
       } else if (resultsCountEl) {
         resultsCountEl.textContent = `${displayedCount} diamanter`;
       }

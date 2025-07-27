@@ -21,6 +21,7 @@ if (typeof window !== 'undefined') {
       this.setupInputFilters();
       this.setupColourSliderImages();
       this.setupClaritySliderImages();
+      this.setupShowNoImageCheckbox();
       // Note: applyInitialFilters() is now called only after all sliders are initialized
       // This is handled by DiamondSearchApp.triggerInitialLoad()
     },
@@ -396,6 +397,34 @@ if (typeof window !== 'undefined') {
         if (!isSliderDragging) {
           hideImages();
         }
+      });
+    },
+
+    // Setup "Show diamonds without images" checkbox
+    setupShowNoImageCheckbox() {
+      const checkbox = document.getElementById('ds-show-no-image');
+      if (!checkbox) return;
+
+      const state = window.DiamondSearchState;
+
+      // Set initial state
+      checkbox.checked = state.showNoImage;
+
+      // Add event listener
+      checkbox.addEventListener('change', async function () {
+        state.showNoImage = this.checked;
+        console.log(`[SHOW NO IMAGE CHANGED] Show diamonds without images: ${state.showNoImage}`);
+        
+        // If toggling to show diamonds without images, make any hidden cards visible again
+        if (state.showNoImage) {
+          const hiddenCards = document.querySelectorAll('.tw-flex.tw-flex-col.tw-bg-white.tw-border.tw-rounded-lg[style*="display: none"]');
+          hiddenCards.forEach(card => {
+            card.style.display = '';
+          });
+        }
+        
+        // Re-render diamonds with the new filter
+        await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
       });
     },
   };

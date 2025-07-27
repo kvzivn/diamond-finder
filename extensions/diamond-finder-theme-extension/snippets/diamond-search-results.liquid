@@ -2,18 +2,25 @@
 <div id='diamond-search-header' class='tw-flex tw-justify-between tw-items-center tw-mb-4 tw-hidden'>
   <p class='tw-text-base tw-text-gray-700'>Resultat - <span id='ds-results-count'>0 diamanter</span></p>
 
-  <div>
-    <label for='ds-sort-by' class='tw-sr-only'>Sortera efter</label>
-    <select
-      id='ds-sort-by'
-      name='ds-sort-by'
-      class='tw-block tw-w-full tw-pl-3 tw-pr-2 tw-py-2 tw-text-base tw-border tw-border-gray-200 focus:tw-outline-none focus:tw-border-gray-400 tw-rounded-md'
-    >
-      <option value='Price: low to high'>Pris: låg till hög</option>
-      <option value='Price: high to low'>Pris: hög till låg</option>
-      <option value='Carat: low to high'>Carat: låg till hög</option>
-      <option value='Carat: high to low'>Carat: hög till låg</option>
-    </select>
+  <div class='tw-flex tw-items-center tw-gap-6'>
+    <div class='tw-flex tw-items-center'>
+      <input type='checkbox' id='ds-show-no-image' name='ds-show-no-image' class='tw-mr-2'>
+      <label for='ds-show-no-image' class='tw-pb-0.5 tw-text-base'>Visa diamanter utan bild</label>
+    </div>
+
+    <div>
+      <label for='ds-sort-by' class='tw-sr-only'>Sortera efter</label>
+      <select
+        id='ds-sort-by'
+        name='ds-sort-by'
+        class='tw-block tw-w-full tw-pl-3 tw-pr-2 tw-py-2 tw-text-base tw-border tw-border-gray-200 focus:tw-outline-none focus:tw-border-gray-400 tw-rounded-md'
+      >
+        <option value='Price: low to high'>Pris: låg till hög</option>
+        <option value='Price: high to low'>Pris: hög till låg</option>
+        <option value='Carat: low to high'>Carat: låg till hög</option>
+        <option value='Carat: high to low'>Carat: hög till låg</option>
+      </select>
+    </div>
   </div>
 </div>
 

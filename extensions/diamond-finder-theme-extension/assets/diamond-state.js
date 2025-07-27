@@ -13,6 +13,7 @@ if (typeof window !== 'undefined') {
     currentSort: 'price-low-high',
     isLoadingMore: false,
     initialLoadComplete: false,
+    showNoImage: false, // Default: only show diamonds with images
 
     // Slider state
     sliderInitializationState: {
