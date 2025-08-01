@@ -1,6 +1,14 @@
 <!-- Diamond Details View (initially hidden) -->
+<!-- Pre-load certificate images for JavaScript access -->
+<script>
+  window.CERTIFICATE_IMAGES = {
+    GIA: '{{ "/" | append: "GIA.jpg" | asset_url }}',
+    IGI: '{{ "/" | append: "IGI.jpg" | asset_url }}',
+    HRD: '{{ "/" | append: "HRD.jpg" | asset_url }}',
+  };
+</script>
 <div id='diamond-details-view' class='tw-hidden'>
-  <div class='tw-max-w-[81.25rem] tw-mx-auto tw-p-6'>
+  <div class='tw-max-w-[90rem] tw-mx-auto tw-p-6'>
     <div class='tw-mb-4'>
       <button
         id='back-to-gallery'
@@ -19,13 +27,65 @@
       </button>
     </div>
     <div class='tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-16'>
-      <!-- Left side - Diamond Image -->
-      <div class='tw-w-full'>
-        <div
-          id='diamond-details-image'
-          class='tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-white'
-        >
-          <!-- Image or SVG will be populated by JavaScript -->
+      <!-- Left side - Diamond Media with Vertical Tabs -->
+      <div class='tw-w-full tw-flex tw-gap-4'>
+        <!-- Vertical Tab Navigation -->
+        <div class='tw-flex tw-flex-col tw-gap-3 tw-w-24'>
+          <button
+            id='tab-3d-video'
+            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-hidden tw-transition-colors tw-duration-200'
+          >
+            <img src='{{ '360.png' | asset_url }}' alt='360° View' class='tw-w-16 tw-h-16' width='128' height='128'>
+          </button>
+          <button
+            id='tab-image'
+            class='tw-w-20 tw-h-20 tw-border tw-border-gray-600 tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-transition-colors tw-duration-200'
+          >
+            <div
+              id='tab-image-preview'
+              class='tw-w-16 tw-h-16 tw-bg-gray-100 tw-rounded-sm tw-flex tw-items-center tw-justify-center'
+            >
+              <!-- Small diamond image preview will be populated by JavaScript -->
+            </div>
+          </button>
+          <button
+            id='tab-certificate'
+            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-hidden tw-transition-colors tw-duration-200'
+          >
+            <div id='tab-certificate-preview' class='tw-w-16 tw-h-16 tw-flex tw-items-center tw-justify-center'>
+              <!-- Certificate image preview will be populated by JavaScript -->
+            </div>
+          </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class='tw-flex-1 tw-aspect-square tw-max-w-[500px] tw-bg-white tw-border tw-rounded-lg tw-overflow-hidden'>
+          <!-- 3D Viewer / Video Tab -->
+          <div id='content-3d-video' class='tw-w-full tw-h-full tw-hidden'>
+            <div id='diamond-3d-viewer' class='tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center'>
+              <!-- 3D viewer or video will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Image Tab -->
+          <div id='content-image' class='tw-w-full tw-h-full'>
+            <div
+              id='diamond-details-image'
+              class='tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-white tw-rounded-lg tw-p-4'
+            >
+              <!-- Image or SVG will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Certificate Tab -->
+          <div
+            id='content-certificate'
+            class='tw-w-full tw-h-full tw-hidden tw-flex tw-items-center tw-justify-center tw-bg-gray-50'
+          >
+            <div id='diamond-certificate' class='tw-text-center'>
+              <!-- Certificate content will be populated by JavaScript -->
+            </div>
+          </div>
         </div>
       </div>
 
@@ -43,7 +103,7 @@
         <div id='diamond-details-specs' class='tw-space-y-2 tw-divide-y tw-divide-gray-200'>
           <!-- Specifications will be populated by JavaScript -->
         </div>
-        
+
         <!-- Add to Cart Button -->
         <div class='tw-mt-8'>
           <button

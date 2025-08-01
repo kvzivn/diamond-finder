@@ -67,6 +67,19 @@ if (typeof window !== 'undefined') {
       // Populate diamond details
       await this.populateDiamondDetails(diamond);
 
+      // Setup media tabs
+      this.setup3DViewerContent(diamond);
+      this.setupCertificateContent(diamond);
+      this.setupImagePreview(diamond);
+
+      // Default to image tab, but switch to 3D if available
+      const has3DContent =
+        document.getElementById('tab-3d-video') &&
+        !document
+          .getElementById('tab-3d-video')
+          .classList.contains('tw-hidden');
+      this.switchTab(has3DContent ? '3d-video' : 'image');
+
       // Scroll to top
       window.scrollTo(0, 0);
     },
@@ -103,7 +116,7 @@ if (typeof window !== 'undefined') {
           // Use actual diamond image
           const imageElement = document.createElement('img');
           imageElement.className =
-            'tw-w-full tw-h-full tw-object-cover tw-border tw-bg-white';
+            'tw-w-full tw-h-full tw-object-contain tw-bg-white';
           imageElement.src = diamond.imagePath;
           imageElement.alt = altText;
           imageElement.width = '100%';
@@ -123,7 +136,7 @@ if (typeof window !== 'undefined') {
               // Use placeholder image as final fallback
               fallbackElement = document.createElement('img');
               fallbackElement.className =
-                'tw-w-full tw-h-auto tw-object-cover tw-border';
+                'tw-w-full tw-h-full tw-object-contain';
               fallbackElement.src =
                 'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
               fallbackElement.alt = altText;
@@ -157,8 +170,7 @@ if (typeof window !== 'undefined') {
         } else {
           // Fallback to placeholder image if DiamondShapeIcons not available
           const placeholderImg = document.createElement('img');
-          placeholderImg.className =
-            'tw-w-full tw-h-auto tw-object-cover tw-border';
+          placeholderImg.className = 'tw-w-full tw-h-full tw-object-contain';
           placeholderImg.src =
             'https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png';
           placeholderImg.alt = altText;
@@ -278,7 +290,7 @@ if (typeof window !== 'undefined') {
           { label: 'SYMMETRI:', value: diamond.symmetry || 'Ej tillgänglig' },
           { label: 'POLERING:', value: diamond.polish || 'Ej tillgänglig' },
           {
-            label: 'CERTIFIKAT NUMMER:',
+            label: 'CERTIFIKATNUMMER:',
             value: diamond.certificateNumber || 'Ej tillgänglig',
           },
           {
@@ -337,6 +349,258 @@ if (typeof window !== 'undefined') {
         backButton.addEventListener('click', () => {
           this.hideDiamondDetails();
         });
+      }
+
+      // Initialize tab functionality
+      this.initializeTabs();
+    },
+
+    // Initialize tab switching functionality
+    initializeTabs() {
+      const tabs = ['3d-video', 'image', 'certificate'];
+
+      tabs.forEach((tabName) => {
+        const tabButton = document.getElementById(`tab-${tabName}`);
+        if (tabButton) {
+          if (tabName === 'certificate') {
+            // Certificate tab should open certificate link directly
+            tabButton.addEventListener('click', () => {
+              const currentDiamond = window.DiamondState?.getCurrentDiamond?.();
+              if (currentDiamond) {
+                const certificateLink =
+                  currentDiamond.certificateUrl ||
+                  currentDiamond.certificatePath;
+                if (certificateLink) {
+                  window.open(certificateLink, '_blank');
+                  return;
+                }
+              }
+              // Fallback to normal tab switching if no certificate link
+              this.switchTab(tabName);
+            });
+          } else {
+            tabButton.addEventListener('click', () => this.switchTab(tabName));
+          }
+        }
+      });
+    },
+
+    // Switch between tabs
+    switchTab(activeTab) {
+      const tabs = ['3d-video', 'image', 'certificate'];
+
+      tabs.forEach((tabName) => {
+        const tabButton = document.getElementById(`tab-${tabName}`);
+        const tabContent = document.getElementById(`content-${tabName}`);
+
+        if (tabButton && tabContent) {
+          if (tabName === activeTab) {
+            // Activate tab
+            tabButton.classList.add('tw-border-gray-600');
+            tabContent.classList.remove('tw-hidden');
+          } else {
+            // Deactivate tab
+            tabButton.classList.remove('tw-border-gray-600');
+            tabContent.classList.add('tw-hidden');
+          }
+        }
+      });
+    },
+
+    // Check if URL contains allowed 3D viewer domains
+    isAllowed3DViewerUrl(url) {
+      if (!url) return false;
+      const allowedDomains = [
+        'nivoda-inhousemedia',
+        'cloudstorage20',
+        'gem360',
+        '.mp4',
+      ];
+      return allowedDomains.some((domain) => url.includes(domain));
+    },
+
+    // Setup 3D viewer or video content
+    setup3DViewerContent(diamond) {
+      const container = document.getElementById('diamond-3d-viewer');
+      const tab3DButton = document.getElementById('tab-3d-video');
+
+      if (!container || !tab3DButton) return;
+
+      // Check for 3D viewer URL first
+      if (
+        diamond.threeDViewerUrl &&
+        this.isAllowed3DViewerUrl(diamond.threeDViewerUrl)
+      ) {
+        // Create iframe for 3D viewer
+        const iframe = document.createElement('iframe');
+        iframe.src = diamond.threeDViewerUrl;
+        iframe.width = '100%';
+        iframe.height = '100%';
+        iframe.frameBorder = '0';
+        iframe.scrolling = 'no';
+        iframe.className = 'tw-w-full tw-h-full tw-rounded-lg';
+
+        container.innerHTML = '';
+        container.appendChild(iframe);
+
+        // Show the tab
+        tab3DButton.classList.remove('tw-hidden');
+        return true;
+      }
+
+      // Check for video URL with .mp4
+      if (diamond.videoUrl && diamond.videoUrl.includes('.mp4')) {
+        // Create video element
+        const video = document.createElement('video');
+        video.src = diamond.videoUrl;
+        video.controls = true;
+        video.autoplay = false;
+        video.className = 'tw-w-full tw-h-full tw-object-contain tw-rounded-lg';
+
+        container.innerHTML = '';
+        container.appendChild(video);
+
+        // Show the tab
+        tab3DButton.classList.remove('tw-hidden');
+        return true;
+      }
+
+      // Hide tab if no valid media
+      tab3DButton.classList.add('tw-hidden');
+      return false;
+    },
+
+    // Setup certificate content
+    setupCertificateContent(diamond) {
+      const container = document.getElementById('diamond-certificate');
+      const tabCertButton = document.getElementById('tab-certificate');
+
+      if (!container || !tabCertButton) return;
+
+      // Check if diamond has certificate information
+      const certificateLink = diamond.certificateUrl || diamond.certificatePath;
+      if (certificateLink && diamond.gradingLab) {
+        const lab = diamond.gradingLab.toUpperCase();
+        let certificateImage = '';
+
+        // Map lab to certificate image
+        if (lab.includes('GIA')) {
+          certificateImage = 'GIA.jpg';
+        } else if (lab.includes('IGI')) {
+          certificateImage = 'IGI.jpg';
+        } else if (lab.includes('HRD')) {
+          certificateImage = 'HRD.jpg';
+        }
+
+        if (certificateImage) {
+          // Get the correct certificate image URL from pre-loaded assets
+          const certificateImageUrl =
+            window.CERTIFICATE_IMAGES &&
+            window.CERTIFICATE_IMAGES[lab.toUpperCase()];
+
+          if (certificateImageUrl) {
+            // Create certificate display elements - now just shows the preview since clicking opens link
+            const certificateContainer = document.createElement('div');
+            certificateContainer.className =
+              'tw-flex tw-flex-col tw-items-center tw-space-y-4';
+
+            // Create certificate image element
+            const certImg = document.createElement('img');
+            certImg.alt = `${lab} Certificate`;
+            certImg.className = 'tw-w-32 tw-h-auto';
+            certImg.src = certificateImageUrl;
+
+            // Create text content
+            const textContainer = document.createElement('div');
+            textContainer.className = 'tw-text-center';
+            textContainer.innerHTML = `
+              <p class="tw-text-lg tw-font-medium tw-text-gray-800">${lab} Certifikat</p>
+              <p class="tw-text-sm tw-text-gray-600 tw-mb-4">Nr: ${diamond.certificateNumber || 'N/A'}</p>
+              <p class="tw-text-sm tw-text-gray-500">Klicka på certifikat-fliken för att öppna</p>
+            `;
+
+            certificateContainer.appendChild(certImg);
+            certificateContainer.appendChild(textContainer);
+
+            container.innerHTML = '';
+            container.appendChild(certificateContainer);
+
+            // Add certificate preview to tab
+            const tabPreview = document.getElementById(
+              'tab-certificate-preview'
+            );
+            if (tabPreview) {
+              const previewImg = document.createElement('img');
+              previewImg.src = certificateImageUrl;
+              previewImg.alt = lab;
+              previewImg.className =
+                'tw-w-full tw-h-full tw-object-contain tw-rounded-sm';
+
+              tabPreview.innerHTML = '';
+              tabPreview.appendChild(previewImg);
+            }
+          }
+
+          // Show the tab
+          tabCertButton.classList.remove('tw-hidden');
+          return true;
+        }
+      }
+
+      // Hide tab if no certificate
+      tabCertButton.classList.add('tw-hidden');
+      return false;
+    },
+
+    // Setup image preview in tab
+    setupImagePreview(diamond) {
+      const tabPreview = document.getElementById('tab-image-preview');
+      if (!tabPreview) return;
+
+      if (diamond.imagePath) {
+        // Use actual diamond image for preview
+        const previewImg = document.createElement('img');
+        previewImg.src = diamond.imagePath;
+        previewImg.alt = 'Diamond';
+        previewImg.className =
+          'tw-w-full tw-h-full tw-object-cover tw-rounded-sm';
+
+        // Handle broken images by falling back to SVG icon
+        previewImg.onerror = () => {
+          if (window.DiamondShapeIcons) {
+            const svgElement = window.DiamondShapeIcons.createSvgElement(
+              diamond.cut,
+              'tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-opacity-60'
+            );
+            tabPreview.innerHTML = '';
+            tabPreview.appendChild(svgElement);
+          } else {
+            // Fallback to diamond icon
+            tabPreview.innerHTML = `
+              <svg class="tw-w-6 tw-h-6 tw-text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 6l2-2h10l2 2-7 10L3 6z"/>
+              </svg>
+            `;
+          }
+        };
+
+        tabPreview.innerHTML = '';
+        tabPreview.appendChild(previewImg);
+      } else if (window.DiamondShapeIcons) {
+        // Use SVG icon for diamond shape when no image path
+        const svgElement = window.DiamondShapeIcons.createSvgElement(
+          diamond.cut,
+          'tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-opacity-60'
+        );
+        tabPreview.innerHTML = '';
+        tabPreview.appendChild(svgElement);
+      } else {
+        // Fallback to simple diamond icon
+        tabPreview.innerHTML = `
+          <svg class="tw-w-6 tw-h-6 tw-text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 6l2-2h10l2 2-7 10L3 6z"/>
+          </svg>
+        `;
       }
     },
   };

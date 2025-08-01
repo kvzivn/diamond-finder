@@ -376,6 +376,7 @@ if (typeof window !== 'undefined') {
       return diamondCard;
     },
 
+
     // Main render function
     async renderDiamonds(diamondsToRender) {
       const state = window.DiamondSearchState;

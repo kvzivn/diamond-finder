@@ -7,6 +7,7 @@ const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 // --- CSV Headers --- //
 const NATURAL_DIAMOND_HEADERS = [
   'Item ID #',
+  'Supplier Stock Ref.',
   'Cut',
   'Carat',
   'Color',
@@ -15,23 +16,30 @@ const NATURAL_DIAMOND_HEADERS = [
   'Natural Fancy Color Overtone',
   'Treated Color',
   'Clarity',
-  'Make (Cut Grade)',
+  'Cut Grade',
   'Grading Lab',
   'Certificate Number',
   'Certificate Path',
   'Image Path',
   'Online Report',
+  'Video URL',
+  '3DViewer URL',
   'Price Per Carat',
   'Total Price',
   '% Off IDEX List',
   'Polish',
   'Symmetry',
-  'Measurements (LengthxWidthxHeight)',
+  'Measurements Length',
+  'Measurements Width',
+  'Measurements Height',
   'Depth',
   'Table',
   'Crown Height',
+  'Crown Angle',
   'Pavilion Depth',
-  'Girdle (From / To)',
+  'Pavilion Angle',
+  'Girdle From',
+  'Girdle To',
   'Culet Size',
   'Culet Condition',
   'Graining',
@@ -41,7 +49,15 @@ const NATURAL_DIAMOND_HEADERS = [
   'Country',
   'State / Region',
   'Pair Stock Ref.',
-  '_EMPTY_FIELD_',
+  'Asking Price For Pair',
+  'Shade',
+  'Milky',
+  'Black Inclusion',
+  'Eye Clean',
+  'Provenance Report',
+  'Provenance Number',
+  'Brand',
+  'Guaranteed Availability',
 ];
 
 const LAB_GROWN_DIAMOND_HEADERS = [
@@ -326,7 +342,7 @@ export async function fetchDiamondsFromApi(
 
   if (type === 'natural') {
     endpoint = `${IDEX_API_BASE_URL}/fullfeed`;
-    dataFormat = 'format_20220525_basis';
+    dataFormat = 'format_20230628_extended';
     headers = NATURAL_DIAMOND_HEADERS;
   } else if (type === 'lab') {
     endpoint = `${IDEX_API_BASE_URL}/labgrownfullfile`;
@@ -519,7 +535,7 @@ export async function* fetchDiamondsStream(
 
   if (type === 'natural') {
     endpoint = `${IDEX_API_BASE_URL}/fullfeed`;
-    dataFormat = 'format_20220525_basis';
+    dataFormat = 'format_20230628_extended';
     headers = NATURAL_DIAMOND_HEADERS;
   } else if (type === 'lab') {
     endpoint = `${IDEX_API_BASE_URL}/labgrownfullfile`;
