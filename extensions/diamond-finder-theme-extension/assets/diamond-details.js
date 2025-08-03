@@ -71,6 +71,11 @@ if (typeof window !== 'undefined') {
       this.setup3DViewerContent(diamond);
       this.setupCertificateContent(diamond);
       this.setupImagePreview(diamond);
+      
+      // Initialize carat sizer
+      if (window.DiamondCaratSizer) {
+        window.DiamondCaratSizer.initialize(diamond);
+      }
 
       // Default to image tab, but switch to 3D if available
       const has3DContent =
@@ -357,7 +362,7 @@ if (typeof window !== 'undefined') {
 
     // Initialize tab switching functionality
     initializeTabs() {
-      const tabs = ['3d-video', 'image', 'certificate'];
+      const tabs = ['3d-video', 'image', 'certificate', 'carat-sizer'];
 
       tabs.forEach((tabName) => {
         const tabButton = document.getElementById(`tab-${tabName}`);
@@ -387,7 +392,7 @@ if (typeof window !== 'undefined') {
 
     // Switch between tabs
     switchTab(activeTab) {
-      const tabs = ['3d-video', 'image', 'certificate'];
+      const tabs = ['3d-video', 'image', 'certificate', 'carat-sizer'];
 
       tabs.forEach((tabName) => {
         const tabButton = document.getElementById(`tab-${tabName}`);

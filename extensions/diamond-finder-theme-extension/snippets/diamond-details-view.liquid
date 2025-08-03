@@ -6,6 +6,50 @@
     IGI: '{{ "/" | append: "IGI.jpg" | asset_url }}',
     HRD: '{{ "/" | append: "HRD.jpg" | asset_url }}',
   };
+
+  // Pre-load carat sizer asset URLs
+  window.CARAT_SIZER_ASSETS = {
+    hand: '{{ "/" | append: "hand.jpg" | asset_url }}',
+    ring: '{{ "/" | append: "ring.png" | asset_url }}',
+    claw: '{{ "/" | append: "claw.png" | asset_url }}',
+    shapes: {
+      round: '{{ "/" | append: "round.png" | asset_url }}',
+      princess: '{{ "/" | append: "princess.png" | asset_url }}',
+      emerald: '{{ "/" | append: "emerald.png" | asset_url }}',
+      asscher: '{{ "/" | append: "asscher.png" | asset_url }}',
+      cushion: '{{ "/" | append: "cushion.png" | asset_url }}',
+      oval: '{{ "/" | append: "oval.png" | asset_url }}',
+      marquise: '{{ "/" | append: "marquise.png" | asset_url }}',
+      pear: '{{ "/" | append: "pear.png" | asset_url }}',
+      radiant: '{{ "/" | append: "radiant.png" | asset_url }}',
+      diamond: '{{ "/" | append: "diamond.png" | asset_url }}',
+    },
+  };
+
+  // Override the getAssetUrl function with proper Shopify asset URLs
+  if (!window.DiamondUtils) {
+    window.DiamondUtils = {};
+  }
+
+  window.DiamondUtils.getAssetUrl = function (path) {
+    // Extract just the filename from any path
+    const filename = path
+      .split('/')
+      .pop()
+      .replace(/\.(png|webp|jpg)$/, '');
+
+    // Check shapes first
+    if (window.CARAT_SIZER_ASSETS.shapes[filename]) {
+      return window.CARAT_SIZER_ASSETS.shapes[filename];
+    }
+
+    // Check other carat sizer assets
+    if (window.CARAT_SIZER_ASSETS[filename]) {
+      return window.CARAT_SIZER_ASSETS[filename];
+    }
+
+    return path;
+  };
 </script>
 <div id='diamond-details-view' class='tw-hidden'>
   <div class='tw-max-w-[90rem] tw-mx-auto tw-p-6'>
@@ -56,6 +100,18 @@
               <!-- Certificate image preview will be populated by JavaScript -->
             </div>
           </button>
+          <button
+            id='tab-carat-sizer'
+            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-transition-colors tw-duration-200'
+          >
+            <img
+              src='{{ "/" | append: "hand.jpg" | asset_url }}'
+              alt='Carat Sizer'
+              class='tw-w-14 tw-h-14 tw-object-contain'
+              width='56'
+              height='56'
+            >
+          </button>
         </div>
 
         <!-- Tab Content -->
@@ -84,6 +140,48 @@
           >
             <div id='diamond-certificate' class='tw-text-center'>
               <!-- Certificate content will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Carat Sizer Tab -->
+          <div
+            id='content-carat-sizer'
+            class='tw-w-full tw-h-full tw-hidden tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-4'
+          >
+            <div class='carat-sizer-container tw-w-full'>
+              <!-- Hand with ring and diamond -->
+              <div class='carat-hand-container'>
+                <img src='{{ "/" | append: "hand.jpg" | asset_url }}' alt='Hand' class='carat-hand-image' width='400' height='300'>
+
+                <!-- Ring container positioned on ring finger -->
+                <div class='carat-ring-container'>
+                  <img src='{{ "/" | append: "ring.png" | asset_url }}' alt='Ring' class='carat-ring-image' width='100' height='100'>
+
+                  <!-- Diamond and claws container -->
+                  <div class='carat-diamond-container'>
+                    <img
+                      id='carat-diamond'
+                      src='{{ "/" | append: "round.png" | asset_url }}'
+                      alt='Diamond'
+                      class='carat-diamond-image'
+                      width='50'
+                      height='50'
+                    >
+                    <div class='ring-claws' id='carat-claws'>
+                      <!-- Claws will be populated by JavaScript -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slider -->
+              <div class='carat-slider-container'>
+                <div id='carat-sizer-slider'></div>
+                <div class='carat-slider-labels'>
+                  <span>0.18ct</span>
+                  <span>3.00ct</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

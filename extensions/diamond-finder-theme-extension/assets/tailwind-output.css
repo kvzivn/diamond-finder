@@ -740,6 +740,10 @@ video {
   height: 100%;
 }
 
+.tw-h-14 {
+  height: 3.5rem;
+}
+
 .tw-w-1\/2 {
   width: 50%;
 }
@@ -793,16 +797,16 @@ video {
   width: max-content;
 }
 
+.tw-w-14 {
+  width: 3.5rem;
+}
+
 .tw-min-w-full {
   min-width: 100%;
 }
 
 .tw-max-w-\[500px\] {
   max-width: 500px;
-}
-
-.tw-max-w-\[81\.25rem\] {
-  max-width: 81.25rem;
 }
 
 .tw-max-w-\[90rem\] {
