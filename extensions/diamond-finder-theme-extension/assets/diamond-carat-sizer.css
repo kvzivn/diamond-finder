@@ -60,9 +60,10 @@
 /* Claws container */
 .ring-claws {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
@@ -72,6 +73,8 @@
   width: 12px;
   height: 12px;
   pointer-events: none;
+  z-index: 10;
+  opacity: 0.9;
 }
 
 /* Slider container */
@@ -85,7 +88,7 @@
 .carat-slider-labels {
   display: flex;
   justify-content: space-between;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-size: 0.875rem;
   color: #4b5563;
 }
@@ -119,10 +122,15 @@
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  width: 20px;
-  height: 20px;
-  top: -7px;
-  right: -10px;
+  width: 24px;
+  height: 24px;
+  top: -9px;
+  right: -12px;
+  background-image: url("data:image/svg+xml,%3Csvg width='29' height='38' viewBox='0 0 29 38' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_22_24)'%3E%3Cpath opacity='0.9' d='M13 3H3V34.5H20.5L25.5 23.5L13 3Z' stroke='%23030405' stroke-width='6'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_22_24'%3E%3Crect width='29' height='38' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E");
+  background-size: 9px 14px;
+  background-repeat: no-repeat;
+  background-position: calc(50% + 1px) center;
+  cursor: pointer;
 }
 
 #carat-sizer-slider .noUi-handle:before,
@@ -140,6 +148,11 @@
   font-size: 0.875rem;
   font-weight: 500;
   bottom: 120%;
+}
+
+/* Show tooltip on container hover */
+.carat-slider-container:hover #carat-sizer-slider .noUi-tooltip {
+  display: block !important;
 }
 
 /* Responsive adjustments */
