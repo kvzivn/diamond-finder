@@ -15,6 +15,7 @@ if (typeof window !== 'undefined') {
     isLoadingMore: false,
     initialLoadComplete: false,
     showNoImage: false, // Default: only show diamonds with images
+    showNoMedia: false, // Default: only show diamonds with video or 3D viewer
 
     // Slider state
     sliderInitializationState: {

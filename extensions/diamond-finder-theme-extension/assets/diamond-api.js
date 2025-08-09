@@ -536,6 +536,25 @@ if (typeof window !== 'undefined') {
         const data = await response.json();
         const newDiamonds = data.diamonds || [];
         console.log('[NEWLY FETCHED DIAMONDS]', newDiamonds);
+        
+        // Debug: Check first 5 diamonds for 3D/video URLs
+        console.log('[MEDIA CHECK] First 5 diamonds with media info:');
+        newDiamonds.slice(0, 5).forEach((d, i) => {
+          console.log(`Diamond ${i + 1}:`, {
+            itemId: d.itemId,
+            videoUrl: d.videoUrl,
+            threeDViewerUrl: d.threeDViewerUrl,
+            hasVideo: !!(d.videoUrl && d.videoUrl.trim() !== '' && d.videoUrl !== 'null'),
+            has3DViewer: !!(d.threeDViewerUrl && d.threeDViewerUrl.trim() !== '' && d.threeDViewerUrl !== 'null')
+          });
+        });
+        
+        // Count diamonds with media
+        const withMedia = newDiamonds.filter(d => 
+          (d.videoUrl && d.videoUrl.trim() !== '' && d.videoUrl !== 'null') ||
+          (d.threeDViewerUrl && d.threeDViewerUrl.trim() !== '' && d.threeDViewerUrl !== 'null')
+        );
+        console.log(`[MEDIA STATS] ${withMedia.length} of ${newDiamonds.length} diamonds have video or 3D viewer`);
 
         // Update state
         state.setDiamonds(newDiamonds, isLoadMore);

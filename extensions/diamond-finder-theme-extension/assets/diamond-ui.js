@@ -22,6 +22,7 @@ if (typeof window !== 'undefined') {
       this.setupColourSliderImages();
       this.setupClaritySliderImages();
       this.setupShowNoImageCheckbox();
+      this.setupShowNoMediaCheckbox();
       // Note: applyInitialFilters() is now called only after all sliders are initialized
       // This is handled by DiamondSearchApp.triggerInitialLoad()
     },
@@ -422,6 +423,26 @@ if (typeof window !== 'undefined') {
             card.style.display = '';
           });
         }
+        
+        // Re-render diamonds with the new filter
+        await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
+      });
+    },
+
+    // Setup "Show diamonds without 3D/video" checkbox
+    setupShowNoMediaCheckbox() {
+      const checkbox = document.getElementById('ds-show-no-media');
+      if (!checkbox) return;
+
+      const state = window.DiamondSearchState;
+
+      // Set initial state
+      checkbox.checked = state.showNoMedia;
+
+      // Add event listener
+      checkbox.addEventListener('change', async function () {
+        state.showNoMedia = this.checked;
+        console.log(`[SHOW NO MEDIA CHANGED] Show diamonds without 3D/video: ${state.showNoMedia}`);
         
         // Re-render diamonds with the new filter
         await window.DiamondRenderer.renderDiamonds(state.allDiamonds);

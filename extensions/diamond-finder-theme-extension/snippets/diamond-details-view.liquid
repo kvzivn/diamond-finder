@@ -78,12 +78,6 @@
         <!-- Vertical Tab Navigation -->
         <div class='tw-flex tw-flex-col tw-gap-3 tw-w-24'>
           <button
-            id='tab-3d-video'
-            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-hidden tw-transition-colors tw-duration-200'
-          >
-            <img src='{{ '360.png' | asset_url }}' alt='360° View' class='tw-w-16 tw-h-16' width='128' height='128'>
-          </button>
-          <button
             id='tab-image'
             class='tw-w-20 tw-h-20 tw-border tw-border-gray-600 tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-transition-colors tw-duration-200'
           >
@@ -93,6 +87,12 @@
             >
               <!-- Small diamond image preview will be populated by JavaScript -->
             </div>
+          </button>
+          <button
+            id='tab-3d-video'
+            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-hidden tw-transition-colors tw-duration-200'
+          >
+            <img src='{{ '360.png' | asset_url }}' alt='360° View' class='tw-w-16 tw-h-16' width='128' height='128'>
           </button>
           <button
             id='tab-carat-sizer'

@@ -55,6 +55,24 @@ if (typeof window !== 'undefined') {
 
       if (!searchView || !detailsView) return;
 
+      // Debug logging for 3D/video URLs
+      console.log('[DIAMOND DETAILS] Selected diamond:', {
+        itemId: diamond.itemId,
+        videoUrl: diamond.videoUrl,
+        threeDViewerUrl: diamond.threeDViewerUrl,
+        imagePath: diamond.imagePath,
+        hasVideo: !!(
+          diamond.videoUrl &&
+          diamond.videoUrl.trim() !== '' &&
+          diamond.videoUrl !== 'null'
+        ),
+        has3DViewer: !!(
+          diamond.threeDViewerUrl &&
+          diamond.threeDViewerUrl.trim() !== '' &&
+          diamond.threeDViewerUrl !== 'null'
+        ),
+      });
+
       // Set current diamond in state
       if (window.DiamondState && window.DiamondState.setCurrentDiamond) {
         window.DiamondState.setCurrentDiamond(diamond);
@@ -71,19 +89,14 @@ if (typeof window !== 'undefined') {
       this.setup3DViewerContent(diamond);
       this.setupCertificateContent(diamond);
       this.setupImagePreview(diamond);
-      
+
       // Initialize carat sizer
       if (window.DiamondCaratSizer) {
         window.DiamondCaratSizer.initialize(diamond);
       }
 
-      // Default to image tab, but switch to 3D if available
-      const has3DContent =
-        document.getElementById('tab-3d-video') &&
-        !document
-          .getElementById('tab-3d-video')
-          .classList.contains('tw-hidden');
-      this.switchTab(has3DContent ? '3d-video' : 'image');
+      // Default to image tab regardless of 3D availability
+      this.switchTab('image');
 
       // Scroll to top
       window.scrollTo(0, 0);
@@ -419,7 +432,15 @@ if (typeof window !== 'undefined') {
         'nivoda-inhousemedia',
         'cloudstorage20',
         'gem360',
+        'vv360.in',
+        'v360.in',
+        'd3at7kzws0mw3g.cloudfront.net',
+        'antwerpdiamondview.com',
+        'diamdna.azureedge.net',
+        'mydiamonds.info',
         '.mp4',
+        'Vision360.html',
+        'vision360.html',
       ];
       return allowedDomains.some((domain) => url.includes(domain));
     },
@@ -430,6 +451,17 @@ if (typeof window !== 'undefined') {
       const tab3DButton = document.getElementById('tab-3d-video');
 
       if (!container || !tab3DButton) return;
+
+      console.log('[3D VIEWER SETUP] Checking media URLs:', {
+        threeDViewerUrl: diamond.threeDViewerUrl,
+        videoUrl: diamond.videoUrl,
+        is3DAllowed: diamond.threeDViewerUrl
+          ? this.isAllowed3DViewerUrl(diamond.threeDViewerUrl)
+          : false,
+        hasMP4Video: diamond.videoUrl
+          ? diamond.videoUrl.includes('.mp4')
+          : false,
+      });
 
       // Check for 3D viewer URL first
       if (
@@ -453,17 +485,33 @@ if (typeof window !== 'undefined') {
         return true;
       }
 
-      // Check for video URL with .mp4
-      if (diamond.videoUrl && diamond.videoUrl.includes('.mp4')) {
-        // Create video element
-        const video = document.createElement('video');
-        video.src = diamond.videoUrl;
-        video.controls = true;
-        video.autoplay = false;
-        video.className = 'tw-w-full tw-h-full tw-object-contain tw-rounded-lg';
+      // Check for video URL
+      if (diamond.videoUrl && this.isAllowed3DViewerUrl(diamond.videoUrl)) {
+        // Check if it's an MP4 video
+        if (diamond.videoUrl.includes('.mp4')) {
+          // Create video element for MP4
+          const video = document.createElement('video');
+          video.src = diamond.videoUrl;
+          video.controls = true;
+          video.autoplay = false;
+          video.className =
+            'tw-w-full tw-h-full tw-object-contain tw-rounded-lg';
 
-        container.innerHTML = '';
-        container.appendChild(video);
+          container.innerHTML = '';
+          container.appendChild(video);
+        } else {
+          // Create iframe for other video formats (Vision360, etc.)
+          const iframe = document.createElement('iframe');
+          iframe.src = diamond.videoUrl;
+          iframe.width = '100%';
+          iframe.height = '100%';
+          iframe.frameBorder = '0';
+          iframe.scrolling = 'no';
+          iframe.className = 'tw-w-full tw-h-full tw-rounded-lg';
+
+          container.innerHTML = '';
+          container.appendChild(iframe);
+        }
 
         // Show the tab
         tab3DButton.classList.remove('tw-hidden');

@@ -415,6 +415,20 @@ if (typeof window !== 'undefined') {
         });
       }
 
+      // Apply media filter based on checkbox state
+      if (!state.showNoMedia) {
+        // Default: Only show diamonds with video or 3D viewer
+        const beforeFilterCount = validPriceDiamonds.length;
+        validPriceDiamonds = validPriceDiamonds.filter((diamond) => {
+          // Check for non-empty strings, not just existence, and exclude "null" strings
+          const hasVideoUrl = diamond.videoUrl && diamond.videoUrl.trim() !== '' && diamond.videoUrl !== 'null';
+          const has3DViewerUrl = diamond.threeDViewerUrl && diamond.threeDViewerUrl.trim() !== '' && diamond.threeDViewerUrl !== 'null';
+          
+          return hasVideoUrl || has3DViewerUrl;
+        });
+        console.log(`[MEDIA FILTER] Filtered from ${beforeFilterCount} to ${validPriceDiamonds.length} diamonds with 3D/video`);
+      }
+
       // Sort diamonds
       const sortedDiamonds = this.sortDiamonds(
         validPriceDiamonds,
@@ -451,8 +465,11 @@ if (typeof window !== 'undefined') {
         state.paginationInfo.totalDiamonds !== undefined
       ) {
         const currentlyShown = state.allDiamonds.length;
-        const imageFilterNote = !state.showNoImage ? ' (endast med bild)' : '';
-        resultsCountEl.textContent = `Visar ${displayedCount} av ${currentlyShown} hämtade${imageFilterNote}`;
+        let filterNotes = [];
+        if (!state.showNoImage) filterNotes.push('med bild');
+        if (!state.showNoMedia) filterNotes.push('med 3D/video');
+        const filterNote = filterNotes.length > 0 ? ` (endast ${filterNotes.join(' och ')})` : '';
+        resultsCountEl.textContent = `Visar ${displayedCount} av ${currentlyShown} hämtade${filterNote}`;
       } else if (resultsCountEl) {
         resultsCountEl.textContent = `${displayedCount} diamanter`;
       }

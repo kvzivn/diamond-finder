@@ -900,6 +900,14 @@ video {
   gap: 1.5rem;
 }
 
+.tw-gap-10 {
+  gap: 2.5rem;
+}
+
+.tw-gap-12 {
+  gap: 3rem;
+}
+
 .tw-gap-x-10 {
   -moz-column-gap: 2.5rem;
        column-gap: 2.5rem;
