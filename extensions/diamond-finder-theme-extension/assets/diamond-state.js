@@ -49,7 +49,7 @@ if (typeof window !== 'undefined') {
     // Configuration constants
     DEFAULT_FILTER_RANGES: {
       price: [2500, 1000000], // SEK range
-      carat: [0.3, 30.0],
+      carat: [0.3, 5.0],
       colour: ['K', 'D_MAX'], // Revert back to K as requested
       clarity: ['SI2', 'FL_MAX'],
       cutGrade: ['Good', 'Excellent_MAX'],

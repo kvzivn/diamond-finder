@@ -96,10 +96,9 @@ if (typeof window !== 'undefined') {
 
       // Create array of valid carat values
       const caratValues = [];
-      for (let i = 0.1; i <= 10.0; i += 0.05) {
+      for (let i = 0.1; i <= 5.0; i += 0.05) {
         caratValues.push(parseFloat(i.toFixed(2)));
       }
-      caratValues.push(15.0, 20.0, 25.0, 30.0);
 
       function snapToValidCaratValue(value) {
         return caratValues.reduce((prev, curr) =>
@@ -114,7 +113,7 @@ if (typeof window !== 'undefined') {
         margin: 0.05,
         range: {
           min: 0.1,
-          max: 30.0,
+          max: 5.0,
         },
         format: {
           to: function (value) {

@@ -12,7 +12,7 @@ if (typeof window !== 'undefined') {
 
     // Carat size bounds
     MIN_CARAT: 0.18,
-    MAX_CARAT: 3.0,
+    MAX_CARAT: 5.0,
     STEP: 0.01,
 
     // Reference values for interpolation
@@ -36,7 +36,7 @@ if (typeof window !== 'undefined') {
         clawRotations: [45, -45, -135, -225],
       },
       2.0: {
-        diamondWidth: 26,
+        diamondWidth: 25,
         clawTop: -17.8,
         clawLeft: 5.8,
         clawRotations: [45, -45, -135, -225],
@@ -45,6 +45,12 @@ if (typeof window !== 'undefined') {
         diamondWidth: 30,
         clawTop: -18.5,
         clawLeft: 6.5,
+        clawRotations: [45, -45, -135, -225],
+      },
+      5.0: {
+        diamondWidth: 35,
+        clawTop: -22.0,
+        clawLeft: 10.0,
         clawRotations: [45, -45, -135, -225],
       },
     },
@@ -94,9 +100,14 @@ if (typeof window !== 'undefined') {
 
       // Determine initial value based on current diamond
       let initialValue = 1.0;
-      if (this.currentDiamond && (this.currentDiamond.carat || this.currentDiamond.caratWeight)) {
+      if (
+        this.currentDiamond &&
+        (this.currentDiamond.carat || this.currentDiamond.caratWeight)
+      ) {
         // Support both 'carat' and 'caratWeight' property names
-        initialValue = parseFloat(this.currentDiamond.carat || this.currentDiamond.caratWeight);
+        initialValue = parseFloat(
+          this.currentDiamond.carat || this.currentDiamond.caratWeight
+        );
         // Clamp to slider bounds
         if (initialValue < this.MIN_CARAT) {
           initialValue = this.MIN_CARAT;
@@ -223,11 +234,16 @@ if (typeof window !== 'undefined') {
         upperRef = this.REFERENCE_VALUES[2.0];
         lowerCarat = 1.0;
         upperCarat = 2.0;
-      } else {
+      } else if (carat <= 3.0) {
         lowerRef = this.REFERENCE_VALUES[2.0];
         upperRef = this.REFERENCE_VALUES[3.0];
         lowerCarat = 2.0;
         upperCarat = 3.0;
+      } else {
+        lowerRef = this.REFERENCE_VALUES[3.0];
+        upperRef = this.REFERENCE_VALUES[5.0];
+        lowerCarat = 3.0;
+        upperCarat = 5.0;
       }
 
       // Calculate interpolation factor
