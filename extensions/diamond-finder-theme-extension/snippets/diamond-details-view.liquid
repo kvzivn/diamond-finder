@@ -51,6 +51,7 @@
     return path;
   };
 </script>
+
 <div id='diamond-details-view' class='tw-hidden'>
   <div class='tw-max-w-[90rem] tw-mx-auto tw-p-6'>
     <div class='tw-mb-4'>
@@ -70,6 +71,7 @@
         Tillbaka
       </button>
     </div>
+
     <div class='tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-16'>
       <!-- Left side - Diamond Media with Vertical Tabs -->
       <div class='tw-w-full tw-flex tw-gap-4'>
@@ -93,24 +95,24 @@
             </div>
           </button>
           <button
+            id='tab-carat-sizer'
+            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-transition-colors tw-duration-200'
+          >
+            <img
+              src='{{ "/" | append: "carat-sizer-tab.jpg" | asset_url }}'
+              alt='Carat Sizer'
+              class='tw-w-16 tw-h-16 tw-object-contain tw-saturate-50'
+              width='56'
+              height='56'
+            >
+          </button>
+          <button
             id='tab-certificate'
             class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-hidden tw-transition-colors tw-duration-200'
           >
             <div id='tab-certificate-preview' class='tw-w-16 tw-h-16 tw-flex tw-items-center tw-justify-center'>
               <!-- Certificate image preview will be populated by JavaScript -->
             </div>
-          </button>
-          <button
-            id='tab-carat-sizer'
-            class='tw-w-20 tw-h-20 tw-border tw-rounded-lg tw-bg-white tw-flex tw-items-center tw-justify-center tw-p-2 hover:tw-border-gray-400 tw-transition-colors tw-duration-200'
-          >
-            <img
-              src='{{ "/" | append: "hand.jpg" | asset_url }}'
-              alt='Carat Sizer'
-              class='tw-w-14 tw-h-14 tw-object-contain'
-              width='56'
-              height='56'
-            >
           </button>
         </div>
 
@@ -151,11 +153,23 @@
             <div class='carat-sizer-container tw-w-full'>
               <!-- Hand with ring and diamond -->
               <div class='carat-hand-container'>
-                <img src='{{ "/" | append: "hand.jpg" | asset_url }}' alt='Hand' class='carat-hand-image' width='400' height='300'>
+                <img
+                  src='{{ "/" | append: "hand.jpg" | asset_url }}'
+                  alt='Hand'
+                  class='carat-hand-image'
+                  width='400'
+                  height='300'
+                >
 
                 <!-- Ring container positioned on ring finger -->
                 <div class='carat-ring-container'>
-                  <img src='{{ "/" | append: "ring.png" | asset_url }}' alt='Ring' class='carat-ring-image' width='100' height='100'>
+                  <img
+                    src='{{ "/" | append: "ring3.png" | asset_url }}'
+                    alt='Ring'
+                    class='carat-ring-image'
+                    width='100'
+                    height='100'
+                  >
 
                   <!-- Diamond and claws container -->
                   <div class='carat-diamond-container'>
@@ -178,8 +192,8 @@
               <div class='carat-slider-container'>
                 <div id='carat-sizer-slider'></div>
                 <div class='carat-slider-labels'>
-                  <span>0.18ct</span>
-                  <span>3.00ct</span>
+                  <span>0.18 ct</span>
+                  <span>3.00 ct</span>
                 </div>
               </div>
             </div>

@@ -138,9 +138,6 @@ export function parseThemeSettingsToRanges(
         ];
 
   if (!settings) {
-    console.log(
-      '[THEME SETTINGS] No settings provided, using default ranges with 1.0 multipliers'
-    );
     return defaultRanges;
   }
 
@@ -157,21 +154,12 @@ export function parseThemeSettingsToRanges(
     `${prefix}5_150`,
   ];
 
-  console.log(
-    `[THEME SETTINGS] Parsing settings for ${type} diamonds:`,
-    settings
-  );
-
   return defaultRanges.map((range, index) => {
     const settingValue = settings[keys[index]];
     const parsedValue = parseFloat(settingValue || '1.0');
 
     // Use 1.0 if the value is not a valid number
     const multiplier = isNaN(parsedValue) ? 1.0 : parsedValue;
-
-    console.log(
-      `[THEME SETTINGS] Range ${index}: ${range.min}-${range.max} carat -> multiplier: ${multiplier} (from setting: ${settingValue})`
-    );
 
     return {
       ...range,

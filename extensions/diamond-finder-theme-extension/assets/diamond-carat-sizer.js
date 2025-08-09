@@ -82,6 +82,28 @@ if (typeof window !== 'undefined') {
         }
       });
       
+      // Hide tooltip initially
+      const tooltip = sliderElement.querySelector('.noUi-tooltip');
+      if (tooltip) {
+        tooltip.style.display = 'none';
+      }
+      
+      // Show tooltip on start event
+      this.slider.on('start', () => {
+        const tooltip = sliderElement.querySelector('.noUi-tooltip');
+        if (tooltip) {
+          tooltip.style.display = 'block';
+        }
+      });
+      
+      // Hide tooltip on end event
+      this.slider.on('end', () => {
+        const tooltip = sliderElement.querySelector('.noUi-tooltip');
+        if (tooltip) {
+          tooltip.style.display = 'none';
+        }
+      });
+      
       // Add event listener for slider changes
       this.slider.on('update', (values) => {
         const caratValue = parseFloat(values[0]);
