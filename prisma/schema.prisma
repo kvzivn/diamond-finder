@@ -154,6 +154,20 @@ enum DiamondType {
   lab
 }
 
+model MarkupInterval {
+  id         String      @id @default(cuid())
+  type       DiamondType
+  minCarat   Float
+  maxCarat   Float
+  multiplier Float       @default(1.0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([type, minCarat, maxCarat])
+  @@index([type])
+  @@index([minCarat, maxCarat])
+}
+
 enum ImportStatus {
   PENDING
   IN_PROGRESS

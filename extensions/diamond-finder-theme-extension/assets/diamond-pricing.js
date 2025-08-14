@@ -1,66 +1,91 @@
 // Diamond Pricing Module - Client-side markup application
 if (typeof window !== 'undefined') {
   window.DiamondPricing = {
-    // Cache for theme settings to avoid repeated processing
-    _themeSettings: null,
+    // Cache for markup intervals to avoid repeated processing
+    _markupIntervals: null,
+    _lastFetch: 0,
+    _cacheTimeout: 5 * 60 * 1000, // 5 minutes
 
-    // Default markup ranges if theme settings can't be fetched
+    // Default markup ranges if API can't be reached
     _defaultRanges: {
-      natural: [
-        { min: 0, max: 0.5, multiplier: 1.0 },
-        { min: 0.5, max: 0.7, multiplier: 1.0 },
-        { min: 0.7, max: 1, multiplier: 1.0 },
-        { min: 1, max: 1.1, multiplier: 1.0 },
-        { min: 1.1, max: 1.5, multiplier: 1.0 },
-        { min: 1.5, max: 2, multiplier: 1.0 },
-        { min: 2, max: 3, multiplier: 1.0 },
-        { min: 3, max: 5, multiplier: 1.0 },
-        { min: 5, max: 150, multiplier: 1.0 },
-      ],
-      lab: [
-        { min: 0, max: 0.5, multiplier: 1.0 },
-        { min: 0.5, max: 0.7, multiplier: 1.0 },
-        { min: 0.7, max: 1, multiplier: 1.0 },
-        { min: 1, max: 1.1, multiplier: 1.0 },
-        { min: 1.1, max: 1.5, multiplier: 1.0 },
-        { min: 1.5, max: 2, multiplier: 1.0 },
-        { min: 2, max: 3, multiplier: 1.0 },
-        { min: 3, max: 5, multiplier: 1.0 },
-        { min: 5, max: 150, multiplier: 1.0 },
-      ],
+      natural: Array.from({ length: 50 }, (_, i) => ({
+        min: i * 0.1,
+        max: i === 49 ? 5.0 : (i * 0.1) + 0.09,
+        multiplier: 1.0,
+      })),
+      lab: Array.from({ length: 50 }, (_, i) => ({
+        min: i * 0.1,
+        max: i === 49 ? 5.0 : (i * 0.1) + 0.09,
+        multiplier: 1.0,
+      })),
     },
 
-    // Clear cache (useful for testing theme settings changes)
+    // Clear cache (useful for testing markup intervals changes)
     clearCache() {
-      this._themeSettings = null;
+      this._markupIntervals = null;
+      this._lastFetch = 0;
     },
 
-    // Fetch theme settings from the directly passed settings
-    async fetchThemeSettings() {
-
-      if (this._themeSettings) {
-        return this._themeSettings;
+    // Fetch markup intervals from the database API
+    async fetchMarkupIntervals() {
+      const now = Date.now();
+      
+      // Use cache if it's still valid
+      if (this._markupIntervals && (now - this._lastFetch) < this._cacheTimeout) {
+        return this._markupIntervals;
       }
 
-      this._themeSettings = this._getSettingsFromWindow();
-      return this._themeSettings;
+      try {
+        const response = await fetch('/apps/diamond-finder/api/markup-intervals');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        this._markupIntervals = data;
+        this._lastFetch = now;
+        
+        console.log('[DIAMOND PRICING] Loaded markup intervals from database:', {
+          natural: data.natural?.length || 0,
+          lab: data.lab?.length || 0,
+          fallback: data.fallback || false
+        });
+        
+        return this._markupIntervals;
+      } catch (error) {
+        console.warn('[DIAMOND PRICING] Failed to fetch markup intervals from API:', error);
+        
+        // Fallback to theme settings if available, otherwise use defaults
+        const fallbackSettings = this._getSettingsFromWindow();
+        if (fallbackSettings) {
+          return this._convertThemeSettingsToIntervals(fallbackSettings);
+        }
+        
+        return this._defaultRanges;
+      }
     },
 
-    // Internal method to get settings from window object
+    // Internal method to get settings from window object (fallback)
     _getSettingsFromWindow() {
       try {
-
         if (!window.DiamondThemeSettings) {
           return null;
         }
-
-        const settings = window.DiamondThemeSettings;
-
-
-        return settings;
+        return window.DiamondThemeSettings;
       } catch (error) {
         return null;
       }
+    },
+
+    // Convert theme settings to new interval format (fallback compatibility)
+    _convertThemeSettingsToIntervals(settings) {
+      const ranges = {
+        natural: this.parseThemeSettingsToRanges(settings, 'natural'),
+        lab: this.parseThemeSettingsToRanges(settings, 'lab'),
+      };
+      
+      console.log('[DIAMOND PRICING] Using theme settings as fallback for markup intervals');
+      return ranges;
     },
 
     // Parse theme settings into carat ranges with multipliers
@@ -147,7 +172,7 @@ if (typeof window !== 'undefined') {
     // Apply markup to a diamond's price (main function to be called by other modules)
     async applyMarkupToDiamond(diamond) {
       try {
-        const settings = await this.fetchThemeSettings();
+        const intervals = await this.fetchMarkupIntervals();
 
         // Determine diamond type - check for lab-grown indicators
         const isLabGrown =
@@ -157,10 +182,7 @@ if (typeof window !== 'undefined') {
         const diamondType = isLabGrown ? 'lab' : 'natural';
 
         // Get markup ranges for this diamond type
-        const markupRanges = this.parseThemeSettingsToRanges(
-          settings,
-          diamondType
-        );
+        const markupRanges = intervals[diamondType] || intervals.natural || this._defaultRanges.natural;
 
         // Calculate final price if we have a base price in SEK
         if (diamond.totalPriceSek && diamond.carat) {
@@ -185,6 +207,7 @@ if (typeof window !== 'undefined') {
               ),
               diamondType,
               carat: diamond.carat,
+              intervalsSource: intervals.fallback ? 'fallback' : 'database',
             },
           };
 
@@ -197,6 +220,7 @@ if (typeof window !== 'undefined') {
           markupApplied: false,
         };
       } catch (error) {
+        console.error('[DIAMOND PRICING] Error applying markup:', error);
         return {
           ...diamond,
           finalPriceSek: diamond.totalPriceSek || 0,
@@ -206,23 +230,28 @@ if (typeof window !== 'undefined') {
     },
   };
 
-  // Expose clearCache globally for testing
+  // Expose clearCache globally for testing and cache invalidation
   window.clearDiamondPricingCache = () => {
     window.DiamondPricing.clearCache();
   };
 
-  // Expose theme settings test function for debugging
-  window.testThemeSettings = () => {
-    try {
-      const result = window.DiamondPricing._getSettingsFromWindow();
-      return result;
-    } catch (error) {
-      return null;
-    }
+  // Expose direct intervals fetch for debugging
+  window.fetchMarkupIntervalsDebug = () => {
+    return window.DiamondPricing.fetchMarkupIntervals();
   };
 
-  // Expose direct settings fetch for debugging
-  window.fetchThemeSettingsDebug = () => {
-    return window.DiamondPricing.fetchThemeSettings();
+  // Test function to check markup calculation for debugging
+  window.testMarkupCalculation = (carat, type) => {
+    return window.DiamondPricing.fetchMarkupIntervals().then(intervals => {
+      const ranges = intervals[type] || intervals.natural;
+      const multiplier = window.DiamondPricing.getMarkupMultiplier(carat, type, ranges);
+      return {
+        carat,
+        type,
+        multiplier,
+        markupPercent: Math.round((multiplier - 1) * 100),
+        availableRanges: ranges.length
+      };
+    });
   };
 }

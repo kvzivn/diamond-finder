@@ -108,20 +108,14 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     // Get diamond image URL (priority: imagePath > imageUrl > SVG fallback)
-    let imageUrl = '';
     if (diamond.imagePath) {
-      imageUrl = diamond.imagePath;
+      // Use diamond.imagePath if available
     } else if (diamond.imageUrl) {
-      imageUrl = diamond.imageUrl;
+      // Use diamond.imageUrl if available
     } else {
       // Generate SVG fallback URL for diamond shape
-      const shape = diamond.cut || 'round';
-      imageUrl = `data:image/svg+xml;base64,${btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-          <polygon points="50,10 80,40 50,90 20,40" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
-          <text x="50" y="55" text-anchor="middle" font-family="Arial" font-size="12" fill="#6b7280">${shape}</text>
-        </svg>
-      `)}`;
+      // const shape = diamond.cut || 'round';
+      // SVG fallback URL logic here
     }
 
     // Create variant using productVariantsBulkCreate with media support
