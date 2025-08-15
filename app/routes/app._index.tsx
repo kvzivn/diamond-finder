@@ -301,26 +301,13 @@ export default function Index() {
                   </Text>
                   <List>
                     <List.Item>
-                      Build an{" "}
                       <Link
-                        url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-                        target="_blank"
+                        url="/app/admin/markup-intervals"
                         removeUnderline
                       >
-                        {" "}
-                        example app
+                        Markup Settings
                       </Link>{" "}
-                      to get started
-                    </List.Item>
-                    <List.Item>
-                      Explore Shopify’s API with{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphiQL
-                      </Link>
+                      - Configure diamond pricing markup by carat intervals
                     </List.Item>
                   </List>
                 </BlockStack>
