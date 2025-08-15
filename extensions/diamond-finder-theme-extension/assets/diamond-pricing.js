@@ -55,82 +55,11 @@ if (typeof window !== 'undefined') {
       } catch (error) {
         console.warn('[DIAMOND PRICING] Failed to fetch markup intervals from API:', error);
         
-        // Fallback to theme settings if available, otherwise use defaults
-        const fallbackSettings = this._getSettingsFromWindow();
-        if (fallbackSettings) {
-          return this._convertThemeSettingsToIntervals(fallbackSettings);
-        }
-        
+        // Use defaults if API fails
         return this._defaultRanges;
       }
     },
 
-    // Internal method to get settings from window object (fallback)
-    _getSettingsFromWindow() {
-      try {
-        if (!window.DiamondThemeSettings) {
-          return null;
-        }
-        return window.DiamondThemeSettings;
-      } catch (error) {
-        return null;
-      }
-    },
-
-    // Convert theme settings to new interval format (fallback compatibility)
-    _convertThemeSettingsToIntervals(settings) {
-      const ranges = {
-        natural: this.parseThemeSettingsToRanges(settings, 'natural'),
-        lab: this.parseThemeSettingsToRanges(settings, 'lab'),
-      };
-      
-      console.log('[DIAMOND PRICING] Using theme settings as fallback for markup intervals');
-      return ranges;
-    },
-
-    // Parse theme settings into carat ranges with multipliers
-    parseThemeSettingsToRanges(settings, type) {
-
-      const defaultRanges =
-        this._defaultRanges[type] || this._defaultRanges.natural;
-
-      if (!settings) {
-        return defaultRanges;
-      }
-
-      const prefix = type === 'natural' ? 'natural_' : 'lab_';
-      const keys = [
-        `${prefix}0_0_5`,
-        `${prefix}0_5_0_7`,
-        `${prefix}0_7_1`,
-        `${prefix}1_1_1`,
-        `${prefix}1_1_1_5`,
-        `${prefix}1_5_2`,
-        `${prefix}2_3`,
-        `${prefix}3_5`,
-        `${prefix}5_150`,
-      ];
-
-
-      const ranges = defaultRanges.map((range, index) => {
-        const settingKey = keys[index];
-        const settingValue = settings[settingKey];
-        const parsedValue = parseFloat(settingValue || '1.0');
-
-        // Use 1.0 (no markup) if the value is not a valid number
-        const multiplier = isNaN(parsedValue) ? 1.0 : parsedValue;
-
-
-        return {
-          ...range,
-          multiplier,
-        };
-      });
-
-
-
-      return ranges;
-    },
 
     // Get markup multiplier for a diamond based on its carat and type
     getMarkupMultiplier(carat, type, markupRanges) {
