@@ -10,12 +10,12 @@ if (typeof window !== 'undefined') {
     _defaultRanges: {
       natural: Array.from({ length: 50 }, (_, i) => ({
         min: i * 0.1,
-        max: i === 49 ? 5.0 : (i * 0.1) + 0.09,
+        max: i === 49 ? 5.0 : i * 0.1 + 0.09,
         multiplier: 1.0,
       })),
       lab: Array.from({ length: 50 }, (_, i) => ({
         min: i * 0.1,
-        max: i === 49 ? 5.0 : (i * 0.1) + 0.09,
+        max: i === 49 ? 5.0 : i * 0.1 + 0.09,
         multiplier: 1.0,
       })),
     },
@@ -29,37 +29,42 @@ if (typeof window !== 'undefined') {
     // Fetch markup intervals from the database API
     async fetchMarkupIntervals() {
       const now = Date.now();
-      
+
       // Use cache if it's still valid
-      if (this._markupIntervals && (now - this._lastFetch) < this._cacheTimeout) {
+      if (this._markupIntervals && now - this._lastFetch < this._cacheTimeout) {
         return this._markupIntervals;
       }
 
       try {
-        const response = await fetch('/apps/diamond-finder/api/markup-intervals');
+        const response = await fetch('/apps/api/markup-intervals');
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
-        
+
         const data = await response.json();
         this._markupIntervals = data;
         this._lastFetch = now;
-        
-        console.log('[DIAMOND PRICING] Loaded markup intervals from database:', {
-          natural: data.natural?.length || 0,
-          lab: data.lab?.length || 0,
-          fallback: data.fallback || false
-        });
-        
+
+        console.log(
+          '[DIAMOND PRICING] Loaded markup intervals from database:',
+          {
+            natural: data.natural?.length || 0,
+            lab: data.lab?.length || 0,
+            fallback: data.fallback || false,
+          }
+        );
+
         return this._markupIntervals;
       } catch (error) {
-        console.warn('[DIAMOND PRICING] Failed to fetch markup intervals from API:', error);
-        
+        console.warn(
+          '[DIAMOND PRICING] Failed to fetch markup intervals from API:',
+          error
+        );
+
         // Use defaults if API fails
         return this._defaultRanges;
       }
     },
-
 
     // Get markup multiplier for a diamond based on its carat and type
     getMarkupMultiplier(carat, type, markupRanges) {
@@ -111,7 +116,10 @@ if (typeof window !== 'undefined') {
         const diamondType = isLabGrown ? 'lab' : 'natural';
 
         // Get markup ranges for this diamond type
-        const markupRanges = intervals[diamondType] || intervals.natural || this._defaultRanges.natural;
+        const markupRanges =
+          intervals[diamondType] ||
+          intervals.natural ||
+          this._defaultRanges.natural;
 
         // Calculate final price if we have a base price in SEK
         if (diamond.totalPriceSek && diamond.carat) {
@@ -171,15 +179,19 @@ if (typeof window !== 'undefined') {
 
   // Test function to check markup calculation for debugging
   window.testMarkupCalculation = (carat, type) => {
-    return window.DiamondPricing.fetchMarkupIntervals().then(intervals => {
+    return window.DiamondPricing.fetchMarkupIntervals().then((intervals) => {
       const ranges = intervals[type] || intervals.natural;
-      const multiplier = window.DiamondPricing.getMarkupMultiplier(carat, type, ranges);
+      const multiplier = window.DiamondPricing.getMarkupMultiplier(
+        carat,
+        type,
+        ranges
+      );
       return {
         carat,
         type,
         multiplier,
         markupPercent: Math.round((multiplier - 1) * 100),
-        availableRanges: ranges.length
+        availableRanges: ranges.length,
       };
     });
   };
