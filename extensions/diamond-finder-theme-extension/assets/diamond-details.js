@@ -349,12 +349,36 @@ if (typeof window !== 'undefined') {
           label.className = 'tw-text-gray-600 tw-font-medium tw-text-sm';
           label.textContent = spec.label;
 
-          const value = document.createElement('span');
-          value.className = 'tw-text-gray-800 tw-text-sm';
-          value.textContent = spec.value;
+          // Check if this is the certificate number and we have a certificate URL
+          if (spec.label === 'CERTIFIKATNUMMER:' && spec.value !== 'Ej tillgänglig') {
+            const certificateLink = diamond.certificateUrl || diamond.certificatePath;
+            if (certificateLink) {
+              // Create a link for the certificate number
+              const value = document.createElement('a');
+              value.className = 'tw-text-gray-800 tw-text-sm tw-underline hover:tw-text-gray-600';
+              value.textContent = spec.value;
+              value.href = certificateLink;
+              value.target = '_blank';
+              value.rel = 'noopener noreferrer';
+              specRow.appendChild(label);
+              specRow.appendChild(value);
+            } else {
+              // No certificate link, render as normal text
+              const value = document.createElement('span');
+              value.className = 'tw-text-gray-800 tw-text-sm';
+              value.textContent = spec.value;
+              specRow.appendChild(label);
+              specRow.appendChild(value);
+            }
+          } else {
+            // Regular spec item
+            const value = document.createElement('span');
+            value.className = 'tw-text-gray-800 tw-text-sm';
+            value.textContent = spec.value;
+            specRow.appendChild(label);
+            specRow.appendChild(value);
+          }
 
-          specRow.appendChild(label);
-          specRow.appendChild(value);
           specsContainer.appendChild(specRow);
         });
       }
