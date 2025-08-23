@@ -1,10 +1,8 @@
 // Diamond Pricing Module - Client-side markup application
 if (typeof window !== 'undefined') {
   window.DiamondPricing = {
-    // Cache for markup intervals to avoid repeated processing
-    _markupIntervals: null,
-    _lastFetch: 0,
-    _cacheTimeout: 5 * 60 * 1000, // 5 minutes
+    // Store intervals for the current page session only (no persistent caching)
+    _currentIntervals: null,
 
     // Default markup ranges if API can't be reached
     _defaultRanges: {
@@ -20,33 +18,30 @@ if (typeof window !== 'undefined') {
       })),
     },
 
-    // Clear cache (useful for testing markup intervals changes)
+    // Clear cache (kept for compatibility but now just clears current intervals)
     clearCache() {
-      this._markupIntervals = null;
-      this._lastFetch = 0;
+      this._currentIntervals = null;
     },
 
-    // Fetch markup intervals from the database API
+    // Fetch markup intervals from the database API - once per page load
     async fetchMarkupIntervals() {
-      const now = Date.now();
-
-      // Use cache if it's still valid
-      if (this._markupIntervals && now - this._lastFetch < this._cacheTimeout) {
-        return this._markupIntervals;
+      // If we already have intervals for this page session, return them
+      if (this._currentIntervals) {
+        return this._currentIntervals;
       }
 
+      // Fetch fresh data on first call
       try {
-        const response = await fetch('/apps/api/markup-intervals');
+        const response = await fetch(`/apps/api/markup-intervals?t=${Date.now()}`);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        this._markupIntervals = data;
-        this._lastFetch = now;
+        this._currentIntervals = data;
 
         console.log(
-          '[DIAMOND PRICING] Loaded markup intervals from database:',
+          '[DIAMOND PRICING] Loaded fresh markup intervals from database:',
           {
             natural: data.natural?.length || 0,
             lab: data.lab?.length || 0,
@@ -54,7 +49,7 @@ if (typeof window !== 'undefined') {
           }
         );
 
-        return this._markupIntervals;
+        return this._currentIntervals;
       } catch (error) {
         console.warn(
           '[DIAMOND PRICING] Failed to fetch markup intervals from API:',
@@ -97,8 +92,11 @@ if (typeof window !== 'undefined') {
       const multiplier = this.getMarkupMultiplier(carat, type, markupRanges);
       const priceWithMarkup = basePriceSek * multiplier;
 
-      // Round to nearest 100 SEK
-      const finalPrice = Math.round(priceWithMarkup / 100) * 100;
+      // Only round to nearest 100 SEK if multiplier is not 1.0
+      // When multiplier is 1.0, return exact price
+      const finalPrice = multiplier === 1.0 
+        ? priceWithMarkup 
+        : Math.round(priceWithMarkup / 100) * 100;
 
       return finalPrice;
     },
@@ -123,6 +121,36 @@ if (typeof window !== 'undefined') {
 
         // Calculate final price if we have a base price in SEK
         if (diamond.totalPriceSek && diamond.carat) {
+          const multiplier = this.getMarkupMultiplier(
+            diamond.carat,
+            diamondType,
+            markupRanges
+          );
+          
+          // Find the specific range for this diamond
+          const specificRange = markupRanges.find((range, index) => {
+            const isLast = index === markupRanges.length - 1;
+            const inRange = isLast
+              ? diamond.carat >= range.min && diamond.carat <= range.max
+              : diamond.carat >= range.min && diamond.carat < range.max;
+            return inRange;
+          });
+          
+          // Log markup details for debugging
+          console.log('[MARKUP DEBUG]', {
+            itemId: diamond.itemId,
+            carat: diamond.carat,
+            type: diamondType,
+            totalPriceSek: diamond.totalPriceSek,
+            range: specificRange ? `${specificRange.min}-${specificRange.max}` : 'none',
+            multiplier: multiplier,
+            rangeMultiplier: specificRange?.multiplier || 'N/A',
+            priceWithMarkup: diamond.totalPriceSek * multiplier,
+            intervalsSource: intervals.fallback ? 'fallback' : 'database',
+            totalRanges: markupRanges.length,
+            firstFewRanges: markupRanges.slice(0, 5).map(r => `${r.min}-${r.max}: ${r.multiplier}`)
+          });
+          
           const finalPriceSek = this.calculateFinalPriceSek(
             diamond.totalPriceSek,
             diamond.carat,
@@ -137,11 +165,7 @@ if (typeof window !== 'undefined') {
             // Add debug info
             _debugInfo: {
               originalPrice: diamond.totalPriceSek,
-              multiplier: this.getMarkupMultiplier(
-                diamond.carat,
-                diamondType,
-                markupRanges
-              ),
+              multiplier: multiplier,
               diamondType,
               carat: diamond.carat,
               intervalsSource: intervals.fallback ? 'fallback' : 'database',

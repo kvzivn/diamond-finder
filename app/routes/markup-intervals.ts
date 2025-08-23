@@ -52,7 +52,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     return json(response, {
       headers: {
-        'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // No caching
+        'Pragma': 'no-cache',
+        'Expires': '0',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -78,7 +80,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       { 
         status: 200,
         headers: {
-          'Cache-Control': 'public, max-age=60', // Shorter cache for fallback
+          'Cache-Control': 'no-cache, no-store, must-revalidate', // No caching
+          'Pragma': 'no-cache',
+          'Expires': '0',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET',
           'Access-Control-Allow-Headers': 'Content-Type',

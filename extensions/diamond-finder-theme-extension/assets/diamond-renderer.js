@@ -109,27 +109,41 @@ if (typeof window !== 'undefined') {
 
       let imageElement;
 
-      if ((diamond.imagePath && diamond.imagePath.trim() !== '' && diamond.imagePath !== 'null') || (diamond.imageUrl && diamond.imageUrl.trim() !== '' && diamond.imageUrl !== 'null')) {
+      if (
+        (diamond.imagePath &&
+          diamond.imagePath.trim() !== '' &&
+          diamond.imagePath !== 'null') ||
+        (diamond.imageUrl &&
+          diamond.imageUrl.trim() !== '' &&
+          diamond.imageUrl !== 'null')
+      ) {
         // Use actual diamond image
         imageElement = document.createElement('img');
         imageElement.className =
           'tw-w-full tw-h-48 tw-object-contain tw-rounded-md tw-mb-4';
-        imageElement.src = (diamond.imagePath && diamond.imagePath.trim() !== '' && diamond.imagePath !== 'null') ? diamond.imagePath : diamond.imageUrl;
+        imageElement.src =
+          diamond.imagePath &&
+          diamond.imagePath.trim() !== '' &&
+          diamond.imagePath !== 'null'
+            ? diamond.imagePath
+            : diamond.imageUrl;
         imageElement.alt = `${carats}ct ${shape} ${displayType}`;
 
         // Handle broken images by falling back to SVG icon or placeholder
         imageElement.onerror = () => {
           const state = window.DiamondSearchState;
-          
+
           // If showNoImage is false (default), hide this diamond completely
           if (!state.showNoImage) {
-            const cardElement = imageElement.closest('.tw-flex.tw-flex-col.tw-bg-white.tw-border.tw-rounded-lg');
+            const cardElement = imageElement.closest(
+              '.tw-flex.tw-flex-col.tw-bg-white.tw-border.tw-rounded-lg'
+            );
             if (cardElement) {
               cardElement.style.display = 'none';
             }
             return;
           }
-          
+
           // Otherwise, show SVG fallback
           const parentContainer = imageElement.parentNode;
           if (parentContainer) {
@@ -197,6 +211,8 @@ if (typeof window !== 'undefined') {
         detailsData.push({ label: 'Polering:', value: diamond.polish });
       if (diamond.symmetry)
         detailsData.push({ label: 'Symmetri:', value: diamond.symmetry });
+      if (diamond.gradingLab)
+        detailsData.push({ label: 'Certifiering:', value: diamond.gradingLab });
       if (diamond.fluorescence)
         detailsData.push({
           label: 'Fluorescens:',
@@ -231,133 +247,187 @@ if (typeof window !== 'undefined') {
       const priceCertContainer = document.createElement('div');
       priceCertContainer.className = 'tw-flex tw-flex-col tw-space-y-2 tw-mb-1';
 
-      let originalPrice = 'Pris ej tillgängligt';
+      let priceWithMarkup = null;
       let finalPrice = 'Pris ej tillgängligt';
       let displayCurrency = 'SEK';
       let markupApplied = false;
+      let diamondWithMarkup = null;
 
       // Apply markup using the new pricing module
       if (window.DiamondPricing && diamond.totalPriceSek) {
         try {
-          const diamondWithMarkup =
+          diamondWithMarkup =
             await window.DiamondPricing.applyMarkupToDiamond(diamond);
-
-          // Round original price to nearest 100 SEK for consistency with markup price
-          const roundedOriginalPrice =
-            Math.round(diamond.totalPriceSek / 100) * 100;
-          originalPrice = roundedOriginalPrice
-            .toLocaleString('sv-SE')
-            .replace(/,/g, ' ');
 
           if (
             diamondWithMarkup.finalPriceSek &&
             diamondWithMarkup.finalPriceSek > 0
           ) {
-            finalPrice = diamondWithMarkup.finalPriceSek
-              .toLocaleString('sv-SE')
-              .replace(/,/g, ' ');
+            // Calculate the unrounded price with markup
+            if (
+              diamondWithMarkup._debugInfo &&
+              diamondWithMarkup._debugInfo.multiplier
+            ) {
+              priceWithMarkup =
+                diamond.totalPriceSek * diamondWithMarkup._debugInfo.multiplier;
+            } else {
+              priceWithMarkup = diamondWithMarkup.finalPriceSek;
+            }
+            // Round final price to nearest 100 SEK
+            finalPrice =
+              Math.round(diamondWithMarkup.finalPriceSek / 100) * 100;
             markupApplied = diamondWithMarkup.markupApplied;
           } else {
-            finalPrice = originalPrice; // Fallback to original price
+            // Fallback to original price, rounded
+            finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;
           }
         } catch (error) {
           console.warn(
             '[DIAMOND RENDERER] Error applying markup, using base price:',
             error
           );
-          // Fallback to base price for both
-          const roundedOriginalPrice =
-            Math.round(diamond.totalPriceSek / 100) * 100;
-          originalPrice = roundedOriginalPrice
-            .toLocaleString('sv-SE')
-            .replace(/,/g, ' ');
-          finalPrice = originalPrice;
+          // Fallback to base price, rounded
+          finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;
         }
       } else if (
         diamond.totalPriceSek !== null &&
         typeof diamond.totalPriceSek === 'number'
       ) {
-        // Fallback to base price if pricing module not available
-        const roundedOriginalPrice =
-          Math.round(diamond.totalPriceSek / 100) * 100;
-        originalPrice = roundedOriginalPrice
-          .toLocaleString('sv-SE')
-          .replace(/,/g, ' ');
-        finalPrice = originalPrice;
+        // Fallback to base price if pricing module not available, rounded
+        finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;
       } else if (
         diamond.totalPrice !== null &&
         typeof diamond.totalPrice === 'number'
       ) {
-        originalPrice = diamond.totalPrice.toLocaleString();
-        finalPrice = originalPrice;
+        finalPrice = diamond.totalPrice;
         displayCurrency = 'USD';
       }
 
-      // Original price row (always show if markup is applied)
-      if (markupApplied && originalPrice !== finalPrice) {
-        const originalPriceRow = document.createElement('div');
-        originalPriceRow.className =
-          'tw-flex tw-justify-between tw-items-center tw-text-sm';
+      // Add original USD price row for transparency/debugging
+      if (
+        diamond.totalPrice !== null &&
+        typeof diamond.totalPrice === 'number'
+      ) {
+        const usdPriceRow = document.createElement('div');
+        usdPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
 
-        const originalPriceLabel = document.createElement('span');
-        originalPriceLabel.className = 'tw-text-gray-500';
-        originalPriceLabel.textContent = 'Ursprungspris:';
+        const usdPriceLabel = document.createElement('span');
+        usdPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+        usdPriceLabel.textContent = 'Originalpris (USD):';
 
-        const originalPriceValue = document.createElement('span');
-        originalPriceValue.className = 'tw-text-gray-500';
-        originalPriceValue.textContent = `${originalPrice} ${displayCurrency}`;
+        const usdPriceValue = document.createElement('span');
+        usdPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+        usdPriceValue.textContent = `$${diamond.totalPrice.toLocaleString()}`;
 
-        originalPriceRow.appendChild(originalPriceLabel);
-        originalPriceRow.appendChild(originalPriceValue);
-        priceCertContainer.appendChild(originalPriceRow);
+        usdPriceRow.appendChild(usdPriceLabel);
+        usdPriceRow.appendChild(usdPriceValue);
+        priceCertContainer.appendChild(usdPriceRow);
       }
 
-      // Final price row (main price display)
-      const finalPriceRow = document.createElement('div');
-      finalPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
+      // Add converted SEK price row (non-rounded) for transparency
+      if (
+        diamond.totalPriceSek !== null &&
+        typeof diamond.totalPriceSek === 'number'
+      ) {
+        const sekConvertedRow = document.createElement('div');
+        sekConvertedRow.className =
+          'tw-flex tw-justify-between tw-items-center';
 
-      const finalPriceLabel = document.createElement('span');
-      finalPriceLabel.className = 'tw-text-sm tw-text-gray-700';
-      if (markupApplied && originalPrice !== finalPrice) {
-        finalPriceLabel.textContent = 'Slutpris:';
-      } else {
-        finalPriceLabel.textContent = 'Pris:';
+        const sekConvertedLabel = document.createElement('span');
+        sekConvertedLabel.className = 'tw-text-sm tw-text-gray-700';
+        sekConvertedLabel.textContent = 'SEK (konverterat):';
+
+        const sekConvertedValue = document.createElement('span');
+        sekConvertedValue.className =
+          'tw-text-lg tw-font-bold tw-text-gray-900';
+        // Display the exact converted value without rounding
+        sekConvertedValue.textContent = `${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`;
+
+        sekConvertedRow.appendChild(sekConvertedLabel);
+        sekConvertedRow.appendChild(sekConvertedValue);
+        priceCertContainer.appendChild(sekConvertedRow);
       }
 
-      const finalPriceValue = document.createElement('span');
-      finalPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
-      finalPriceValue.textContent = `${finalPrice} ${displayCurrency}`;
+      // Add price with markup (show even if multiplier is 1.0, to display exact value)
+      if (priceWithMarkup !== null) {
+        const markupPriceRow = document.createElement('div');
+        markupPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
 
-      // Add markup indicator if applicable
-      if (markupApplied && originalPrice !== finalPrice) {
-        const markupIndicator = document.createElement('span');
-        markupIndicator.className = 'tw-text-xs tw-text-green-600 tw-ml-1';
-        markupIndicator.textContent = '(markup)';
-        finalPriceValue.appendChild(markupIndicator);
+        const markupPriceLabel = document.createElement('span');
+        markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+
+        // Calculate markup percentage from the multiplier
+        let markupPercentage = 0;
+        if (
+          diamondWithMarkup &&
+          diamondWithMarkup._debugInfo &&
+          diamondWithMarkup._debugInfo.multiplier
+        ) {
+          markupPercentage = Math.round(
+            (diamondWithMarkup._debugInfo.multiplier - 1) * 100
+          );
+        }
+
+        // Display the markup percentage in the label
+        if (markupPercentage > 0) {
+          markupPriceLabel.textContent = `Efter påslag (${markupPercentage}%):`;
+        } else {
+          markupPriceLabel.textContent = 'Efter påslag (0%):';
+        }
+
+        const markupPriceValue = document.createElement('span');
+        markupPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+        markupPriceValue.textContent = `${priceWithMarkup.toFixed(2).replace('.', ',')} SEK`;
+
+        markupPriceRow.appendChild(markupPriceLabel);
+        markupPriceRow.appendChild(markupPriceValue);
+        priceCertContainer.appendChild(markupPriceRow);
+      } else if (
+        diamond.totalPriceSek !== null &&
+        typeof diamond.totalPriceSek === 'number'
+      ) {
+        // If no markup was applied, still show the exact value as "Efter påslag"
+        const markupPriceRow = document.createElement('div');
+        markupPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
+
+        const markupPriceLabel = document.createElement('span');
+        markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+        markupPriceLabel.textContent = 'Efter påslag (0%):';
+
+        const markupPriceValue = document.createElement('span');
+        markupPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+        markupPriceValue.textContent = `${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`;
+
+        markupPriceRow.appendChild(markupPriceLabel);
+        markupPriceRow.appendChild(markupPriceValue);
+        priceCertContainer.appendChild(markupPriceRow);
       }
 
-      finalPriceRow.appendChild(finalPriceLabel);
-      finalPriceRow.appendChild(finalPriceValue);
-      priceCertContainer.appendChild(finalPriceRow);
+      // Final price row (rounded to nearest 100)
+      if (
+        typeof finalPrice === 'number' ||
+        finalPrice !== 'Pris ej tillgängligt'
+      ) {
+        const finalPriceRow = document.createElement('div');
+        finalPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
 
-      // Certification row
-      const certificationRow = document.createElement('div');
-      certificationRow.className =
-        'tw-flex tw-justify-between tw-items-center tw-text-sm';
+        const finalPriceLabel = document.createElement('span');
+        finalPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+        finalPriceLabel.textContent = 'Slutpris (avrundat):';
 
-      const certificationLabel = document.createElement('span');
-      certificationLabel.className = 'tw-text-gray-700';
-      certificationLabel.textContent = 'Certifiering:';
+        const finalPriceValue = document.createElement('span');
+        finalPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
 
-      const certificationValue = document.createElement('span');
-      certificationValue.className = 'tw-text-gray-800';
-      certificationValue.textContent = diamond.gradingLab
-        ? `${diamond.gradingLab}`
-        : 'Ej tillgänglig';
+        if (typeof finalPrice === 'number') {
+          finalPriceValue.textContent = `${finalPrice.toLocaleString('sv-SE').replace(/,/g, ' ')} ${displayCurrency}`;
+        } else {
+          finalPriceValue.textContent = finalPrice;
+        }
 
-      certificationRow.appendChild(certificationLabel);
-      certificationRow.appendChild(certificationValue);
-      priceCertContainer.appendChild(certificationRow);
+        finalPriceRow.appendChild(finalPriceLabel);
+        finalPriceRow.appendChild(finalPriceValue);
+        priceCertContainer.appendChild(finalPriceRow);
+      }
 
       // Add to cart button
       // const addButton = document.createElement('button');
@@ -375,7 +445,6 @@ if (typeof window !== 'undefined') {
 
       return diamondCard;
     },
-
 
     // Main render function
     async renderDiamonds(diamondsToRender) {
@@ -408,9 +477,15 @@ if (typeof window !== 'undefined') {
         // Default: Only show diamonds with images
         validPriceDiamonds = validPriceDiamonds.filter((diamond) => {
           // Check for non-empty strings, not just existence, and exclude "null" strings
-          const hasImagePath = diamond.imagePath && diamond.imagePath.trim() !== '' && diamond.imagePath !== 'null';
-          const hasImageUrl = diamond.imageUrl && diamond.imageUrl.trim() !== '' && diamond.imageUrl !== 'null';
-          
+          const hasImagePath =
+            diamond.imagePath &&
+            diamond.imagePath.trim() !== '' &&
+            diamond.imagePath !== 'null';
+          const hasImageUrl =
+            diamond.imageUrl &&
+            diamond.imageUrl.trim() !== '' &&
+            diamond.imageUrl !== 'null';
+
           return hasImagePath || hasImageUrl;
         });
       }
@@ -421,12 +496,20 @@ if (typeof window !== 'undefined') {
         const beforeFilterCount = validPriceDiamonds.length;
         validPriceDiamonds = validPriceDiamonds.filter((diamond) => {
           // Check for non-empty strings, not just existence, and exclude "null" strings
-          const hasVideoUrl = diamond.videoUrl && diamond.videoUrl.trim() !== '' && diamond.videoUrl !== 'null';
-          const has3DViewerUrl = diamond.threeDViewerUrl && diamond.threeDViewerUrl.trim() !== '' && diamond.threeDViewerUrl !== 'null';
-          
+          const hasVideoUrl =
+            diamond.videoUrl &&
+            diamond.videoUrl.trim() !== '' &&
+            diamond.videoUrl !== 'null';
+          const has3DViewerUrl =
+            diamond.threeDViewerUrl &&
+            diamond.threeDViewerUrl.trim() !== '' &&
+            diamond.threeDViewerUrl !== 'null';
+
           return hasVideoUrl || has3DViewerUrl;
         });
-        console.log(`[MEDIA FILTER] Filtered from ${beforeFilterCount} to ${validPriceDiamonds.length} diamonds with 3D/video`);
+        console.log(
+          `[MEDIA FILTER] Filtered from ${beforeFilterCount} to ${validPriceDiamonds.length} diamonds with 3D/video`
+        );
       }
 
       // Sort diamonds
@@ -468,7 +551,10 @@ if (typeof window !== 'undefined') {
         let filterNotes = [];
         if (!state.showNoImage) filterNotes.push('med bild');
         if (!state.showNoMedia) filterNotes.push('med 3D/video');
-        const filterNote = filterNotes.length > 0 ? ` (endast ${filterNotes.join(' och ')})` : '';
+        const filterNote =
+          filterNotes.length > 0
+            ? ` (endast ${filterNotes.join(' och ')})`
+            : '';
         resultsCountEl.textContent = `Visar ${displayedCount} av ${currentlyShown} hämtade${filterNote}`;
       } else if (resultsCountEl) {
         resultsCountEl.textContent = `${displayedCount} diamanter`;

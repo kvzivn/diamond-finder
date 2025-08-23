@@ -2,21 +2,11 @@ import prisma from '../db.server';
 import type { DiamondType } from '../models/diamond.server';
 import type { CaratRange } from './diamond-pricing.server';
 
-let intervalCache: Map<DiamondType, CaratRange[]> = new Map();
-let lastCacheUpdate = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 /**
  * Fetches markup intervals from database for a specific diamond type
+ * No caching - always returns fresh data from database
  */
 export async function getMarkupIntervals(type: DiamondType): Promise<CaratRange[]> {
-  const now = Date.now();
-  
-  // Use cache if it's still valid
-  if (intervalCache.has(type) && (now - lastCacheUpdate) < CACHE_TTL) {
-    return intervalCache.get(type)!;
-  }
-
   try {
     const intervals = await prisma.markupInterval.findMany({
       where: { type },
@@ -29,11 +19,7 @@ export async function getMarkupIntervals(type: DiamondType): Promise<CaratRange[
       multiplier: interval.multiplier,
     }));
 
-    // Update cache
-    intervalCache.set(type, caratRanges);
-    lastCacheUpdate = now;
-
-    console.log(`[MARKUP INTERVALS] Loaded ${caratRanges.length} intervals for ${type} diamonds`);
+    console.log(`[MARKUP INTERVALS] Loaded ${caratRanges.length} fresh intervals for ${type} diamonds`);
     return caratRanges;
   } catch (error) {
     console.error(`[MARKUP INTERVALS] Error fetching intervals for ${type}:`, error);
@@ -44,12 +30,11 @@ export async function getMarkupIntervals(type: DiamondType): Promise<CaratRange[
 }
 
 /**
- * Clears the interval cache - call this after updating intervals
+ * Clears the interval cache - kept for compatibility but no longer needed
+ * since we don't cache anymore
  */
 export function clearIntervalCache(): void {
-  intervalCache.clear();
-  lastCacheUpdate = 0;
-  console.log('[MARKUP INTERVALS] Cache cleared');
+  console.log('[MARKUP INTERVALS] Cache clear called (no-op - caching removed)');
 }
 
 /**
