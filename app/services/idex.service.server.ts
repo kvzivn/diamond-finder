@@ -117,6 +117,43 @@ const LAB_GROWN_DIAMOND_HEADERS = [
   '3DViewer URL',
 ];
 
+// Robust CSV parser that handles quoted fields with commas
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+  
+  while (i < line.length) {
+    const char = line[i];
+    
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        // Escaped quote inside quoted field
+        current += '"';
+        i += 2;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+        i++;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator outside quotes
+      result.push(current.trim());
+      current = '';
+      i++;
+    } else {
+      // Regular character
+      current += char;
+      i++;
+    }
+  }
+  
+  // Add the last field
+  result.push(current.trim());
+  return result;
+}
+
 // Helper to convert header names to camelCase Diamond interface keys
 function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
   // Specific mappings for clarity and consistency
@@ -211,7 +248,7 @@ function parseCSV(csvString: string, headers: string[]): Diamond[] {
 
   return lines
     .map((line) => {
-      const values = line.split(',');
+      const values = parseCSVLine(line);
       const diamond: Partial<Diamond> = {};
 
       headers.forEach((header, index) => {
@@ -623,7 +660,7 @@ export async function* fetchDiamondsStream(
       break;
     }
     processedCount++;
-    const values = line.split(',');
+    const values = parseCSVLine(line);
     const diamond: Partial<Diamond> = {};
 
     headers.forEach((header, index) => {
