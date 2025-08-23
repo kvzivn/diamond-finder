@@ -250,7 +250,6 @@ if (typeof window !== 'undefined') {
       let priceWithMarkup = null;
       let finalPrice = 'Pris ej tillgängligt';
       let displayCurrency = 'SEK';
-      let markupApplied = false;
       let diamondWithMarkup = null;
 
       // Apply markup using the new pricing module
@@ -276,7 +275,6 @@ if (typeof window !== 'undefined') {
             // Round final price to nearest 100 SEK
             finalPrice =
               Math.round(diamondWithMarkup.finalPriceSek / 100) * 100;
-            markupApplied = diamondWithMarkup.markupApplied;
           } else {
             // Fallback to original price, rounded
             finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;

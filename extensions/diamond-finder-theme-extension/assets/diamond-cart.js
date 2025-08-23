@@ -255,51 +255,74 @@ if (typeof window !== 'undefined') {
     updateCartCounterWithCartData(cart) {
       console.log('[DIAMOND CART] Updating cart counter with cart data:', cart);
       
-      // Check if cart-count-bubble exists, create it if it doesn't
-      let cartCountBubble = document.querySelector('.cart-count-bubble');
+      const cartIcon = document.getElementById('cart-icon-bubble');
+      if (!cartIcon) {
+        console.warn('[DIAMOND CART] Cart icon not found');
+        return;
+      }
       
-      if (!cartCountBubble && cart.item_count > 0) {
-        // Create the cart count bubble if it doesn't exist
-        console.log('[DIAMOND CART] Cart count bubble not found, creating it');
-        
-        const cartIcon = document.getElementById('cart-icon-bubble');
-        if (cartIcon) {
+      // Check if cart-count-bubble exists
+      let cartCountBubble = cartIcon.querySelector('.cart-count-bubble');
+      
+      if (cart.item_count > 0) {
+        if (!cartCountBubble) {
+          // Create the cart count bubble if it doesn't exist
+          console.log('[DIAMOND CART] Cart count bubble not found, creating it');
+          
           cartCountBubble = document.createElement('div');
           cartCountBubble.className = 'cart-count-bubble';
           cartCountBubble.innerHTML = `<span aria-hidden="true">${cart.item_count}</span><span class="visually-hidden">${cart.item_count} item${cart.item_count !== 1 ? 's' : ''}</span>`;
           cartIcon.appendChild(cartCountBubble);
           console.log('[DIAMOND CART] Created cart count bubble');
+        } else {
+          // Update existing cart count bubble
+          console.log('[DIAMOND CART] Found existing cart count bubble, updating');
+          const visibleSpan = cartCountBubble.querySelector('span[aria-hidden="true"]');
+          const hiddenSpan = cartCountBubble.querySelector('span.visually-hidden');
           
-          // Also update the cart icon SVG from empty to filled
-          const emptyCartIcon = cartIcon.querySelector('.icon-cart-empty');
-          if (emptyCartIcon) {
-            emptyCartIcon.classList.remove('icon-cart-empty');
-            emptyCartIcon.classList.add('icon-cart');
+          if (visibleSpan) {
+            visibleSpan.textContent = cart.item_count;
+          }
+          if (hiddenSpan) {
+            hiddenSpan.textContent = `${cart.item_count} item${cart.item_count !== 1 ? 's' : ''}`;
+          }
+        }
+        
+        // Update cart icon SVG from empty to filled state
+        const cartIconSvg = cartIcon.querySelector('svg.icon');
+        if (cartIconSvg) {
+          // Change from empty cart to filled cart icon
+          if (cartIconSvg.classList.contains('icon-cart-empty')) {
+            cartIconSvg.classList.remove('icon-cart-empty');
+            cartIconSvg.classList.add('icon-cart');
+            
             // Update the SVG path for filled cart icon
-            const path = emptyCartIcon.querySelector('path');
+            const path = cartIconSvg.querySelector('path');
             if (path) {
-              path.setAttribute('d', 'M20.5 6.5a4.75 4.75 0 00-4.75 4.75v.56h-3.16l-.77 11.6a5 5 0 004.99 5.34h7.38a5 5 0 004.99-5.33l-.77-11.6h-3.16v-.57A4.75 4.75 0 0020.5 6.5zm3.75 5.31v-.56a3.75 3.75 0 10-7.5 0v.56h7.5zm-7.5 1h7.5v.56a3.75 3.75 0 11-7.5 0v-.56zm-1 0v.56a4.75 4.75 0 109.5 0v-.56h2.22l.71 10.67a4 4 0 01-3.99 4.27h-7.38a4 4 0 01-4-4.27l.72-10.67h2.22z');
+              path.setAttribute('fill-rule', 'evenodd');
+              path.setAttribute('d', 'M20.5 6.5a4.75 4.75 0 0 0-4.75 4.75v.56h-3.16l-.77 11.6a5 5 0 0 0 4.99 5.34h7.38a5 5 0 0 0 4.99-5.33l-.77-11.6h-3.16v-.57A4.75 4.75 0 0 0 20.5 6.5m3.75 5.31v-.56a3.75 3.75 0 1 0-7.5 0v.56zm-7.5 1h7.5v.56a3.75 3.75 0 1 1-7.5 0zm-1 0v.56a4.75 4.75 0 1 0 9.5 0v-.56h2.22l.71 10.67a4 4 0 0 1-3.99 4.27h-7.38a4 4 0 0 1-4-4.27l.72-10.67z');
               console.log('[DIAMOND CART] Updated cart icon to filled state');
             }
           }
         }
-      } else if (cartCountBubble) {
-        // Update existing cart count bubble
-        console.log('[DIAMOND CART] Found existing cart count bubble, updating');
-        const cartCounterSpans = cartCountBubble.querySelectorAll('span');
-        console.log(`[DIAMOND CART] Found ${cartCounterSpans.length} cart counter spans`);
+      } else if (cart.item_count === 0 && cartCountBubble) {
+        // Remove cart count bubble when cart is empty
+        cartCountBubble.remove();
+        console.log('[DIAMOND CART] Removed cart count bubble (cart empty)');
         
-        cartCounterSpans.forEach((span, index) => {
-          const oldValue = span.textContent;
-          if (index === 0) {
-            // First span: just the number
-            span.textContent = cart.item_count;
-          } else {
-            // Second span: "X item(s)"
-            span.textContent = `${cart.item_count} item${cart.item_count !== 1 ? 's' : ''}`;
+        // Update cart icon SVG back to empty state
+        const cartIconSvg = cartIcon.querySelector('svg.icon');
+        if (cartIconSvg && cartIconSvg.classList.contains('icon-cart')) {
+          cartIconSvg.classList.remove('icon-cart');
+          cartIconSvg.classList.add('icon-cart-empty');
+          
+          // Update the SVG path for empty cart icon
+          const path = cartIconSvg.querySelector('path');
+          if (path) {
+            path.setAttribute('d', 'M15.75 11.8h-3.16l-.77 11.6a5 5 0 0 0 4.99 5.34h7.38a5 5 0 0 0 4.99-5.33L28.4 11.8zm0 1h-2.22l-.71 10.67a4 4 0 0 0 3.99 4.27h7.38a4 4 0 0 0 4-4.27l-.72-10.67h-2.22v.63a4.75 4.75 0 1 1-9.5 0zm8.5 0h-7.5v.63a3.75 3.75 0 1 0 7.5 0z');
+            console.log('[DIAMOND CART] Updated cart icon to empty state');
           }
-          console.log(`[DIAMOND CART] Updated cart counter span ${index}: ${oldValue} → ${span.textContent}`);
-        });
+        }
       }
       
       console.log(`[DIAMOND CART] Cart counter updated to: ${cart.item_count}`);

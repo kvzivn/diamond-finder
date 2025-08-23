@@ -2,7 +2,7 @@ import type { ActionFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { authenticate } from '../shopify.server';
 
-const DIAMOND_PRODUCT_ID = 'gid://shopify/Product/10209833189703';
+const DIAMOND_PRODUCT_ID = 'gid://shopify/Product/10332690252122';
 
 export async function action({ request }: ActionFunctionArgs) {
   if (request.method !== 'POST') {
@@ -177,8 +177,7 @@ export async function action({ request }: ActionFunctionArgs) {
         mediaContentType: 'IMAGE'
       });
       
-      // Associate the media with the variant
-      variantInput.mediaSrc = [realImageUrl];
+      // Media is associated via the media array parameter
       
       console.log(`Creating variant with image: ${realImageUrl}`);
     } else {
