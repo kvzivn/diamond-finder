@@ -57,6 +57,8 @@ model Diamond {
   pricePerCarat               Float?
   totalPrice                  Float?
   totalPriceSek               Float?
+  priceWithMarkupSek          Float?
+  finalPriceSek               Float?
   percentOffIdexList          Float?
   polish                      String?
   symmetry                    String?
@@ -106,6 +108,8 @@ model Diamond {
   @@index([cut])
   @@index([totalPrice])
   @@index([totalPriceSek])
+  @@index([priceWithMarkupSek])
+  @@index([finalPriceSek])
   @@index([carat])
   @@index([color])
   @@index([clarity])

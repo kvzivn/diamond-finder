@@ -55,7 +55,7 @@ export async function getDiamondsByType(
       where: { type },
       skip: offset,
       take: limit,
-      orderBy: { totalPrice: 'asc' },
+      orderBy: { finalPriceSek: 'asc' },
     }),
     prisma.diamond.count({ where: { type } }),
   ]);
@@ -79,19 +79,18 @@ export async function getFilteredDiamonds(
   }
 
   // Price filters (prioritize SEK over USD) - always exclude diamonds with null prices
-  // Note: We adjust price filters to account for markup multipliers (max 1.5x)
-  // Since finalPriceSek = totalPriceSek * multiplier, we need to be conservative
+  // Now using finalPriceSek which already has markup applied
   if (filters.minPriceSek !== undefined || filters.maxPriceSek !== undefined) {
-    where.totalPriceSek = {
+    where.finalPriceSek = {
       not: null, // Exclude diamonds with null prices
     };
     if (filters.minPriceSek !== undefined) {
-      // Divide by max multiplier (1.5) to ensure we don't exclude diamonds that would pass after markup
-      where.totalPriceSek.gte = Math.floor(filters.minPriceSek / 1.5);
+      // Direct comparison - no adjustment needed since finalPriceSek already has markup
+      where.finalPriceSek.gte = filters.minPriceSek;
     }
     if (filters.maxPriceSek !== undefined) {
-      // No adjustment needed for max price - totalPriceSek should be <= maxPrice even before markup
-      where.totalPriceSek.lte = filters.maxPriceSek;
+      // Direct comparison - no adjustment needed
+      where.finalPriceSek.lte = filters.maxPriceSek;
     }
   } else if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     where.totalPrice = {
@@ -105,11 +104,11 @@ export async function getFilteredDiamonds(
     }
   } else {
     // Even when no explicit price filters are applied, exclude diamonds with null prices
-    // Prioritize SEK prices, fallback to USD prices, but exclude completely null diamonds
+    // Prioritize finalPriceSek (which includes markup), fallback to USD prices
     where.OR = [
-      { totalPriceSek: { not: null } },
+      { finalPriceSek: { not: null } },
       {
-        AND: [{ totalPriceSek: null }, { totalPrice: { not: null } }],
+        AND: [{ finalPriceSek: null }, { totalPrice: { not: null } }],
       },
     ];
   }
@@ -814,7 +813,7 @@ export async function getFilteredDiamonds(
       where,
       skip: offset,
       take: limit,
-      orderBy: { totalPrice: 'asc' },
+      orderBy: { finalPriceSek: 'asc' },
     }),
     prisma.diamond.count({ where }),
   ]);

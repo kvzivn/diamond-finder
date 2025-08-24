@@ -33,15 +33,15 @@ if (typeof window !== 'undefined') {
       switch (sortType) {
         case 'price-low-high':
           return diamondsCopy.sort((a, b) => {
-            const priceA = a.totalPriceSek || a.totalPrice || 0;
-            const priceB = b.totalPriceSek || b.totalPrice || 0;
+            const priceA = a.finalPriceSek || a.totalPriceSek || a.totalPrice || 0;
+            const priceB = b.finalPriceSek || b.totalPriceSek || b.totalPrice || 0;
             return priceA - priceB;
           });
 
         case 'price-high-low':
           return diamondsCopy.sort((a, b) => {
-            const priceA = a.totalPriceSek || a.totalPrice || 0;
-            const priceB = b.totalPriceSek || b.totalPrice || 0;
+            const priceA = a.finalPriceSek || a.totalPriceSek || a.totalPrice || 0;
+            const priceB = b.finalPriceSek || b.totalPriceSek || b.totalPrice || 0;
             return priceB - priceA;
           });
 
@@ -250,48 +250,21 @@ if (typeof window !== 'undefined') {
       let priceWithMarkup = null;
       let finalPrice = 'Pris ej tillgängligt';
       let displayCurrency = 'SEK';
-      let diamondWithMarkup = null;
 
-      // Apply markup using the new pricing module
-      if (window.DiamondPricing && diamond.totalPriceSek) {
-        try {
-          diamondWithMarkup =
-            await window.DiamondPricing.applyMarkupToDiamond(diamond);
-
-          if (
-            diamondWithMarkup.finalPriceSek &&
-            diamondWithMarkup.finalPriceSek > 0
-          ) {
-            // Calculate the unrounded price with markup
-            if (
-              diamondWithMarkup._debugInfo &&
-              diamondWithMarkup._debugInfo.multiplier
-            ) {
-              priceWithMarkup =
-                diamond.totalPriceSek * diamondWithMarkup._debugInfo.multiplier;
-            } else {
-              priceWithMarkup = diamondWithMarkup.finalPriceSek;
-            }
-            // Round final price to nearest 100 SEK
-            finalPrice =
-              Math.round(diamondWithMarkup.finalPriceSek / 100) * 100;
-          } else {
-            // Fallback to original price, rounded
-            finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;
-          }
-        } catch (error) {
-          console.warn(
-            '[DIAMOND RENDERER] Error applying markup, using base price:',
-            error
-          );
-          // Fallback to base price, rounded
-          finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;
+      // Use server-calculated prices if available
+      if (diamond.finalPriceSek !== null && typeof diamond.finalPriceSek === 'number') {
+        // Server already calculated and rounded the final price
+        finalPrice = diamond.finalPriceSek;
+        
+        // Use priceWithMarkupSek for display of unrounded price
+        if (diamond.priceWithMarkupSek !== null && typeof diamond.priceWithMarkupSek === 'number') {
+          priceWithMarkup = diamond.priceWithMarkupSek;
         }
       } else if (
         diamond.totalPriceSek !== null &&
         typeof diamond.totalPriceSek === 'number'
       ) {
-        // Fallback to base price if pricing module not available, rounded
+        // Fallback to base price if new fields not available, rounded
         finalPrice = Math.round(diamond.totalPriceSek / 100) * 100;
       } else if (
         diamond.totalPrice !== null &&
@@ -354,16 +327,11 @@ if (typeof window !== 'undefined') {
         const markupPriceLabel = document.createElement('span');
         markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
 
-        // Calculate markup percentage from the multiplier
+        // Calculate markup percentage from server values
         let markupPercentage = 0;
-        if (
-          diamondWithMarkup &&
-          diamondWithMarkup._debugInfo &&
-          diamondWithMarkup._debugInfo.multiplier
-        ) {
-          markupPercentage = Math.round(
-            (diamondWithMarkup._debugInfo.multiplier - 1) * 100
-          );
+        if (diamond.priceWithMarkupSek && diamond.totalPriceSek && diamond.totalPriceSek > 0) {
+          const multiplier = diamond.priceWithMarkupSek / diamond.totalPriceSek;
+          markupPercentage = Math.round((multiplier - 1) * 100);
         }
 
         // Display the markup percentage in the label
@@ -470,52 +438,8 @@ if (typeof window !== 'undefined') {
         return hasValidPrice;
       });
 
-      // Apply client-side finalPriceSek filtering
-      const priceSliderEl = document.getElementById('ds-price-slider');
-      if (priceSliderEl && priceSliderEl.noUiSlider) {
-        const priceValues = priceSliderEl.noUiSlider.get();
-        if (priceValues && priceValues.length === 2) {
-          const minPrice = parseFloat(String(priceValues[0]).replace(/\s/g, ''));
-          const maxPrice = parseFloat(String(priceValues[1]).replace(/\s/g, ''));
-          
-          if (!isNaN(minPrice) || !isNaN(maxPrice)) {
-            const beforePriceFilterCount = validPriceDiamonds.length;
-            validPriceDiamonds = await Promise.all(
-              validPriceDiamonds.map(async (diamond) => {
-                try {
-                  // Calculate finalPriceSek with markup
-                  let finalPriceSek = diamond.totalPriceSek;
-                  if (window.DiamondPricing && diamond.totalPriceSek) {
-                    const diamondWithMarkup = await window.DiamondPricing.applyMarkupToDiamond(diamond);
-                    if (diamondWithMarkup.finalPriceSek && diamondWithMarkup.finalPriceSek > 0) {
-                      finalPriceSek = diamondWithMarkup.finalPriceSek;
-                    }
-                  }
-                  
-                  // Apply price filters
-                  let passesFilter = true;
-                  if (!isNaN(minPrice) && finalPriceSek < minPrice) {
-                    passesFilter = false;
-                  }
-                  if (!isNaN(maxPrice) && finalPriceSek > maxPrice) {
-                    passesFilter = false;
-                  }
-                  
-                  return passesFilter ? diamond : null;
-                } catch (error) {
-                  console.warn('[DIAMOND RENDERER] Error filtering by finalPriceSek:', error);
-                  return diamond; // Keep diamond if error occurs
-                }
-              })
-            );
-            
-            // Remove null entries
-            validPriceDiamonds = validPriceDiamonds.filter(diamond => diamond !== null);
-            
-            console.log(`[PRICE FILTER] Filtered from ${beforePriceFilterCount} to ${validPriceDiamonds.length} diamonds based on finalPriceSek`);
-          }
-        }
-      }
+      // Price filtering now happens server-side with finalPriceSek
+      // No client-side filtering needed
 
       // Apply image filter based on checkbox state
       if (!state.showNoImage) {

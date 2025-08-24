@@ -1198,11 +1198,6 @@ video {
   line-height: 1.25rem;
 }
 
-.tw-text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
 .tw-text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
@@ -1253,11 +1248,6 @@ video {
 .tw-text-gray-900 {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
-}
-
-.tw-text-green-600 {
-  --tw-text-opacity: 1;
-  color: rgb(22 163 74 / var(--tw-text-opacity, 1));
 }
 
 .tw-text-red-600 {

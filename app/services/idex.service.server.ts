@@ -1,6 +1,8 @@
 import JSZip from 'jszip';
 import type { Diamond, DiamondType } from '../models/diamond.server';
 import { saveExchangeRate } from './diamond-db.server';
+import { getMarkupIntervals } from './markup-intervals.server';
+import { getMarkupMultiplier } from './diamond-pricing.server';
 
 const IDEX_API_BASE_URL = 'https://api.idexonline.com/onsite/api';
 
@@ -421,20 +423,49 @@ export async function fetchDiamondsFromApi(
     );
   }
 
-  // Fetch exchange rate and convert prices to SEK
+  // Fetch exchange rate and markup intervals, then convert prices to SEK with markup
   try {
     const exchangeRate = await getUsdToSekExchangeRate();
-
-    // Convert USD prices to SEK (base prices without markup)
+    
+    // Fetch markup intervals for both types
+    const [naturalIntervals, labIntervals] = await Promise.all([
+      getMarkupIntervals('natural'),
+      getMarkupIntervals('lab'),
+    ]);
+    
     console.log(
-      `[IDEX SERVICE] Converting USD prices to SEK for ${diamonds.length} ${type} diamonds...`
+      `[IDEX SERVICE] Fetched markup intervals - Natural: ${naturalIntervals.length}, Lab: ${labIntervals.length}`
+    );
+
+    // Convert USD prices to SEK with markup applied
+    console.log(
+      `[IDEX SERVICE] Converting USD prices to SEK with markup for ${diamonds.length} ${type} diamonds...`
     );
 
     diamonds = diamonds.map((diamond, index) => {
-      const diamondWithSek = { ...diamond };
+      const diamondWithPricing = { ...diamond };
+      
       if (typeof diamond.totalPrice === 'number') {
-        // Convert USD to SEK without markup (markup will be applied on client side)
-        diamondWithSek.totalPriceSek = diamond.totalPrice * exchangeRate;
+        // Step 1: Convert USD to SEK
+        diamondWithPricing.totalPriceSek = diamond.totalPrice * exchangeRate;
+        
+        // Step 2: Determine diamond type (check for lab-grown indicators)
+        const isLabGrown = (diamond as any)._shouldBeLabType || 
+          type === 'lab' ||
+          (diamond.certificateNumber && diamond.certificateNumber.toUpperCase().includes('LG'));
+        const diamondType = isLabGrown ? 'lab' : 'natural';
+        const markupRanges = diamondType === 'lab' ? labIntervals : naturalIntervals;
+        
+        // Step 3: Apply markup if we have carat weight
+        if (diamond.carat && markupRanges.length > 0) {
+          const multiplier = getMarkupMultiplier(diamond.carat, diamondType, markupRanges);
+          diamondWithPricing.priceWithMarkupSek = diamondWithPricing.totalPriceSek * multiplier;
+          diamondWithPricing.finalPriceSek = Math.round(diamondWithPricing.priceWithMarkupSek / 100) * 100;
+        } else {
+          // No markup if no carat or no intervals
+          diamondWithPricing.priceWithMarkupSek = diamondWithPricing.totalPriceSek;
+          diamondWithPricing.finalPriceSek = Math.round(diamondWithPricing.totalPriceSek / 100) * 100;
+        }
       }
 
       // Progress indicator every 5000 diamonds
@@ -444,15 +475,15 @@ export async function fetchDiamondsFromApi(
         );
       }
 
-      return diamondWithSek;
+      return diamondWithPricing;
     });
 
     console.log(
-      `[IDEX SERVICE] Applied USD to SEK conversion for ${diamonds.length} diamonds using exchange rate: ${exchangeRate}`
+      `[IDEX SERVICE] Applied USD to SEK conversion with markup for ${diamonds.length} diamonds using exchange rate: ${exchangeRate}`
     );
   } catch (error) {
     console.error(
-      '[IDEX SERVICE] Failed to fetch exchange rate or apply currency conversion. Proceeding with USD prices only.',
+      '[IDEX SERVICE] Failed to fetch exchange rate/markup intervals or apply pricing. Proceeding with USD prices only.',
       error
     );
     // Continue without SEK conversion - diamonds will only have USD prices
@@ -589,14 +620,26 @@ export async function* fetchDiamondsStream(
   console.log(`Found CSV file in ZIP: ${csvFile.name}`);
   const csvString = await csvFile.async('string');
 
-  // Get exchange rate first
+  // Get exchange rate and markup intervals first
   let exchangeRate: number | null = null;
+  let naturalIntervals: any[] = [];
+  let labIntervals: any[] = [];
+  
   try {
     exchangeRate = await getUsdToSekExchangeRate();
     console.log(`[IDEX SERVICE] Using exchange rate: ${exchangeRate}`);
+    
+    // Fetch markup intervals
+    [naturalIntervals, labIntervals] = await Promise.all([
+      getMarkupIntervals('natural'),
+      getMarkupIntervals('lab'),
+    ]);
+    console.log(
+      `[IDEX SERVICE] Fetched markup intervals - Natural: ${naturalIntervals.length}, Lab: ${labIntervals.length}`
+    );
   } catch (error) {
     console.error(
-      '[IDEX SERVICE] Failed to fetch exchange rate. Proceeding without SEK conversion.',
+      '[IDEX SERVICE] Failed to fetch exchange rate or markup intervals. Proceeding without SEK conversion.',
       error
     );
   }
@@ -698,10 +741,28 @@ export async function* fetchDiamondsStream(
       labGrownInNaturalCount++;
     }
 
-    // Apply exchange rate conversion (base prices without markup)
+    // Apply exchange rate conversion and markup
     if (exchangeRate && typeof diamond.totalPrice === 'number') {
-      // Convert USD to SEK without markup (markup will be applied on client side)
+      // Step 1: Convert USD to SEK
       diamond.totalPriceSek = diamond.totalPrice * exchangeRate;
+      
+      // Step 2: Determine diamond type
+      const isLabGrown = (diamond as any)._shouldBeLabType || 
+        type === 'lab' ||
+        (diamond.certificateNumber && diamond.certificateNumber.toUpperCase().includes('LG'));
+      const diamondType = isLabGrown ? 'lab' : 'natural';
+      const markupRanges = diamondType === 'lab' ? labIntervals : naturalIntervals;
+      
+      // Step 3: Apply markup if we have carat weight
+      if (diamond.carat && markupRanges.length > 0) {
+        const multiplier = getMarkupMultiplier(diamond.carat, diamondType, markupRanges);
+        diamond.priceWithMarkupSek = diamond.totalPriceSek * multiplier;
+        diamond.finalPriceSek = Math.round(diamond.priceWithMarkupSek / 100) * 100;
+      } else {
+        // No markup if no carat or no intervals
+        diamond.priceWithMarkupSek = diamond.totalPriceSek;
+        diamond.finalPriceSek = Math.round(diamond.totalPriceSek / 100) * 100;
+      }
     }
 
     if (diamond.itemId) {

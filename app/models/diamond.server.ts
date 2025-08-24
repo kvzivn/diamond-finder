@@ -23,6 +23,8 @@ export interface Diamond {
   pricePerCarat?: number; // Price Per Carat
   totalPrice?: number; // Total Price
   totalPriceSek?: number; // Total Price in Swedish Krona
+  priceWithMarkupSek?: number; // Price in SEK with markup applied (before rounding)
+  finalPriceSek?: number; // Final price in SEK with markup applied and rounded to nearest 100
   percentOffIdexList?: number; // % Off IDEX List (Natural)
   polish?: string; // Polish
   symmetry?: string; // Symmetry
