@@ -470,6 +470,53 @@ if (typeof window !== 'undefined') {
         return hasValidPrice;
       });
 
+      // Apply client-side finalPriceSek filtering
+      const priceSliderEl = document.getElementById('ds-price-slider');
+      if (priceSliderEl && priceSliderEl.noUiSlider) {
+        const priceValues = priceSliderEl.noUiSlider.get();
+        if (priceValues && priceValues.length === 2) {
+          const minPrice = parseFloat(String(priceValues[0]).replace(/\s/g, ''));
+          const maxPrice = parseFloat(String(priceValues[1]).replace(/\s/g, ''));
+          
+          if (!isNaN(minPrice) || !isNaN(maxPrice)) {
+            const beforePriceFilterCount = validPriceDiamonds.length;
+            validPriceDiamonds = await Promise.all(
+              validPriceDiamonds.map(async (diamond) => {
+                try {
+                  // Calculate finalPriceSek with markup
+                  let finalPriceSek = diamond.totalPriceSek;
+                  if (window.DiamondPricing && diamond.totalPriceSek) {
+                    const diamondWithMarkup = await window.DiamondPricing.applyMarkupToDiamond(diamond);
+                    if (diamondWithMarkup.finalPriceSek && diamondWithMarkup.finalPriceSek > 0) {
+                      finalPriceSek = diamondWithMarkup.finalPriceSek;
+                    }
+                  }
+                  
+                  // Apply price filters
+                  let passesFilter = true;
+                  if (!isNaN(minPrice) && finalPriceSek < minPrice) {
+                    passesFilter = false;
+                  }
+                  if (!isNaN(maxPrice) && finalPriceSek > maxPrice) {
+                    passesFilter = false;
+                  }
+                  
+                  return passesFilter ? diamond : null;
+                } catch (error) {
+                  console.warn('[DIAMOND RENDERER] Error filtering by finalPriceSek:', error);
+                  return diamond; // Keep diamond if error occurs
+                }
+              })
+            );
+            
+            // Remove null entries
+            validPriceDiamonds = validPriceDiamonds.filter(diamond => diamond !== null);
+            
+            console.log(`[PRICE FILTER] Filtered from ${beforePriceFilterCount} to ${validPriceDiamonds.length} diamonds based on finalPriceSek`);
+          }
+        }
+      }
+
       // Apply image filter based on checkbox state
       if (!state.showNoImage) {
         // Default: Only show diamonds with images

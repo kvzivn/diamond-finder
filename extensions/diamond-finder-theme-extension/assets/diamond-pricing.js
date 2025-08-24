@@ -32,7 +32,9 @@ if (typeof window !== 'undefined') {
 
       // Fetch fresh data on first call
       try {
-        const response = await fetch(`/apps/api/markup-intervals?t=${Date.now()}`);
+        const response = await fetch(
+          `/apps/api/markup-intervals?t=${Date.now()}`
+        );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
@@ -94,9 +96,10 @@ if (typeof window !== 'undefined') {
 
       // Only round to nearest 100 SEK if multiplier is not 1.0
       // When multiplier is 1.0, return exact price
-      const finalPrice = multiplier === 1.0 
-        ? priceWithMarkup 
-        : Math.round(priceWithMarkup / 100) * 100;
+      const finalPrice =
+        multiplier === 1.0
+          ? priceWithMarkup
+          : Math.round(priceWithMarkup / 100) * 100;
 
       return finalPrice;
     },
@@ -126,31 +129,7 @@ if (typeof window !== 'undefined') {
             diamondType,
             markupRanges
           );
-          
-          // Find the specific range for this diamond
-          const specificRange = markupRanges.find((range, index) => {
-            const isLast = index === markupRanges.length - 1;
-            const inRange = isLast
-              ? diamond.carat >= range.min && diamond.carat <= range.max
-              : diamond.carat >= range.min && diamond.carat < range.max;
-            return inRange;
-          });
-          
-          // Log markup details for debugging
-          console.log('[MARKUP DEBUG]', {
-            itemId: diamond.itemId,
-            carat: diamond.carat,
-            type: diamondType,
-            totalPriceSek: diamond.totalPriceSek,
-            range: specificRange ? `${specificRange.min}-${specificRange.max}` : 'none',
-            multiplier: multiplier,
-            rangeMultiplier: specificRange?.multiplier || 'N/A',
-            priceWithMarkup: diamond.totalPriceSek * multiplier,
-            intervalsSource: intervals.fallback ? 'fallback' : 'database',
-            totalRanges: markupRanges.length,
-            firstFewRanges: markupRanges.slice(0, 5).map(r => `${r.min}-${r.max}: ${r.multiplier}`)
-          });
-          
+
           const finalPriceSek = this.calculateFinalPriceSek(
             diamond.totalPriceSek,
             diamond.carat,

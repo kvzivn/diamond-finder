@@ -79,14 +79,18 @@ export async function getFilteredDiamonds(
   }
 
   // Price filters (prioritize SEK over USD) - always exclude diamonds with null prices
+  // Note: We adjust price filters to account for markup multipliers (max 1.5x)
+  // Since finalPriceSek = totalPriceSek * multiplier, we need to be conservative
   if (filters.minPriceSek !== undefined || filters.maxPriceSek !== undefined) {
     where.totalPriceSek = {
       not: null, // Exclude diamonds with null prices
     };
     if (filters.minPriceSek !== undefined) {
-      where.totalPriceSek.gte = filters.minPriceSek;
+      // Divide by max multiplier (1.5) to ensure we don't exclude diamonds that would pass after markup
+      where.totalPriceSek.gte = Math.floor(filters.minPriceSek / 1.5);
     }
     if (filters.maxPriceSek !== undefined) {
+      // No adjustment needed for max price - totalPriceSek should be <= maxPrice even before markup
       where.totalPriceSek.lte = filters.maxPriceSek;
     }
   } else if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
