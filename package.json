@@ -22,7 +22,8 @@
     "import:all": "tsx scripts/import-diamonds-direct.ts",
     "import:natural": "tsx scripts/import-diamonds-direct.ts natural",
     "import:lab": "tsx scripts/import-diamonds-direct.ts lab",
-    "import:status": "tsx scripts/check-import-status.ts"
+    "import:status": "tsx scripts/check-import-status.ts",
+    "import:samples": "tsx scripts/import-samples.ts"
   },
   "type": "module",
   "engines": {

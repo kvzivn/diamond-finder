@@ -117,43 +117,6 @@ const LAB_GROWN_DIAMOND_HEADERS = [
   '3DViewer URL',
 ];
 
-// Robust CSV parser that handles quoted fields with commas
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-  let i = 0;
-  
-  while (i < line.length) {
-    const char = line[i];
-    
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        // Escaped quote inside quoted field
-        current += '"';
-        i += 2;
-      } else {
-        // Toggle quote state
-        inQuotes = !inQuotes;
-        i++;
-      }
-    } else if (char === ',' && !inQuotes) {
-      // Field separator outside quotes
-      result.push(current.trim());
-      current = '';
-      i++;
-    } else {
-      // Regular character
-      current += char;
-      i++;
-    }
-  }
-  
-  // Add the last field
-  result.push(current.trim());
-  return result;
-}
-
 // Helper to convert header names to camelCase Diamond interface keys
 function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
   // Specific mappings for clarity and consistency
@@ -248,7 +211,7 @@ function parseCSV(csvString: string, headers: string[]): Diamond[] {
 
   return lines
     .map((line) => {
-      const values = parseCSVLine(line);
+      const values = line.split(',');
       const diamond: Partial<Diamond> = {};
 
       headers.forEach((header, index) => {
@@ -462,7 +425,6 @@ export async function fetchDiamondsFromApi(
   try {
     const exchangeRate = await getUsdToSekExchangeRate();
 
-
     // Convert USD prices to SEK (base prices without markup)
     console.log(
       `[IDEX SERVICE] Converting USD prices to SEK for ${diamonds.length} ${type} diamonds...`
@@ -544,7 +506,9 @@ export async function fetchDiamondsFromApi(
 
   // Apply temporary limit for testing if specified
   if (options?.limit && diamonds.length > options.limit) {
-    console.log(`[IDEX SERVICE] Limiting ${type} diamonds from ${diamonds.length} to ${options.limit} for testing`);
+    console.log(
+      `[IDEX SERVICE] Limiting ${type} diamonds from ${diamonds.length} to ${options.limit} for testing`
+    );
     diamonds = diamonds.slice(0, options.limit);
   }
 
@@ -637,7 +601,6 @@ export async function* fetchDiamondsStream(
     );
   }
 
-
   // Parse and yield diamonds in chunks for memory efficiency
   const lines = csvString.trim().split('\n');
   const diamondKeys = headers.map(headerToCamelCase);
@@ -656,11 +619,13 @@ export async function* fetchDiamondsStream(
   for (const line of lines) {
     // Check if we've reached the limit
     if (options?.limit && totalYielded >= options.limit) {
-      console.log(`[IDEX SERVICE] Reached limit of ${options.limit} ${type} diamonds`);
+      console.log(
+        `[IDEX SERVICE] Reached limit of ${options.limit} ${type} diamonds`
+      );
       break;
     }
     processedCount++;
-    const values = parseCSVLine(line);
+    const values = line.split(',');
     const diamond: Partial<Diamond> = {};
 
     headers.forEach((header, index) => {
@@ -742,14 +707,17 @@ export async function* fetchDiamondsStream(
     if (diamond.itemId) {
       chunk.push(diamond as Diamond);
 
-      if (chunk.length >= CHUNK_SIZE || (options?.limit && totalYielded + chunk.length >= options.limit)) {
+      if (
+        chunk.length >= CHUNK_SIZE ||
+        (options?.limit && totalYielded + chunk.length >= options.limit)
+      ) {
         // Apply limit if specified
         let yieldChunk = chunk;
         if (options?.limit && totalYielded + chunk.length > options.limit) {
           const remaining = options.limit - totalYielded;
           yieldChunk = chunk.slice(0, remaining);
         }
-        
+
         console.log(
           `[IDEX SERVICE] Processed ${processedCount}/${totalLines} lines, yielding optimized batch of ${yieldChunk.length} ${type} diamonds`
         );
@@ -773,7 +741,9 @@ export async function* fetchDiamondsStream(
       const remaining = options.limit - totalYielded;
       yieldChunk = chunk.slice(0, remaining);
     }
-    console.log(`[IDEX SERVICE] Final batch: ${yieldChunk.length} ${type} diamonds`);
+    console.log(
+      `[IDEX SERVICE] Final batch: ${yieldChunk.length} ${type} diamonds`
+    );
     yield yieldChunk;
     totalYielded += yieldChunk.length;
   }
