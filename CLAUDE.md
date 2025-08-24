@@ -132,15 +132,6 @@ Uses Prisma with PostgreSQL. Main models:
 - **ImportJob**: Tracks diamond import processes
 - **ExchangeRate**: Historical currency conversion rates
 
-Key indexes on Diamond table:
-
-- `type` (natural/lab)
-- `shapeCode`
-- `pricePerCaratUSD`
-- `priceRetailUSD`
-- `caratWeight`
-- Composite indexes for common filter combinations
-
 ## API Routes
 
 - `/diamonds/all` - Returns filtered diamond data with pagination

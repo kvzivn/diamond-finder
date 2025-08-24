@@ -137,9 +137,9 @@ class DirectDiamondImporter {
       const placeholders: string[] = [];
 
       diamondsWithIds.forEach((diamond, index) => {
-        const baseIndex = index * 68; // 68 fields per diamond
+        const baseIndex = index * 70; // 70 fields per diamond (added priceWithMarkupSek and finalPriceSek)
         placeholders.push(
-          `(${Array.from({ length: 68 }, (_, i) => `$${baseIndex + i + 1}`).join(', ')})`
+          `(${Array.from({ length: 70 }, (_, i) => `$${baseIndex + i + 1}`).join(', ')})`
         );
 
         values.push(
@@ -168,6 +168,8 @@ class DirectDiamondImporter {
           diamond.pricePerCarat,
           diamond.totalPrice,
           diamond.totalPriceSek,
+          diamond.priceWithMarkupSek,
+          diamond.finalPriceSek,
           diamond.percentOffIdexList,
           diamond.polish,
           diamond.symmetry,
@@ -220,7 +222,7 @@ class DirectDiamondImporter {
           "naturalFancyColorIntensity", "naturalFancyColorOvertone", "treatedColor", clarity,
           "cutGrade", "gradingLab", "certificateNumber", "certificatePath", "certificateUrl",
           "imagePath", "imageUrl", "onlineReport", "onlineReportUrl", "videoUrl", "threeDViewerUrl",
-          "pricePerCarat", "totalPrice", "totalPriceSek", "percentOffIdexList", polish, symmetry,
+          "pricePerCarat", "totalPrice", "totalPriceSek", "priceWithMarkupSek", "finalPriceSek", "percentOffIdexList", polish, symmetry,
           "measurementsLength", "measurementsWidth", "measurementsHeight", "depthPercent",
           "tablePercent", "crownHeight", "crownAngle", "pavilionDepth", "pavilionAngle",
           "girdleFrom", "girdleTo", "culetSize", "culetCondition", graining,
@@ -233,6 +235,8 @@ class DirectDiamondImporter {
         ON CONFLICT ("itemId") DO UPDATE SET
           "totalPrice" = EXCLUDED."totalPrice",
           "totalPriceSek" = EXCLUDED."totalPriceSek",
+          "priceWithMarkupSek" = EXCLUDED."priceWithMarkupSek",
+          "finalPriceSek" = EXCLUDED."finalPriceSek",
           "updatedAt" = EXCLUDED."updatedAt",
           "importJobId" = EXCLUDED."importJobId"
       `;
