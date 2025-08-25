@@ -23,7 +23,12 @@
     "import:natural": "tsx scripts/import-diamonds-direct.ts natural",
     "import:lab": "tsx scripts/import-diamonds-direct.ts lab",
     "import:status": "tsx scripts/check-import-status.ts",
-    "import:samples": "tsx scripts/import-samples.ts"
+    "import:samples": "tsx scripts/import-samples.ts",
+    "import:local": "tsx scripts/import-diamonds-local.ts",
+    "import:local:natural": "tsx scripts/import-diamonds-local.ts natural",
+    "import:local:lab": "tsx scripts/import-diamonds-local.ts lab",
+    "setup:local-db": "./scripts/setup-local-db.sh",
+    "setup:local": "npm run setup:local-db && ./scripts/setup-local-prisma.sh"
   },
   "type": "module",
   "engines": {

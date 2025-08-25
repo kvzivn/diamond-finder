@@ -204,14 +204,12 @@ function headerToCamelCase(header: string): keyof Diamond | '_EMPTY_FIELD_' {
 
 function parseCSV(csvString: string, headers: string[]): Diamond[] {
   const lines = csvString.trim().split('\n');
-  // Some APIs might include a header row in the CSV data itself.
-  // If the first line matches a known pattern of headers, skip it.
-  // For now, assuming IDEX CSV does NOT include headers in the data based on earlier findings.
-  // const dataLines = lines.slice(lines[0].includes(headers[0]) ? 1 : 0);
+  // Skip the header row - IDEX CSV always includes headers as the first line
+  const dataLines = lines.slice(1);
 
   const diamondKeys = headers.map(headerToCamelCase);
 
-  return lines
+  return dataLines
     .map((line) => {
       const values = line.split(',');
       const diamond: Partial<Diamond> = {};
@@ -659,7 +657,10 @@ export async function* fetchDiamondsStream(
   let labGrownInNaturalCount = 0;
   let totalYielded = 0;
 
-  for (const line of lines) {
+  // Skip header row - process data rows only
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    
     // Check if we've reached the limit
     if (options?.limit && totalYielded >= options.limit) {
       console.log(
