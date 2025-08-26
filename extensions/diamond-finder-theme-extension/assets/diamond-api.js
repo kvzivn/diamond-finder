@@ -525,6 +525,7 @@ if (typeof window !== 'undefined') {
         const baseUrl = `/apps/api/diamonds/all?page=${page}&limit=${limit}`;
         const url = filterParams ? `${baseUrl}&${filterParams}` : baseUrl;
 
+        console.log('[DIAMOND API] Making request to:', url);
         const response = await fetch(url);
         if (!response.ok) {
           const errorText = await response.text();
