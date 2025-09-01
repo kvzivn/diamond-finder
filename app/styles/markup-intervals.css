@@ -170,3 +170,57 @@
   color: #1d4ed8;
   font-size: 14px;
 }
+
+/* Empty State Styles */
+.markup-intervals-empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px 20px;
+}
+
+.markup-intervals-empty-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 48px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.markup-intervals-empty-card h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px;
+}
+
+.markup-intervals-empty-card p {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+.markup-intervals-seed-button {
+  background: #10b981;
+  color: #fff;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.markup-intervals-seed-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.markup-intervals-seed-button:not(:disabled):hover {
+  background: #059669;
+}
