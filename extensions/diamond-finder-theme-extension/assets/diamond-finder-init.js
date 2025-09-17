@@ -45,6 +45,65 @@ if (typeof window !== 'undefined') {
           );
         });
       }
+
+      // Setup keyboard shortcut for pricing visibility toggle
+      this.setupPricingToggleShortcut();
+    },
+
+    // Setup keyboard shortcut for toggling detailed pricing
+    setupPricingToggleShortcut() {
+      document.addEventListener('keydown', (event) => {
+        // Check for Ctrl/Cmd + Shift + P
+        const isModifierPressed = event.ctrlKey || event.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
+        if (isModifierPressed && event.shiftKey && event.key === 'P') {
+          event.preventDefault(); // Prevent default browser behavior
+
+          const state = window.DiamondSearchState;
+          const isNowVisible = state.toggleDetailedPricing();
+
+          // Show notification
+          this.showPricingToggleNotification(isNowVisible);
+
+          // Re-render current diamonds to reflect the change
+          if (window.DiamondRenderer && state.allDiamonds.length > 0) {
+            window.DiamondRenderer.renderDiamonds(state.allDiamonds);
+          }
+
+          // Update details view if it's open
+          if (state.currentDiamond && window.DiamondDetails) {
+            const detailsView = document.getElementById('diamond-details-view');
+            if (detailsView && !detailsView.classList.contains('tw-hidden')) {
+              window.DiamondDetails.populateDiamondDetails(state.currentDiamond);
+            }
+          }
+
+          console.log('[PRICING TOGGLE] Detailed pricing visibility:', isNowVisible);
+        }
+      });
+    },
+
+    // Show notification when pricing visibility is toggled
+    showPricingToggleNotification(isVisible) {
+      // Remove any existing notification
+      const existingNotification = document.querySelector('.pricing-toggle-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+
+      // Create new notification
+      const notification = document.createElement('div');
+      notification.className = 'pricing-toggle-notification tw-fixed tw-top-4 tw-right-4 tw-bg-black tw-text-white tw-px-4 tw-py-2 tw-rounded-lg tw-shadow-lg tw-z-50 tw-transition-opacity tw-duration-300';
+      notification.textContent = isVisible ? 'Detaljerad prissättning aktiverad' : 'Detaljerad prissättning dold';
+
+      document.body.appendChild(notification);
+
+      // Auto-remove after 2 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 2000);
     },
 
     // Method to trigger initial load after all sliders are initialized

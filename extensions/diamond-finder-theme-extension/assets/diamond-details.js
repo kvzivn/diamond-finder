@@ -208,11 +208,15 @@ if (typeof window !== 'undefined') {
         title.textContent = `Diamant ${shapeName}`;
       }
 
-      // Update price - apply client-side markup and show only final price
+      // Update price - apply client-side markup and show pricing based on visibility setting
       const price = document.getElementById('diamond-details-price');
       if (price) {
         let finalPrice = 'Pris ej tillgängligt';
         let displayCurrency = 'SEK';
+        let priceBreakdown = [];
+
+        // Check if detailed pricing should be shown
+        const showDetailedPricing = window.DiamondSearchState.getDetailedPricingVisibility();
 
         // Apply markup using the new pricing module
         if (window.DiamondPricing && diamond.totalPriceSek) {
@@ -226,6 +230,24 @@ if (typeof window !== 'undefined') {
             ) {
               // Round final price to nearest 100 SEK
               finalPrice = Math.round(diamondWithMarkup.finalPriceSek / 100) * 100;
+
+              if (showDetailedPricing) {
+                // Collect detailed pricing info
+                if (diamond.totalPrice) {
+                  priceBreakdown.push(`USD: $${diamond.totalPrice.toLocaleString()}`);
+                }
+                if (diamond.totalPriceSek) {
+                  priceBreakdown.push(`SEK (konverterat): ${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`);
+                }
+                if (diamondWithMarkup.priceWithMarkupSek) {
+                  const markupPercentage = diamond.totalPriceSek > 0
+                    ? Math.round(((diamondWithMarkup.priceWithMarkupSek / diamond.totalPriceSek) - 1) * 100)
+                    : 0;
+                  priceBreakdown.push(`Efter påslag (${markupPercentage}%): ${diamondWithMarkup.priceWithMarkupSek.toFixed(2).replace('.', ',')} SEK`);
+                }
+                priceBreakdown.push(`Slutpris (avrundat): ${finalPrice.toLocaleString('sv-SE').replace(/,/g, ' ')} SEK`);
+              }
+
               finalPrice = finalPrice
                 .toLocaleString('sv-SE')
                 .replace(/,/g, ' ');
@@ -264,8 +286,14 @@ if (typeof window !== 'undefined') {
           displayCurrency = 'USD';
         }
 
-        // Display only the final price
-        price.textContent = `${finalPrice} ${displayCurrency}`;
+        // Display price based on visibility setting
+        if (showDetailedPricing && priceBreakdown.length > 0) {
+          // Show detailed pricing breakdown
+          price.innerHTML = priceBreakdown.join('<br>');
+        } else {
+          // Show only final price
+          price.textContent = `${finalPrice} ${displayCurrency}`;
+        }
       }
 
       // Update specifications

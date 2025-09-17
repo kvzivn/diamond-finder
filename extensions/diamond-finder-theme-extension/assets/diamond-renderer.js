@@ -274,102 +274,107 @@ if (typeof window !== 'undefined') {
         displayCurrency = 'USD';
       }
 
-      // Add original USD price row for transparency/debugging
-      if (
-        diamond.totalPrice !== null &&
-        typeof diamond.totalPrice === 'number'
-      ) {
-        const usdPriceRow = document.createElement('div');
-        usdPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
+      // Check if detailed pricing should be shown
+      const showDetailedPricing = window.DiamondSearchState.getDetailedPricingVisibility();
 
-        const usdPriceLabel = document.createElement('span');
-        usdPriceLabel.className = 'tw-text-sm tw-text-gray-700';
-        usdPriceLabel.textContent = 'Originalpris (USD):';
+      if (showDetailedPricing) {
+        // Add original USD price row for transparency/debugging
+        if (
+          diamond.totalPrice !== null &&
+          typeof diamond.totalPrice === 'number'
+        ) {
+          const usdPriceRow = document.createElement('div');
+          usdPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
 
-        const usdPriceValue = document.createElement('span');
-        usdPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
-        usdPriceValue.textContent = `$${diamond.totalPrice.toLocaleString()}`;
+          const usdPriceLabel = document.createElement('span');
+          usdPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+          usdPriceLabel.textContent = 'Originalpris (USD):';
 
-        usdPriceRow.appendChild(usdPriceLabel);
-        usdPriceRow.appendChild(usdPriceValue);
-        priceCertContainer.appendChild(usdPriceRow);
-      }
+          const usdPriceValue = document.createElement('span');
+          usdPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+          usdPriceValue.textContent = `$${diamond.totalPrice.toLocaleString()}`;
 
-      // Add converted SEK price row (non-rounded) for transparency
-      if (
-        diamond.totalPriceSek !== null &&
-        typeof diamond.totalPriceSek === 'number'
-      ) {
-        const sekConvertedRow = document.createElement('div');
-        sekConvertedRow.className =
-          'tw-flex tw-justify-between tw-items-center';
-
-        const sekConvertedLabel = document.createElement('span');
-        sekConvertedLabel.className = 'tw-text-sm tw-text-gray-700';
-        sekConvertedLabel.textContent = 'SEK (konverterat):';
-
-        const sekConvertedValue = document.createElement('span');
-        sekConvertedValue.className =
-          'tw-text-lg tw-font-bold tw-text-gray-900';
-        // Display the exact converted value without rounding
-        sekConvertedValue.textContent = `${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`;
-
-        sekConvertedRow.appendChild(sekConvertedLabel);
-        sekConvertedRow.appendChild(sekConvertedValue);
-        priceCertContainer.appendChild(sekConvertedRow);
-      }
-
-      // Add price with markup (show even if multiplier is 1.0, to display exact value)
-      if (priceWithMarkup !== null) {
-        const markupPriceRow = document.createElement('div');
-        markupPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
-
-        const markupPriceLabel = document.createElement('span');
-        markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
-
-        // Calculate markup percentage from server values
-        let markupPercentage = 0;
-        if (diamond.priceWithMarkupSek && diamond.totalPriceSek && diamond.totalPriceSek > 0) {
-          const multiplier = diamond.priceWithMarkupSek / diamond.totalPriceSek;
-          markupPercentage = Math.round((multiplier - 1) * 100);
+          usdPriceRow.appendChild(usdPriceLabel);
+          usdPriceRow.appendChild(usdPriceValue);
+          priceCertContainer.appendChild(usdPriceRow);
         }
 
-        // Display the markup percentage in the label
-        if (markupPercentage > 0) {
-          markupPriceLabel.textContent = `Efter påslag (${markupPercentage}%):`;
-        } else {
+        // Add converted SEK price row (non-rounded) for transparency
+        if (
+          diamond.totalPriceSek !== null &&
+          typeof diamond.totalPriceSek === 'number'
+        ) {
+          const sekConvertedRow = document.createElement('div');
+          sekConvertedRow.className =
+            'tw-flex tw-justify-between tw-items-center';
+
+          const sekConvertedLabel = document.createElement('span');
+          sekConvertedLabel.className = 'tw-text-sm tw-text-gray-700';
+          sekConvertedLabel.textContent = 'SEK (konverterat):';
+
+          const sekConvertedValue = document.createElement('span');
+          sekConvertedValue.className =
+            'tw-text-lg tw-font-bold tw-text-gray-900';
+          // Display the exact converted value without rounding
+          sekConvertedValue.textContent = `${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`;
+
+          sekConvertedRow.appendChild(sekConvertedLabel);
+          sekConvertedRow.appendChild(sekConvertedValue);
+          priceCertContainer.appendChild(sekConvertedRow);
+        }
+
+        // Add price with markup (show even if multiplier is 1.0, to display exact value)
+        if (priceWithMarkup !== null) {
+          const markupPriceRow = document.createElement('div');
+          markupPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
+
+          const markupPriceLabel = document.createElement('span');
+          markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
+
+          // Calculate markup percentage from server values
+          let markupPercentage = 0;
+          if (diamond.priceWithMarkupSek && diamond.totalPriceSek && diamond.totalPriceSek > 0) {
+            const multiplier = diamond.priceWithMarkupSek / diamond.totalPriceSek;
+            markupPercentage = Math.round((multiplier - 1) * 100);
+          }
+
+          // Display the markup percentage in the label
+          if (markupPercentage > 0) {
+            markupPriceLabel.textContent = `Efter påslag (${markupPercentage}%):`;
+          } else {
+            markupPriceLabel.textContent = 'Efter påslag (0%):';
+          }
+
+          const markupPriceValue = document.createElement('span');
+          markupPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+          markupPriceValue.textContent = `${priceWithMarkup.toFixed(2).replace('.', ',')} SEK`;
+
+          markupPriceRow.appendChild(markupPriceLabel);
+          markupPriceRow.appendChild(markupPriceValue);
+          priceCertContainer.appendChild(markupPriceRow);
+        } else if (
+          diamond.totalPriceSek !== null &&
+          typeof diamond.totalPriceSek === 'number'
+        ) {
+          // If no markup was applied, still show the exact value as "Efter påslag"
+          const markupPriceRow = document.createElement('div');
+          markupPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
+
+          const markupPriceLabel = document.createElement('span');
+          markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
           markupPriceLabel.textContent = 'Efter påslag (0%):';
+
+          const markupPriceValue = document.createElement('span');
+          markupPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
+          markupPriceValue.textContent = `${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`;
+
+          markupPriceRow.appendChild(markupPriceLabel);
+          markupPriceRow.appendChild(markupPriceValue);
+          priceCertContainer.appendChild(markupPriceRow);
         }
-
-        const markupPriceValue = document.createElement('span');
-        markupPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
-        markupPriceValue.textContent = `${priceWithMarkup.toFixed(2).replace('.', ',')} SEK`;
-
-        markupPriceRow.appendChild(markupPriceLabel);
-        markupPriceRow.appendChild(markupPriceValue);
-        priceCertContainer.appendChild(markupPriceRow);
-      } else if (
-        diamond.totalPriceSek !== null &&
-        typeof diamond.totalPriceSek === 'number'
-      ) {
-        // If no markup was applied, still show the exact value as "Efter påslag"
-        const markupPriceRow = document.createElement('div');
-        markupPriceRow.className = 'tw-flex tw-justify-between tw-items-center';
-
-        const markupPriceLabel = document.createElement('span');
-        markupPriceLabel.className = 'tw-text-sm tw-text-gray-700';
-        markupPriceLabel.textContent = 'Efter påslag (0%):';
-
-        const markupPriceValue = document.createElement('span');
-        markupPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';
-        markupPriceValue.textContent = `${diamond.totalPriceSek.toFixed(2).replace('.', ',')} SEK`;
-
-        markupPriceRow.appendChild(markupPriceLabel);
-        markupPriceRow.appendChild(markupPriceValue);
-        priceCertContainer.appendChild(markupPriceRow);
       }
 
-      // Final price row (rounded to nearest 100)
+      // Final price row (always shown)
       if (
         typeof finalPrice === 'number' ||
         finalPrice !== 'Pris ej tillgängligt'
@@ -379,7 +384,8 @@ if (typeof window !== 'undefined') {
 
         const finalPriceLabel = document.createElement('span');
         finalPriceLabel.className = 'tw-text-sm tw-text-gray-700';
-        finalPriceLabel.textContent = 'Slutpris (avrundat):';
+        // Only show "(avrundat)" label when detailed pricing is visible
+        finalPriceLabel.textContent = showDetailedPricing ? 'Slutpris (avrundat):' : 'Pris:';
 
         const finalPriceValue = document.createElement('span');
         finalPriceValue.className = 'tw-text-lg tw-font-bold tw-text-gray-900';

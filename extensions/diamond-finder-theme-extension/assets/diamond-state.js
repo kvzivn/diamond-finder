@@ -16,6 +16,7 @@ if (typeof window !== 'undefined') {
     initialLoadComplete: false,
     showNoImage: false, // Default: only show diamonds with images
     showNoMedia: false, // Default: only show diamonds with video or 3D viewer
+    showDetailedPricing: false, // Default: hide detailed pricing breakdown
 
     // Slider state
     sliderInitializationState: {
@@ -172,6 +173,15 @@ if (typeof window !== 'undefined') {
         this.sliderChangedState[key] = false;
       });
     }
+  };
+
+  window.DiamondSearchState.toggleDetailedPricing = function () {
+    this.showDetailedPricing = !this.showDetailedPricing;
+    return this.showDetailedPricing;
+  };
+
+  window.DiamondSearchState.getDetailedPricingVisibility = function () {
+    return this.showDetailedPricing;
   };
 
   // Utility functions
