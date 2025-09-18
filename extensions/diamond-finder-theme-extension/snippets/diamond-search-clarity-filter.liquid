@@ -3,7 +3,7 @@
   <div class='tw-relative'>
     <div
       id='ds-clarity-images'
-      class='tw-absolute tw-bottom-full tw-left-1/2 tw-transform tw--translate-x-1/2 tw-flex tw-justify-between tw-items-end tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-6 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10 tw-w-max tw-min-w-full'
+      class='tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-flex tw-justify-between tw-items-end tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-3 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10'
     >
       {% assign clarity_grades_for_images = 'SI2,SI1,VS2,VS1,VVS2,VVS1,IF,FL' | split: ',' %}
       {% for grade_img_filename in clarity_grades_for_images %}
@@ -11,7 +11,7 @@
           <img
             src='{{ grade_img_filename | append: '.jpg' | asset_url }}'
             alt='{{ grade_img_filename }} clarity'
-            class='tw-mx-auto tw-h-12 tw-w-auto tw-rounded-sm md:tw-h-32'
+            class='tw-mx-auto tw-h-12 tw-w-auto tw-rounded-sm'
             width='48'
             height='48'
           >
