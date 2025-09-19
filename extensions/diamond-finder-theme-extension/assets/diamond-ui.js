@@ -21,6 +21,9 @@ if (typeof window !== 'undefined') {
       this.setupInputFilters();
       this.setupColourSliderImages();
       this.setupClaritySliderImages();
+      this.setupCutGradeSliderImages();
+      this.setupSymmetrySliderImages();
+      this.setupFluorescenceSliderImages();
       this.setupShowNoImageCheckbox();
       this.setupShowNoMediaCheckbox();
       // Note: applyInitialFilters() is now called only after all sliders are initialized
@@ -401,6 +404,141 @@ if (typeof window !== 'undefined') {
       });
     },
 
+    setupCutGradeSliderImages() {
+      const cutGradeSlider = document.getElementById(
+        'ds-cut-grade-slider-noui'
+      );
+      const cutGradeImagesDiv = document.getElementById('ds-cut-grade-images');
+      if (!cutGradeSlider || !cutGradeImagesDiv) return;
+      let isSliderDragging = false;
+      const showImages = () => {
+        cutGradeImagesDiv.style.opacity = '1';
+        cutGradeImagesDiv.style.pointerEvents = 'auto';
+      };
+      const hideImages = () => {
+        if (!isSliderDragging) {
+          cutGradeImagesDiv.style.opacity = '0';
+          cutGradeImagesDiv.style.pointerEvents = 'none';
+        }
+      };
+      // Setup slider event handlers
+      const setupSliderEvents = () => {
+        if (cutGradeSlider.noUiSlider) {
+          cutGradeSlider.noUiSlider.on('start', function () {
+            isSliderDragging = true;
+            showImages();
+          });
+          cutGradeSlider.noUiSlider.on('end', function () {
+            isSliderDragging = false;
+            hideImages();
+          });
+        }
+      };
+      // Try immediately or wait for slider initialization
+      if (cutGradeSlider.noUiSlider) {
+        setupSliderEvents();
+      } else {
+        setTimeout(setupSliderEvents, 100);
+      }
+      // Keep images visible when hovering
+      cutGradeImagesDiv.addEventListener('mouseenter', showImages);
+      cutGradeImagesDiv.addEventListener('mouseleave', () => {
+        if (!isSliderDragging) {
+          hideImages();
+        }
+      });
+    },
+
+    setupSymmetrySliderImages() {
+      const symmetrySlider = document.getElementById('ds-symmetry-slider-noui');
+      const symmetryImagesDiv = document.getElementById('ds-symmetry-images');
+      if (!symmetrySlider || !symmetryImagesDiv) return;
+      let isSliderDragging = false;
+      const showImages = () => {
+        symmetryImagesDiv.style.opacity = '1';
+        symmetryImagesDiv.style.pointerEvents = 'auto';
+      };
+      const hideImages = () => {
+        if (!isSliderDragging) {
+          symmetryImagesDiv.style.opacity = '0';
+          symmetryImagesDiv.style.pointerEvents = 'none';
+        }
+      };
+      // Setup slider event handlers
+      const setupSliderEvents = () => {
+        if (symmetrySlider.noUiSlider) {
+          symmetrySlider.noUiSlider.on('start', function () {
+            isSliderDragging = true;
+            showImages();
+          });
+          symmetrySlider.noUiSlider.on('end', function () {
+            isSliderDragging = false;
+            hideImages();
+          });
+        }
+      };
+      // Try immediately or wait for slider initialization
+      if (symmetrySlider.noUiSlider) {
+        setupSliderEvents();
+      } else {
+        setTimeout(setupSliderEvents, 100);
+      }
+      // Keep images visible when hovering
+      symmetryImagesDiv.addEventListener('mouseenter', showImages);
+      symmetryImagesDiv.addEventListener('mouseleave', () => {
+        if (!isSliderDragging) {
+          hideImages();
+        }
+      });
+    },
+
+    setupFluorescenceSliderImages() {
+      const fluorescenceSlider = document.getElementById(
+        'ds-fluorescence-slider-noui'
+      );
+      const fluorescenceImagesDiv = document.getElementById(
+        'ds-fluorescence-images'
+      );
+      if (!fluorescenceSlider || !fluorescenceImagesDiv) return;
+      let isSliderDragging = false;
+      const showImages = () => {
+        fluorescenceImagesDiv.style.opacity = '1';
+        fluorescenceImagesDiv.style.pointerEvents = 'auto';
+      };
+      const hideImages = () => {
+        if (!isSliderDragging) {
+          fluorescenceImagesDiv.style.opacity = '0';
+          fluorescenceImagesDiv.style.pointerEvents = 'none';
+        }
+      };
+      // Setup slider event handlers
+      const setupSliderEvents = () => {
+        if (fluorescenceSlider.noUiSlider) {
+          fluorescenceSlider.noUiSlider.on('start', function () {
+            isSliderDragging = true;
+            showImages();
+          });
+          fluorescenceSlider.noUiSlider.on('end', function () {
+            isSliderDragging = false;
+            hideImages();
+          });
+        }
+      };
+      // Try immediately or wait for slider initialization
+      if (fluorescenceSlider.noUiSlider) {
+        setupSliderEvents();
+      } else {
+        setTimeout(setupSliderEvents, 100);
+      }
+      // Keep images visible when hovering
+      fluorescenceImagesDiv.addEventListener('mouseenter', showImages);
+      fluorescenceImagesDiv.addEventListener('mouseleave', () => {
+        if (!isSliderDragging) {
+          hideImages();
+        }
+      });
+    },
+
     // Setup "Show diamonds without images" checkbox
     setupShowNoImageCheckbox() {
       const checkbox = document.getElementById('ds-show-no-image');
@@ -414,16 +552,20 @@ if (typeof window !== 'undefined') {
       // Add event listener
       checkbox.addEventListener('change', async function () {
         state.showNoImage = this.checked;
-        console.log(`[SHOW NO IMAGE CHANGED] Show diamonds without images: ${state.showNoImage}`);
-        
+        console.log(
+          `[SHOW NO IMAGE CHANGED] Show diamonds without images: ${state.showNoImage}`
+        );
+
         // If toggling to show diamonds without images, make any hidden cards visible again
         if (state.showNoImage) {
-          const hiddenCards = document.querySelectorAll('.tw-flex.tw-flex-col.tw-bg-white.tw-border.tw-rounded-lg[style*="display: none"]');
-          hiddenCards.forEach(card => {
+          const hiddenCards = document.querySelectorAll(
+            '.tw-flex.tw-flex-col.tw-bg-white.tw-border.tw-rounded-lg[style*="display: none"]'
+          );
+          hiddenCards.forEach((card) => {
             card.style.display = '';
           });
         }
-        
+
         // Re-render diamonds with the new filter
         await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
       });
@@ -442,8 +584,10 @@ if (typeof window !== 'undefined') {
       // Add event listener
       checkbox.addEventListener('change', async function () {
         state.showNoMedia = this.checked;
-        console.log(`[SHOW NO MEDIA CHANGED] Show diamonds without 3D/video: ${state.showNoMedia}`);
-        
+        console.log(
+          `[SHOW NO MEDIA CHANGED] Show diamonds without 3D/video: ${state.showNoMedia}`
+        );
+
         // Re-render diamonds with the new filter
         await window.DiamondRenderer.renderDiamonds(state.allDiamonds);
       });

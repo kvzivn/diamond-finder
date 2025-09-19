@@ -31,20 +31,15 @@
   <div id='ds-colour-panel-white' class='tw-relative' data-panel='white'>
     <div
       id='ds-colour-images'
-      class='tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-flex tw-justify-between tw-items-end tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-3 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10'
+      class='tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-3 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10'
     >
-      {% assign color_grades_for_images = 'K,J,I,H,G,F,E,D' | split: ',' %}
-      {% for grade_img_filename in color_grades_for_images %}
-        <div class='tw-text-center'>
-          <img
-            src='{{ '/' | append: grade_img_filename | append: '.jpg' | asset_url }}'
-            alt='{{ grade_img_filename }} color'
-            class='tw-mx-auto tw-h-12 tw-w-auto tw-rounded-sm'
-            width='48'
-            height='48'
-          >
-        </div>
-      {% endfor %}
+      <img
+        src='{{ 'color.jpg' | asset_url }}'
+        alt='Color reference'
+        class='tw-w-full tw-h-auto tw-rounded-sm'
+        width='400'
+        height='200'
+      >
     </div>
 
     <div id='ds-colour-slider-noui' class='tw-mt-8'></div>

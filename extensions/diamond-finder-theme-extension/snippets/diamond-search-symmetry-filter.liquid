@@ -1,7 +1,24 @@
 <div>
   <label for='ds-symmetry-slider' class='tw-block tw-text-base tw-font-medium tw-text-gray-700 tw-mb-2'>Symmetri</label>
-  <div id='ds-symmetry-slider-noui' class='tw-mt-8'></div>
-  <div class='label-container tw-flex tw-justify-around tw-mt-4 tw-text-sm tw-text-gray-500' id='ds-symmetry-labels'>
-    <span>Good</span><span>Very Good</span><span>Excellent</span>
+
+  <div class='tw-relative'>
+    <div
+      id='ds-symmetry-images'
+      class='tw-absolute tw-bottom-full tw-left-0 tw-right-0 tw-bg-white tw-border tw-border-gray-200 tw-rounded-md tw-shadow-md tw-p-3 tw-mb-2 tw-opacity-0 tw-pointer-events-none tw-transition-opacity tw-duration-300 tw-z-10'
+    >
+      <img
+        src='{{ 'symmetri.jpg' | asset_url }}'
+        alt='Symmetry reference'
+        class='tw-w-full tw-h-auto tw-rounded-sm'
+        width='400'
+        height='200'
+      >
+    </div>
+
+    <div id='ds-symmetry-slider-noui' class='tw-mt-8'></div>
+
+    <div class='label-container tw-flex tw-justify-around tw-mt-4 tw-text-sm tw-text-gray-500' id='ds-symmetry-labels'>
+      <span>Good</span><span>Very Good</span><span>Excellent</span>
+    </div>
   </div>
 </div>
